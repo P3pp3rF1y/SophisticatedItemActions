@@ -1,7 +1,8 @@
 {
+  "key.category.sophisticateditemactions.main": "精妙物品操作",
   "key.sophisticateditemactions.item_highlight": "高亮存有物品的容器",
-  "key.sophisticateditemactions.deposit_item": "将物品卸货至容器/背包",
-  "key.sophisticateditemactions.restock_item": "从容器/背包中补充物品",
+  "key.sophisticateditemactions.deposit_item": "将物品卸货至容器",
+  "key.sophisticateditemactions.restock_item": "从容器中补充物品",
   "gui.sophisticateditemactions.status.matching_stacks_found" : "在%s个位置中找到精确物品。",
   "gui.sophisticateditemactions.status.matching_items_found" : "在%s个位置中找到物品类型。",
   "gui.sophisticateditemactions.status.no_matching_items_found" : "未找到精确物品或物品类型",
