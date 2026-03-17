@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -19,6 +20,9 @@ import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.p3pp3rf1y.sophisticateditemactions.client.discovery.ItemActionNudgeManager;
+import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
+import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeHintType;
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.EntityHighlightRenderer;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.ItemFlightAnimator;
@@ -43,6 +47,7 @@ public class ClientEventHandler {
 	public static final KeyMapping ITEM_RESTOCK_KEYBIND = new KeyMapping(ItemActionsTranslationHelper.INSTANCE.translKeybind("restock_item"),
 			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_BACKSLASH), KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY);
 	private static final List<IHoveredStackProvider> HOVERED_STACK_PROVIDERS = new ArrayList<>();
+	private static final ItemActionNudgeManager NUDGE_MANAGER = new ItemActionNudgeManager();
 	private static final IHoveredStackProvider DEFAULT_HOVERED_STACK_PROVIDER = new IHoveredStackProvider() {
 		@Override
 		public ItemStack getHoveredStack(Screen screen) {
@@ -82,8 +87,13 @@ public class ClientEventHandler {
 		eventBus.addListener(ClientEventHandler::onPostClientTick);
 		eventBus.addListener(ClientEventHandler::handleGuiKeyPress);
 		eventBus.addListener(ClientEventHandler::handleGuiMouseKeyPress);
+		eventBus.addListener(ClientEventHandler::onPlayerLoggingOut);
 		eventBus.addListener(ClientEventHandler::renderLevelStage);
 		eventBus.addListener(ClientEventHandler::tickLevel);
+	}
+
+	private static void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+		NUDGE_MANAGER.onWorldLeft(Minecraft.getInstance());
 	}
 
 	private static void renderLevelStage(RenderLevelStageEvent event) {
@@ -110,6 +120,7 @@ public class ClientEventHandler {
 	public static void handleGuiKeyPress(ScreenEvent.KeyPressed.Pre event) {
 		InputConstants.Key key = InputConstants.getKey(event.getKeyCode(), event.getScanCode());
 		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key) && event.getScreen() instanceof AbstractContainerScreen<?> screen && tryHighlightItem(screen.getSlotUnderMouse())) {
+			NudgeActionUsageTracker.markUsed(NudgeHintType.HIGHLIGHT);
 			event.getScreen().getMinecraft().setScreen(null);
 			event.setCanceled(true);
 		}
@@ -118,6 +129,7 @@ public class ClientEventHandler {
 	public static void handleGuiMouseKeyPress(ScreenEvent.MouseButtonPressed.Pre event) {
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
 		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input) && event.getScreen() instanceof AbstractContainerScreen<?> screen && tryHighlightItem(screen.getSlotUnderMouse())) {
+			NudgeActionUsageTracker.markUsed(NudgeHintType.HIGHLIGHT);
 			event.getScreen().getMinecraft().setScreen(null);
 			event.setCanceled(true);
 		}
@@ -128,9 +140,10 @@ public class ClientEventHandler {
 			return;
 		}
 
-		if (ITEM_HIGHLIGHT_KEYBIND.consumeClick()) {
-			tryHighlightItem();
+		if (ITEM_HIGHLIGHT_KEYBIND.consumeClick() && tryHighlightItem()) {
+			NudgeActionUsageTracker.markUsed(NudgeHintType.HIGHLIGHT);
 		}
+		NUDGE_MANAGER.tick(Minecraft.getInstance());
 	}
 
 	private static boolean tryHighlightItem(@Nullable Slot slot) {
@@ -145,14 +158,15 @@ public class ClientEventHandler {
 		return true;
 	}
 
-	private static void tryHighlightItem() {
+	private static boolean tryHighlightItem() {
 		Minecraft mc = Minecraft.getInstance();
 		LocalPlayer player = mc.player;
 		if (player == null || player.getMainHandItem().isEmpty()) {
-			return;
+			return false;
 		}
 
 		HighlightHandler.highlightItem(player, player.getMainHandItem());
+		return true;
 	}
 
 	public static void handleKeyInput(InputEvent.Key event) {
@@ -162,16 +176,20 @@ public class ClientEventHandler {
 		}
 
 		if (!ITEM_DEPOSIT_KEYBIND.isUnbound() && ITEM_DEPOSIT_KEYBIND.getKey().getValue() == event.getKey() && event.getAction() == GLFW.GLFW_PRESS) {
-			tryDepositItem(event);
+			if (tryDepositItem(event)) {
+				NudgeActionUsageTracker.markUsed(NudgeHintType.DEPOSIT);
+			}
 		} else if (!ITEM_RESTOCK_KEYBIND.isUnbound() && ITEM_RESTOCK_KEYBIND.getKey().getValue() == event.getKey() && event.getAction() == GLFW.GLFW_PRESS) {
-			tryRestockItem(event);
+			if (tryRestockItem(event)) {
+				NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
+			}
 		}
 	}
 
-	private static void tryRestockItem(InputEvent.Key event) {
+	private static boolean tryRestockItem(InputEvent.Key event) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null) {
-			return;
+			return false;
 		}
 
 		int mods = event.getModifiers();
@@ -197,7 +215,7 @@ public class ClientEventHandler {
 		}
 
 		if (slot == -1) {
-			return;
+			return false;
 		}
 
 		if (mainInventory || hotbar) {
@@ -205,6 +223,8 @@ public class ClientEventHandler {
 		} else {
 			ItemTransferHandler.restockItem(player, filter, slot, fillEmpty, refillSingle);
 		}
+
+		return true;
 	}
 
 	@Nullable
@@ -220,10 +240,10 @@ public class ClientEventHandler {
 		return null;
 	}
 
-	private static void tryDepositItem(InputEvent.Key event) {
+	private static boolean tryDepositItem(InputEvent.Key event) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null) {
-			return;
+			return false;
 		}
 
 		int mods = event.getModifiers();
@@ -232,36 +252,40 @@ public class ClientEventHandler {
 		boolean hotbar = (mods & GLFW.GLFW_MOD_ALT) != 0;
 
 		if (mainInventory || hotbar) {
-			tryDepositMultipleItems(player, mainInventory, hotbar, onlyMatching);
-			return;
+			return tryDepositMultipleItems(player, mainInventory, hotbar, onlyMatching);
 		}
 
 		Screen screen = Minecraft.getInstance().screen;
 		if (screen != null) {
 			if (screen instanceof AbstractContainerScreen<?> containerScreen) {
-				tryDepositItem(player, containerScreen.getSlotUnderMouse(), onlyMatching);
+				return tryDepositItem(player, containerScreen.getSlotUnderMouse(), onlyMatching);
 			}
-		} else {
-			tryDepositItem(player, onlyMatching);
+			return false;
 		}
+
+		return tryDepositItem(player, onlyMatching);
 	}
 
-	private static void tryDepositMultipleItems(Player player, boolean mainInventory, boolean hotbar, boolean onlyMatching) {
+	private static boolean tryDepositMultipleItems(Player player, boolean mainInventory, boolean hotbar, boolean onlyMatching) {
 		ItemTransferHandler.depositMultipleItems(player, mainInventory, hotbar, onlyMatching);
+		return true;
 	}
 
-	private static void tryDepositItem(Player player, boolean onlyMatching) {
+	private static boolean tryDepositItem(Player player, boolean onlyMatching) {
 		ItemStack item = player.getMainHandItem();
 		if (!item.isEmpty()) {
 			ItemTransferHandler.depositItem(player, player.getInventory().selected, onlyMatching);
+			return true;
 		}
+		return false;
 	}
 
-	private static void tryDepositItem(Player player, @Nullable Slot slot, boolean onlyMatching) {
+	private static boolean tryDepositItem(Player player, @Nullable Slot slot, boolean onlyMatching) {
 		if (slot == null || slot.getItem().isEmpty() || !(slot.container instanceof Inventory)) {
-			return;
+			return false;
 		}
 		ItemTransferHandler.depositItem(player, slot.getSlotIndex(), onlyMatching);
+		return true;
 	}
 
 	private static class ItemHighlightKeyConflictContext implements IKeyConflictContext {

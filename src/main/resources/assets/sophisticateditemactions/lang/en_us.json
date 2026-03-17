@@ -16,5 +16,11 @@
   "gui.sophisticateditemactions.status.cannot_restock_item" : "Could not restock %s from any storage",
   "gui.sophisticateditemactions.status.cannot_restock_items" : "Could not restock any items from storage",
   "gui.sophisticateditemactions.status.cannot_restock_full_stack" : "Stack %s is already full",
-  "gui.sophisticateditemactions.status.cannot_restock_full_stacks" : "All stacks are already full"
+  "gui.sophisticateditemactions.status.cannot_restock_full_stacks" : "All stacks are already full",
+  "gui.sophisticateditemactions.discovery.nudge.highlight.title" : "Storage Search Tip",
+  "gui.sophisticateditemactions.discovery.nudge.highlight.description" : "Press %s to find items in nearby storages",
+  "gui.sophisticateditemactions.discovery.nudge.restock.title" : "Restock Tip",
+  "gui.sophisticateditemactions.discovery.nudge.restock.description" : "Press %s to restock from nearby storages",
+  "gui.sophisticateditemactions.discovery.nudge.deposit.title" : "Deposit Tip",
+  "gui.sophisticateditemactions.discovery.nudge.deposit.description" : "Press %s to deposit into nearby storages"
 }
