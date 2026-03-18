@@ -19,17 +19,8 @@ public class NudgeToastDisplayer {
 			return true;
 		}
 
-		if (minecraft.gui != null) {
-			minecraft.gui.setOverlayMessage(description, false);
-			return true;
-		}
-
-		if (minecraft.player != null) {
-			minecraft.player.displayClientMessage(description, true);
-			return true;
-		}
-
-		return false;
+		minecraft.gui.setOverlayMessage(description, false);
+		return true;
 	}
 
 	private Component getTitle(NudgeHintType hintType) {
@@ -50,28 +41,7 @@ public class NudgeToastDisplayer {
 	}
 
 	private boolean tryShowSystemToast(Minecraft minecraft, Component title, Component description) {
-		try {
-			SystemToast.SystemToastIds toastId = getToastId();
-			if (toastId == null) {
-				return false;
-			}
-
-			SystemToast.add(minecraft.getToasts(), toastId, title, description);
-			return true;
-		} catch (Exception ignored) {
-			return false;
-		}
-	}
-
-	private SystemToast.SystemToastIds getToastId() {
-		for (SystemToast.SystemToastIds toastId : SystemToast.SystemToastIds.values()) {
-			String idName = toastId.name();
-			if (idName.contains("TUTORIAL") || idName.contains("PERIODIC")) {
-				return toastId;
-			}
-		}
-
-		SystemToast.SystemToastIds[] allIds = SystemToast.SystemToastIds.values();
-		return allIds.length == 0 ? null : allIds[0];
+		SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, title, description);
+		return true;
 	}
 }
