@@ -19,17 +19,8 @@ public class NudgeToastDisplayer {
 			return true;
 		}
 
-		if (minecraft.gui != null) {
-			minecraft.gui.setOverlayMessage(description, false);
-			return true;
-		}
-
-		if (minecraft.player != null) {
-			minecraft.player.displayClientMessage(description, true);
-			return true;
-		}
-
-		return false;
+		minecraft.gui.setOverlayMessage(description, false);
+		return true;
 	}
 
 	private Component getTitle(NudgeHintType hintType) {
@@ -50,11 +41,7 @@ public class NudgeToastDisplayer {
 	}
 
 	private boolean tryShowSystemToast(Minecraft minecraft, Component title, Component description) {
-		try {
-			SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastId.PERIODIC_NOTIFICATION, title, description);
-			return true;
-		} catch (Exception ignored) {
-			return false;
-		}
+		SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastId.PERIODIC_NOTIFICATION, title, description);
+		return true;
 	}
 }
