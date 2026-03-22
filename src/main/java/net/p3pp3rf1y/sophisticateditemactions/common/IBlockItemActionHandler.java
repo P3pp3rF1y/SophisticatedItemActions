@@ -12,17 +12,13 @@ import java.util.Optional;
 public interface IBlockItemActionHandler {
 	ResourceLocation id();
 
-	default boolean handlesAction(Action action) {
-		return true;
-	}
-
 	boolean canActOn(Level level, BlockPos pos, BlockEntity blockEntity);
 
 	default BlockPos getInteractionPosToActOn(BlockPos pos, BlockEntity blockEntity) {
 		return pos;
 	}
 
-	ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos);
+	ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos, Action action);
 
 	Optional<IDepositHandler> getDepositHandler(ServerPlayer player, BlockPos pos);
 

@@ -26,8 +26,8 @@ public interface IBlockEntityItemActionHandler<T> extends IBlockItemActionHandle
 	}
 
 	@Override
-	default ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos) {
-		return getFromBlockEntity(player, pos, be -> getItemMatch(stackKey, be)).orElse(ItemMatchResult.NO_MATCH);
+	default ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos, Action action) {
+		return getFromBlockEntity(player, pos, be -> getItemMatch(stackKey, be, action)).orElse(ItemMatchResult.NO_MATCH);
 	}
 
 	default <R> Optional<R> getFromBlockEntity(ServerPlayer player, BlockPos pos, Function<T, R> getter) {
@@ -48,7 +48,7 @@ public interface IBlockEntityItemActionHandler<T> extends IBlockItemActionHandle
 
 	IRestockHandler getRestockHandler(T object);
 
-	ItemMatchResult getItemMatch(ItemStackKey stackKey, T object);
+	ItemMatchResult getItemMatch(ItemStackKey stackKey, T object, Action action);
 
 	Class<T> getObjectClass();
 }

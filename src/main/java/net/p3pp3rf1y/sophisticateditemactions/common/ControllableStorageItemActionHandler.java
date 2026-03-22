@@ -8,13 +8,16 @@ import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
 import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ISlotTracker;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
+import net.p3pp3rf1y.sophisticatedstorage.block.ChestBlockEntity;
+
+import java.util.Optional;
 
 public class ControllableStorageItemActionHandler implements IBlockEntityItemActionHandler<IControllableStorage> {
 	public static final ControllableStorageItemActionHandler INSTANCE = new ControllableStorageItemActionHandler();
 	public static final ResourceLocation ID = SophisticatedCore.getRL("controllable_storage");
 
 	@Override
-	public ItemMatchResult getItemMatch(ItemStackKey stackKey, IControllableStorage storage) {
+	public ItemMatchResult getItemMatch(ItemStackKey stackKey, IControllableStorage storage, Action action) {
 		ISlotTracker slotTracker = storage.getStorageWrapper().getInventoryHandler().getSlotTracker();
 		return getItemMatchResult(stackKey, slotTracker, false);
 	}
@@ -42,6 +45,14 @@ public class ControllableStorageItemActionHandler implements IBlockEntityItemAct
 	public IRestockHandler getRestockHandler(IControllableStorage storage) {
 		return new IRestockHandler() {
 			@Override
+			public Optional<BlockPos> getPositionToOpen() {
+				if (storage instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
+					return Optional.of(storage.getStorageBlockPos());
+				}
+				return Optional.empty();
+			}
+
+			@Override
 			public Vec3 getPosition() {
 				return Vec3.atCenterOf(storage.getStorageBlockPos());
 			}
@@ -65,6 +76,14 @@ public class ControllableStorageItemActionHandler implements IBlockEntityItemAct
 			@Override
 			public Vec3 getPosition() {
 				return center;
+			}
+
+			@Override
+			public Optional<BlockPos> getPositionToOpen() {
+				if (storage instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
+					return Optional.of(storage.getStorageBlockPos());
+				}
+				return Optional.empty();
 			}
 
 			@Override

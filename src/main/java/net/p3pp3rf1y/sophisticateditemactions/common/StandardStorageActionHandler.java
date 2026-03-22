@@ -4,11 +4,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.phys.Vec3;
@@ -33,7 +35,7 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 
 	@Override
 	public boolean canActOn(Entity entity) {
-		return entity.getCapability(Capabilities.ItemHandler.ENTITY, null) != null;
+		return !(entity instanceof Player) && entity.getCapability(Capabilities.ItemHandler.ENTITY, null) != null;
 	}
 
 	@Override
@@ -49,6 +51,11 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 		}
 
 		return Optional.of(new IDepositHandler() {
+			@Override
+			public Optional<BlockPos> getPositionToOpen() {
+				return Optional.empty();
+			}
+
 			@Override
 			public Vec3 getPosition() {
 				return entity.position();
@@ -74,6 +81,11 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 		}
 
 		return Optional.of(new IRestockHandler() {
+			@Override
+			public Optional<BlockPos> getPositionToOpen() {
+				return Optional.empty();
+			}
+
 			@Override
 			public Vec3 getPosition() {
 				return entity.position();
@@ -110,7 +122,7 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 	}
 
 	@Override
-	public ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos) {
+	public ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos, Action action) {
 		BlockState state = player.level().getBlockState(pos);
 		if (state.getBlock() == Blocks.CHEST && state.getValue(ChestBlock.TYPE) == ChestType.RIGHT) {
 			return ItemMatchResult.NO_MATCH;
@@ -127,6 +139,14 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 		}
 		Vec3 center = Vec3.atCenterOf(pos);
 		return Optional.of(new IDepositHandler() {
+			@Override
+			public Optional<BlockPos> getPositionToOpen() {
+				if (level.getBlockEntity(pos) instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
+					return Optional.of(pos);
+				}
+				return Optional.empty();
+			}
+
 			@Override
 			public Vec3 getPosition() {
 				return center;
@@ -151,6 +171,14 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 			return Optional.empty();
 		}
 		return Optional.of(new IRestockHandler() {
+			@Override
+			public Optional<BlockPos> getPositionToOpen() {
+				if (player.level().getBlockEntity(pos) instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
+					return Optional.of(pos);
+				}
+				return Optional.empty();
+			}
+
 			@Override
 			public Vec3 getPosition() {
 				return Vec3.atCenterOf(pos);

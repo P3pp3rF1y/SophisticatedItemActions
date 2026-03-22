@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -14,6 +15,9 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.settings.IKeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
+import net.p3pp3rf1y.sophisticateditemactions.client.discovery.ItemActionNudgeManager;
+import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
+import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeHintType;
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.EntityHighlightRenderer;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.ItemFlightAnimator;
@@ -24,23 +28,49 @@ import org.lwjgl.glfw.GLFW;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static net.neoforged.neoforge.client.settings.KeyConflictContext.GUI;
 import static net.neoforged.neoforge.client.settings.KeyConflictContext.IN_GAME;
 
 public class ClientEventHandler {
-	private static final String KEYBIND_SOPHISTICATEDCORE_CATEGORY = "key.category.sophisticateditemactions.main";
+	private static final String KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY = "key.category.sophisticateditemactions.main";
 	public static final KeyMapping ITEM_HIGHLIGHT_KEYBIND = new KeyMapping(ItemActionsTranslationHelper.INSTANCE.translKeybind("item_highlight"),
-			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_SEMICOLON), KEYBIND_SOPHISTICATEDCORE_CATEGORY);
+			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_SEMICOLON), KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY);
 	public static final KeyMapping ITEM_DEPOSIT_KEYBIND = new KeyMapping(ItemActionsTranslationHelper.INSTANCE.translKeybind("deposit_item"),
-			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_APOSTROPHE), KEYBIND_SOPHISTICATEDCORE_CATEGORY);
+			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_APOSTROPHE), KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY);
 	public static final KeyMapping ITEM_RESTOCK_KEYBIND = new KeyMapping(ItemActionsTranslationHelper.INSTANCE.translKeybind("restock_item"),
-			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_BACKSLASH), KEYBIND_SOPHISTICATEDCORE_CATEGORY);
-	private static final List<Supplier<ItemStack>> HOVERED_STACK_SUPPLIERS = new ArrayList<>();
+			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_BACKSLASH), KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY);
+	private static final List<IHoveredStackProvider> HOVERED_STACK_PROVIDERS = new ArrayList<>();
+	private static final ItemActionNudgeManager NUDGE_MANAGER = new ItemActionNudgeManager();
+	private static final IHoveredStackProvider DEFAULT_HOVERED_STACK_PROVIDER = new IHoveredStackProvider() {
+		@Override
+		public ItemStack getHoveredStack(Screen screen) {
+			if (screen instanceof AbstractContainerScreen<?> containerScreen) {
+				Slot slotUnderMouse = containerScreen.getSlotUnderMouse();
+				if (slotUnderMouse != null) {
+					return slotUnderMouse.getItem();
+				}
+			}
+			return ItemStack.EMPTY;
+		}
 
-	public static void registerHoveredStackSupplier(Supplier<ItemStack> stackSupplier) {
-		HOVERED_STACK_SUPPLIERS.add(stackSupplier);
+		@Override
+		public boolean restockSingle(Screen screen) {
+			return false;
+		}
+
+		@Override
+		public int getRestockSlot(Screen screen, Player player, ItemStack filter) {
+			if (!(screen instanceof AbstractContainerScreen<?> containerScreen) || containerScreen.getSlotUnderMouse() == null) {
+				return -1;
+			}
+			return containerScreen.getSlotUnderMouse().getSlotIndex();
+		}
+	};
+
+
+	public static void registerHoveredStackProvider(IHoveredStackProvider provider) {
+		HOVERED_STACK_PROVIDERS.add(provider);
 	}
 
 	public static void registerHandlers(IEventBus modBus) {
@@ -51,7 +81,13 @@ public class ClientEventHandler {
 		eventBus.addListener(ClientEventHandler::onPostClientTick);
 		eventBus.addListener(ClientEventHandler::handleGuiKeyPress);
 		eventBus.addListener(ClientEventHandler::handleGuiMouseKeyPress);
+		eventBus.addListener(ClientEventHandler::onPlayerLoggingOut);
 		eventBus.addListener(ClientEventHandler::renderLevelStage);
+		eventBus.addListener(ClientEventHandler::tickLevel);
+	}
+
+	private static void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+		NUDGE_MANAGER.onWorldLeft(Minecraft.getInstance());
 	}
 
 	private static void renderLevelStage(RenderLevelStageEvent event) {
@@ -63,6 +99,10 @@ public class ClientEventHandler {
 		EntityHighlightRenderer.render(event.getPoseStack(), partialTick, event.getCamera().getPosition());
 	}
 
+	private static void tickLevel(ClientTickEvent.Post event) {
+		ChestOpeningAnimator.tick(Minecraft.getInstance().level);
+	}
+
 	private static void registerKeyMappings(RegisterKeyMappingsEvent event) {
 		event.register(ITEM_HIGHLIGHT_KEYBIND);
 		event.register(ITEM_DEPOSIT_KEYBIND);
@@ -72,7 +112,8 @@ public class ClientEventHandler {
 	public static void handleGuiKeyPress(ScreenEvent.KeyPressed.Pre event) {
 		InputConstants.Key key = InputConstants.getKey(event.getKeyCode(), event.getScanCode());
 		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key) && event.getScreen() instanceof AbstractContainerScreen<?> screen && tryHighlightItem(screen.getSlotUnderMouse())) {
-			screen.onClose();
+			NudgeActionUsageTracker.markUsed(NudgeHintType.HIGHLIGHT);
+			event.getScreen().getMinecraft().setScreen(null);
 			event.setCanceled(true);
 		}
 	}
@@ -80,15 +121,17 @@ public class ClientEventHandler {
 	public static void handleGuiMouseKeyPress(ScreenEvent.MouseButtonPressed.Pre event) {
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
 		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input) && event.getScreen() instanceof AbstractContainerScreen<?> screen && tryHighlightItem(screen.getSlotUnderMouse())) {
-			screen.onClose();
+			NudgeActionUsageTracker.markUsed(NudgeHintType.HIGHLIGHT);
+			event.getScreen().getMinecraft().setScreen(null);
 			event.setCanceled(true);
 		}
 	}
 
 	public static void onPostClientTick(ClientTickEvent.Post event) {
-		if (ITEM_HIGHLIGHT_KEYBIND.consumeClick()) {
-			tryHighlightItem();
+		if (ITEM_HIGHLIGHT_KEYBIND.consumeClick() && tryHighlightItem()) {
+			NudgeActionUsageTracker.markUsed(NudgeHintType.HIGHLIGHT);
 		}
+		NUDGE_MANAGER.tick(Minecraft.getInstance());
 	}
 
 	private static boolean tryHighlightItem(@Nullable Slot slot) {
@@ -103,14 +146,15 @@ public class ClientEventHandler {
 		return true;
 	}
 
-	private static void tryHighlightItem() {
+	private static boolean tryHighlightItem() {
 		Minecraft mc = Minecraft.getInstance();
 		LocalPlayer player = mc.player;
 		if (player == null || player.getMainHandItem().isEmpty()) {
-			return;
+			return false;
 		}
 
 		HighlightHandler.highlightItem(player, player.getMainHandItem());
+		return true;
 	}
 
 	public static void handleKeyInput(InputEvent.Key event) {
@@ -120,16 +164,20 @@ public class ClientEventHandler {
 		}
 
 		if (!ITEM_DEPOSIT_KEYBIND.isUnbound() && ITEM_DEPOSIT_KEYBIND.getKey().getValue() == event.getKey() && event.getAction() == GLFW.GLFW_PRESS) {
-			tryDepositItem(event);
+			if (tryDepositItem(event)) {
+				NudgeActionUsageTracker.markUsed(NudgeHintType.DEPOSIT);
+			}
 		} else if (!ITEM_RESTOCK_KEYBIND.isUnbound() && ITEM_RESTOCK_KEYBIND.getKey().getValue() == event.getKey() && event.getAction() == GLFW.GLFW_PRESS) {
-			tryRestockItem(event);
+			if (tryRestockItem(event)) {
+				NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
+			}
 		}
 	}
 
-	private static void tryRestockItem(InputEvent.Key event) {
+	private static boolean tryRestockItem(InputEvent.Key event) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null) {
-			return;
+			return false;
 		}
 
 		int mods = event.getModifiers();
@@ -138,53 +186,52 @@ public class ClientEventHandler {
 		boolean fillEmpty = (mods & GLFW.GLFW_MOD_CONTROL) != 0;
 
 		Screen screen = Minecraft.getInstance().screen;
-		ItemStack filter = getHoveredStack();
-		int slot;
-		if (filter.isEmpty()) {
-			if (screen != null) {
-				if (screen instanceof AbstractContainerScreen<?> containerScreen) {
-					Slot slotUnderMouse = containerScreen.getSlotUnderMouse();
-					if (slotUnderMouse != null && !slotUnderMouse.getItem().isEmpty()) {
-						filter = slotUnderMouse.getItem();
-						slot = slotUnderMouse.getSlotIndex();
-					} else {
-						return; // exit if not hovering over a slot
-					}
-				} else {
-					return; // exit if not in a container screen
-				}
-			} else {
-				filter = player.getMainHandItem();
-				slot = player.getInventory().selected;
+		ItemStack filter = ItemStack.EMPTY;
+		int slot = -1;
+		boolean refillSingle = false;
+		if (screen != null) {
+			IHoveredStackProvider provider = getHoveredStackProvider(screen);
+			if (provider != null) {
+				filter = provider.getHoveredStack(screen);
+				slot = provider.getRestockSlot(screen, player, filter);
+				fillEmpty |= provider.restockEmptySlot();
+				refillSingle = provider.restockSingle(screen);
 			}
 		} else {
-			slot = player.getInventory().getFreeSlot();
-			fillEmpty = true;
-			if (slot == -1) {
-				return;
-			}
+			filter = player.getMainHandItem();
+			slot = player.getInventory().selected;
 		}
+
+		if (slot == -1) {
+			return false;
+		}
+
 		if (mainInventory || hotbar) {
-			ItemTransferHandler.restockMultipleItems(player, filter, mainInventory, hotbar, fillEmpty);
+			ItemTransferHandler.restockMultipleItems(player, filter, mainInventory, hotbar, fillEmpty, refillSingle);
 		} else {
-			ItemTransferHandler.restockItem(player, filter, slot, fillEmpty);
+			ItemTransferHandler.restockItem(player, filter, slot, fillEmpty, refillSingle);
 		}
+
+		return true;
 	}
 
-	private static ItemStack getHoveredStack() {
-		for (Supplier<ItemStack> supplier : HOVERED_STACK_SUPPLIERS) {
-			ItemStack stack = supplier.get();
-			if (!stack.isEmpty()) {
-				return stack;
+	@Nullable
+	private static IHoveredStackProvider getHoveredStackProvider(Screen screen) {
+		for (IHoveredStackProvider provider : HOVERED_STACK_PROVIDERS) {
+			if (!provider.getHoveredStack(screen).isEmpty()) {
+				return provider;
 			}
 		}
-		return ItemStack.EMPTY;
+		if (screen instanceof AbstractContainerScreen<?>) {
+			return DEFAULT_HOVERED_STACK_PROVIDER;
+		}
+		return null;
 	}
 
-	private static void tryDepositItem(InputEvent.Key event) {
+	private static boolean tryDepositItem(InputEvent.Key event) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null) {
-			return;
+			return false;
 		}
 
 		int mods = event.getModifiers();
@@ -193,29 +240,32 @@ public class ClientEventHandler {
 		boolean hotbar = (mods & GLFW.GLFW_MOD_ALT) != 0;
 
 		if (mainInventory || hotbar) {
-			tryDepositMultipleItems(player, mainInventory, hotbar, onlyMatching);
-			return;
+			return tryDepositMultipleItems(player, mainInventory, hotbar, onlyMatching);
 		}
 
 		Screen screen = Minecraft.getInstance().screen;
 		if (screen != null) {
 			if (screen instanceof AbstractContainerScreen<?> containerScreen) {
-				tryDepositItem(player, containerScreen.getSlotUnderMouse(), onlyMatching);
+				return tryDepositItem(player, containerScreen.getSlotUnderMouse(), onlyMatching);
 			}
-		} else {
-			tryDepositItem(player, onlyMatching);
+			return false;
 		}
+
+		return tryDepositItem(player, onlyMatching);
 	}
 
-	private static void tryDepositMultipleItems(Player player, boolean mainInventory, boolean hotbar, boolean onlyMatching) {
+	private static boolean tryDepositMultipleItems(Player player, boolean mainInventory, boolean hotbar, boolean onlyMatching) {
 		ItemTransferHandler.depositMultipleItems(player, mainInventory, hotbar, onlyMatching);
+		return true;
 	}
 
-	private static void tryDepositItem(Player player, boolean onlyMatching) {
+	private static boolean tryDepositItem(Player player, boolean onlyMatching) {
 		ItemStack item = player.getMainHandItem();
 		if (!item.isEmpty()) {
 			ItemTransferHandler.depositItem(player, player.getInventory().selected, onlyMatching);
+			return true;
 		}
+		return false;
 	}
 
 	private static boolean tryDepositItem(Player player, @Nullable Slot slot, boolean onlyMatching) {
@@ -231,12 +281,34 @@ public class ClientEventHandler {
 
 		@Override
 		public boolean isActive() {
-			return (IN_GAME.isActive() && !Minecraft.getInstance().player.getMainHandItem().isEmpty()) || GUI.isActive();
+			return (IN_GAME.isActive() && Minecraft.getInstance().player != null && !Minecraft.getInstance().player.getMainHandItem().isEmpty()) || GUI.isActive();
 		}
 
 		@Override
 		public boolean conflicts(IKeyConflictContext other) {
 			return this == other;
+		}
+	}
+
+	public interface IHoveredStackProvider {
+		ItemStack getHoveredStack(Screen screen);
+
+		boolean restockSingle(Screen screen);
+
+		default int getRestockSlot(Screen screen, Player player, ItemStack filter) {
+			NonNullList<ItemStack> items = player.getInventory().items;
+			for(int slot = 0; slot < items.size(); ++slot) {
+				ItemStack stack = items.get(slot);
+				if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(filter, stack) && stack.getCount() < stack.getMaxStackSize()) {
+					return slot;
+				}
+			}
+
+			return player.getInventory().getFreeSlot();
+		}
+
+		default boolean restockEmptySlot() {
+			return false;
 		}
 	}
 }

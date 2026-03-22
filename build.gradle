@@ -40,33 +40,33 @@ repositories {
         name = "GHPCore"
         url = uri("https://maven.pkg.github.com/p3pp3rf1y/sophisticatedcore")
         credentials {
-            username = System.getenv("USERNAME")
+            username = System.getenv("GITHUB_ACTOR")
             password = System.getenv("GITHUB_TOKEN")
         }
         content {
-            includeGroupByRegex "sophisticatedcore.*"
+            includeModule("net.p3pp3rf1y", "sophisticatedcore")
         }
     }
     maven {
         name = "GHPInMotion"
         url = uri("https://maven.pkg.github.com/p3pp3rf1y/sophisticatedstorageinmotion")
         credentials {
-            username = System.getenv("USERNAME")
+            username = System.getenv("GITHUB_ACTOR")
             password = System.getenv("GITHUB_TOKEN")
         }
         content {
-            includeGroupByRegex "sophisticatedstorageinmotion.*"
+            includeModule("net.p3pp3rf1y", "sophisticatedstorageinmotion")
         }
     }
     maven {
         name = "GHPStorage"
         url = uri("https://maven.pkg.github.com/p3pp3rf1y/sophisticatedstorage")
         credentials {
-            username = System.getenv("USERNAME")
+            username = System.getenv("GITHUB_ACTOR")
             password = System.getenv("GITHUB_TOKEN")
         }
         content {
-            includeGroupByRegex "sophisticatedstorage.*"
+            includeModule("net.p3pp3rf1y", "sophisticatedstorage")
         }
     }
     maven {
@@ -172,9 +172,9 @@ configurations {
 dependencies {
     compileOnly "mezz.jei:jei-${jei_mc_version}-api:${jei_version}"
     localRuntime "mezz.jei:jei-${jei_mc_version}:${jei_version}"
-    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
+    compileOnly "dev.emi:emi-neoforge:${emi_version}"
     localRuntime "dev.emi:emi-neoforge:${emi_version}"
-    compileOnly "me.shedaniel:RoughlyEnoughItems-api-neoforge:${rei_version}"
+    compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
     compileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
     localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
     localRuntime "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
@@ -182,30 +182,30 @@ dependencies {
     if (findProject(':SophisticatedCore') != null) {
         dependencies.implementation project(':SophisticatedCore')
     } else {
-        dependencies.implementation("sophisticatedcore:sophisticatedcore:${sc_version}") {
+        dependencies.implementation("net.p3pp3rf1y:sophisticatedcore:${sc_version}") {
             transitive = false
         }
-        dependencies.testImplementation("sophisticatedcore:sophisticatedcore:${sc_version}") {
+        dependencies.testImplementation("net.p3pp3rf1y:sophisticatedcore:${sc_version}") {
             transitive = false
         }
     }
     if (findProject(':SophisticatedStorageInMotion') != null) {
         dependencies.implementation project(':SophisticatedStorageInMotion')
     } else {
-        dependencies.implementation("sophisticatedstorageinmotion:sophisticatedstorageinmotion:${ssim_version}") {
+        dependencies.implementation("net.p3pp3rf1y:sophisticatedstorageinmotion:${ssim_version}") {
             transitive = false
         }
-        dependencies.testImplementation("sophisticatedstorageinmotion:sophisticatedstorageinmotion:${ssim_version}") {
+        dependencies.testImplementation("net.p3pp3rf1y:sophisticatedstorageinmotion:${ssim_version}") {
             transitive = false
         }
     }
     if (findProject(':SophisticatedStorage') != null) {
         dependencies.implementation project(':SophisticatedStorage')
     } else {
-        dependencies.implementation("sophisticatedstorage:sophisticatedstorage:${ss_version}") {
+        dependencies.implementation("net.p3pp3rf1y:sophisticatedstorage:${ss_version}") {
             transitive = false
         }
-        dependencies.testImplementation("sophisticatedstorage:sophisticatedstorage:${ss_version}") {
+        dependencies.testImplementation("net.p3pp3rf1y:sophisticatedstorage:${ss_version}") {
             transitive = false
         }
     }
@@ -293,9 +293,9 @@ publishing {
     }
 }
 
-sonarqube {
+sonar {
     properties {
-        property "sonar.projectName", "${mod_id}"
+        property "sonar.organization", "p3pp3rf1y-github"
         property "sonar.projectKey", "${sonar_project_key}"
     }
 }

@@ -16,11 +16,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public record RestockItemsPayload(ItemStack filter, int minSlot, int maxSlot, boolean fillEmpty,
+public record RestockItemsPayload(ItemStack filter, int minSlot, int maxSlot, boolean fillEmpty, boolean refillSingle,
 								  Map<ResourceLocation, List<BlockPos>> storagePositions,
 								  Map<ResourceLocation, List<Integer>> entityIds) implements CustomPacketPayload {
 	public static final Type<RestockItemsPayload> TYPE = new Type<>(SophisticatedCore.getRL("restock_items"));
-	public static final StreamCodec<RegistryFriendlyByteBuf, RestockItemsPayload> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, RestockItemsPayload> STREAM_CODEC = StreamCodecHelper.composite(
 			ItemStack.OPTIONAL_STREAM_CODEC,
 			RestockItemsPayload::filter,
 			ByteBufCodecs.INT,
@@ -29,6 +29,8 @@ public record RestockItemsPayload(ItemStack filter, int minSlot, int maxSlot, bo
 			RestockItemsPayload::maxSlot,
 			ByteBufCodecs.BOOL,
 			RestockItemsPayload::fillEmpty,
+			ByteBufCodecs.BOOL,
+			RestockItemsPayload::refillSingle,
 			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()), HashMap::new),
 			RestockItemsPayload::storagePositions,
 			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new),
@@ -41,7 +43,7 @@ public record RestockItemsPayload(ItemStack filter, int minSlot, int maxSlot, bo
 	}
 
 	public static void handlePayload(RestockItemsPayload payload, IPayloadContext context) {
-		ItemTransferHandler.handleRestock(context.player(), payload.storagePositions(), payload.entityIds, payload.minSlot(), payload.maxSlot(), payload.filter(), payload.fillEmpty());
+		ItemTransferHandler.handleRestock(context.player(), payload.storagePositions(), payload.entityIds, payload.minSlot(), payload.maxSlot(), payload.filter(), payload.fillEmpty(), payload.refillSingle());
 	}
 
 }

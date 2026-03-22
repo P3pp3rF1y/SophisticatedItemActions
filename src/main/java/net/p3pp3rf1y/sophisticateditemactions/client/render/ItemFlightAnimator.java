@@ -44,11 +44,11 @@ public class ItemFlightAnimator {
 			double timeRaw = (gameTime + partialTick - flight.startTime) / (double) flight.durationTicks;
 			float time = (float) Mth.clamp(timeRaw, 0d, 1d);
 
-			float progress = START_PROGRESS + (1f - START_PROGRESS) * Easing.EASE_IN_OUT_CUBIC.ease(time);
+			float progress = START_PROGRESS + (1f - START_PROGRESS) * Easing.EASE_IN_CUBIC_OUT_QUINT.ease(time);
 
 			Vec3 pos = lerp(flight.from, flight.to, progress);
 
-			double spinP = Easing.EASE_OUT_CUBIC.ease(progress);
+			double spinP = Easing.EASE_OUT_CUBIC.ease(time);
 			float spinDeg = (float) (flight.spinTurns * 360.0 * spinP);
 			float scale = (float) (0.9 + 0.1 * progress);
 

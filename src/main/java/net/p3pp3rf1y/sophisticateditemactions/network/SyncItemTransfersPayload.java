@@ -15,17 +15,17 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
+import net.p3pp3rf1y.sophisticateditemactions.client.ChestOpeningAnimator;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.ItemFlightAnimator;
+import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferData;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public record SyncItemTransfersPayload(Map<Vec3, List<ItemStack>> itemsTransferred, Vec3 playerPos, boolean fromPlayer) implements CustomPacketPayload {
+public record SyncItemTransfersPayload(List<ItemTransferData> itemTransferData, Vec3 playerPos, boolean fromPlayer) implements CustomPacketPayload {
 	public static final Type<SyncItemTransfersPayload> TYPE = new Type<>(SophisticatedCore.getRL("sync_item_transfers"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, SyncItemTransfersPayload> STREAM_CODEC = StreamCodec.composite(
-			StreamCodecHelper.ofMap(StreamCodecHelper.VEC3, ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()), HashMap::new),
-			SyncItemTransfersPayload::itemsTransferred,
+			ItemTransferData.STREAM_CODEC.apply(ByteBufCodecs.list()),
+			SyncItemTransfersPayload::itemTransferData,
 			StreamCodecHelper.VEC3,
 			SyncItemTransfersPayload::playerPos,
 			ByteBufCodecs.BOOL,
@@ -38,13 +38,16 @@ public record SyncItemTransfersPayload(Map<Vec3, List<ItemStack>> itemsTransferr
 	}
 
 	public static void handlePayload(SyncItemTransfersPayload payload, IPayloadContext context) {
-		payload.itemsTransferred().forEach((pos, stacks) -> {
+		payload.itemTransferData().forEach(itemTransferData -> {
 			Player player = context.player();
-			Vec3 from = payload.fromPlayer() ? payload.playerPos : pos;
-			Vec3 to = payload.fromPlayer() ? pos : payload.playerPos;
+			Vec3 from = payload.fromPlayer() ? payload.playerPos : itemTransferData.itemFlightPos();
+			Vec3 to = payload.fromPlayer() ? itemTransferData.itemFlightPos() : payload.playerPos;
 			Level level = player.level();
-			for (ItemStack stack : stacks) {
-				ItemFlightAnimator.startFlight(stack, from, to, level.getGameTime(), payload.fromPlayer() ? 10 : 5, level.getRandom());
+			if (itemTransferData.positionToOpen() != null) {
+				ChestOpeningAnimator.animateOpeningIfOpenable(level, itemTransferData.positionToOpen());
+			}
+			for (ItemStack stack : itemTransferData.itemsTransferred()) {
+				ItemFlightAnimator.startFlight(stack, from, to, level.getGameTime(), payload.fromPlayer() ? 15 : 10, level.getRandom());
 			}
 			float pitch = payload.fromPlayer() ? RandHelper.getRandomMinusOneToOne(level.random) * 0.1F + 0.2F : RandHelper.getRandomMinusOneToOne(level.random) * 1.4F + 2.0F;
 			level.playSound(player, to.x(), to.y(), to.z(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.3F, pitch);

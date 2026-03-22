@@ -5,6 +5,7 @@ import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
@@ -28,8 +29,23 @@ public class JeiClientCompat {
 		IEventBus eventBus = NeoForge.EVENT_BUS;
 		eventBus.addListener(JeiClientCompat::handleGuiKeyPress);
 		eventBus.addListener(JeiClientCompat::handleGuiMouseKeyPress);
-		ClientEventHandler.registerHoveredStackSupplier(() -> getStack().orElse(ItemStack.EMPTY));
+		ClientEventHandler.registerHoveredStackProvider(new ClientEventHandler.IHoveredStackProvider() {
+			@Override
+			public ItemStack getHoveredStack(Screen screen) {
+				return getStack().orElse(ItemStack.EMPTY);
+			}
 
+			@Override
+			public boolean restockSingle(Screen screen) {
+				//in case of crafting grid return single
+				return runtime != null && runtime.getRecipesGui().getIngredientUnderMouse(VanillaTypes.ITEM_STACK).isPresent();
+			}
+
+			@Override
+			public boolean restockEmptySlot() {
+				return true;
+			}
+		});
 	}
 
 	private static Optional<ItemStack> getStack() {
@@ -45,7 +61,7 @@ public class JeiClientCompat {
 		}
 		InputConstants.Key key = InputConstants.getKey(event.getKeyCode(), event.getScanCode());
 		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key) && getStack().map(JeiClientCompat::tryHighlightItem).orElse(false)) {
-			event.getScreen().onClose();
+			event.getScreen().getMinecraft().setScreen(null);
 			event.setCanceled(true);
 		}
 	}
@@ -56,7 +72,7 @@ public class JeiClientCompat {
 		}
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
 		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input) && getStack().map(JeiClientCompat::tryHighlightItem).orElse(false)) {
-			event.getScreen().onClose();
+			event.getScreen().getMinecraft().setScreen(null);
 			event.setCanceled(true);
 		}
 	}

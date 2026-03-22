@@ -40,13 +40,13 @@ public class ItemActionHandlerRegistry {
 
 	public static Optional<IBlockItemActionHandler> getBlockHandlerFor(Level level, BlockPos pos, BlockEntity blockEntity, IBlockItemActionHandler.Action action) {
 		for (IBlockItemActionHandler h : blockHandlersRegistry.values()) {
-			if (h.handlesAction(action) && h.canActOn(level, pos, blockEntity)) {
+			if (h.canActOn(level, pos, blockEntity)) {
 				return Optional.of(h);
 			}
 		}
 
 		IBlockItemActionHandler fallback = StandardStorageActionHandler.INSTANCE;
-		if (fallback.handlesAction(action) && fallback.canActOn(level, pos, blockEntity)) {
+		if (fallback.canActOn(level, pos, blockEntity)) {
 			return Optional.of(fallback);
 		}
 
