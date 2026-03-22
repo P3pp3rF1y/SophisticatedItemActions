@@ -16,5 +16,11 @@
   "gui.sophisticateditemactions.status.cannot_restock_item" : "无法从任何容器中补充%s",
   "gui.sophisticateditemactions.status.cannot_restock_items" : "无法从容器中补充任何物品",
   "gui.sophisticateditemactions.status.cannot_restock_full_stack" : "堆叠%s已满",
-  "gui.sophisticateditemactions.status.cannot_restock_full_stacks" : "所有堆叠均已满"
+  "gui.sophisticateditemactions.status.cannot_restock_full_stacks" : "所有堆叠均已满",
+  "gui.sophisticateditemactions.discovery.nudge.highlight.title" : "存储搜索提示",
+  "gui.sophisticateditemactions.discovery.nudge.highlight.description" : "按%s在附近容器中搜索",
+  "gui.sophisticateditemactions.discovery.nudge.restock.title" : "补充提示",
+  "gui.sophisticateditemactions.discovery.nudge.restock.description" : "按%s从附近容器中补充物品",
+  "gui.sophisticateditemactions.discovery.nudge.deposit.title" : "卸货提示",
+  "gui.sophisticateditemactions.discovery.nudge.deposit.description" : "按%s将物品卸货至附近容器"
 }
