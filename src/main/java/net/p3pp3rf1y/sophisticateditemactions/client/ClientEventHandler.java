@@ -13,6 +13,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.client.settings.IKeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
@@ -83,7 +84,7 @@ public class ClientEventHandler {
 		eventBus.addListener(ClientEventHandler::handleGuiKeyPress);
 		eventBus.addListener(ClientEventHandler::handleGuiMouseKeyPress);
 		eventBus.addListener(ClientEventHandler::onPlayerLoggingOut);
-		eventBus.addListener(ClientEventHandler::renderLevelStage);
+		eventBus.addListener(ClientEventHandler::submitCustomGeometry);
 		eventBus.addListener(ClientEventHandler::tickLevel);
 	}
 
@@ -91,10 +92,10 @@ public class ClientEventHandler {
 		NUDGE_MANAGER.onWorldLeft(Minecraft.getInstance());
 	}
 
-	private static void renderLevelStage(RenderLevelStageEvent.AfterEntities event) {
+	private static void submitCustomGeometry(SubmitCustomGeometryEvent event) {
 		float partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
-		ItemFlightAnimator.submitItems(event.getPoseStack(), partialTick, event.getLevelRenderState().cameraRenderState.pos);
-		EntityHighlightRenderer.render(event.getPoseStack(), partialTick, event.getLevelRenderState().cameraRenderState.pos);
+		ItemFlightAnimator.submitItems(event.getSubmitNodeCollector(), event.getPoseStack(), partialTick, event.getLevelRenderState().cameraRenderState.pos);
+		EntityHighlightRenderer.render(event.getSubmitNodeCollector(), event.getPoseStack(), partialTick, event.getLevelRenderState().cameraRenderState.pos);
 	}
 
 	private static void tickLevel(ClientTickEvent.Post event) {
@@ -140,9 +141,7 @@ public class ClientEventHandler {
 			return false;
 		}
 
-		HighlightHandler.highlightItem(player, slot.getItem());
-
-		return true;
+		return tryHighlightItem(player, slot.getItem());
 	}
 
 	private static boolean tryHighlightItem() {
@@ -152,7 +151,15 @@ public class ClientEventHandler {
 			return false;
 		}
 
-		HighlightHandler.highlightItem(player, player.getMainHandItem());
+		return tryHighlightItem(player, player.getMainHandItem());
+	}
+
+	public static boolean tryHighlightItem(Player player, ItemStack stack) {
+		var payload = HighlightHandler.createHighlightRequestPayload(player, stack);
+		if (payload == null) {
+			return false;
+		}
+		ClientPacketDistributor.sendToServer(payload);
 		return true;
 	}
 
@@ -206,9 +213,17 @@ public class ClientEventHandler {
 		}
 
 		if (mainInventory || hotbar) {
-			ItemTransferHandler.restockMultipleItems(player, filter, mainInventory, hotbar, fillEmpty, refillSingle);
+			var payload = ItemTransferHandler.createRestockMultipleItemsPayload(player, filter, mainInventory, hotbar, fillEmpty, refillSingle);
+			if (payload == null) {
+				return false;
+			}
+			ClientPacketDistributor.sendToServer(payload);
 		} else {
-			ItemTransferHandler.restockItem(player, filter, slot, fillEmpty, refillSingle);
+			var payload = ItemTransferHandler.createRestockItemPayload(player, filter, slot, fillEmpty, refillSingle);
+			if (payload == null) {
+				return false;
+			}
+			ClientPacketDistributor.sendToServer(payload);
 		}
 
 		return true;
@@ -254,14 +269,22 @@ public class ClientEventHandler {
 	}
 
 	private static boolean tryDepositMultipleItems(Player player, boolean mainInventory, boolean hotbar, boolean onlyMatching) {
-		ItemTransferHandler.depositMultipleItems(player, mainInventory, hotbar, onlyMatching);
+		var payload = ItemTransferHandler.createDepositMultipleItemsPayload(player, mainInventory, hotbar, onlyMatching);
+		if (payload == null) {
+			return false;
+		}
+		ClientPacketDistributor.sendToServer(payload);
 		return true;
 	}
 
 	private static boolean tryDepositItem(Player player, boolean onlyMatching) {
 		ItemStack item = player.getMainHandItem();
 		if (!item.isEmpty()) {
-			ItemTransferHandler.depositItem(player, player.getInventory().getSelectedSlot(), onlyMatching);
+			var payload = ItemTransferHandler.createDepositItemPayload(player, player.getInventory().getSelectedSlot(), onlyMatching);
+			if (payload == null) {
+				return false;
+			}
+			ClientPacketDistributor.sendToServer(payload);
 			return true;
 		}
 		return false;
@@ -271,7 +294,11 @@ public class ClientEventHandler {
 		if (slot == null || slot.getItem().isEmpty() || !(slot.container instanceof Inventory)) {
 			return false;
 		}
-		ItemTransferHandler.depositItem(player, slot.getSlotIndex(), onlyMatching);
+		var payload = ItemTransferHandler.createDepositItemPayload(player, slot.getSlotIndex(), onlyMatching);
+		if (payload == null) {
+			return false;
+		}
+		ClientPacketDistributor.sendToServer(payload);
 		return true;
 	}
 

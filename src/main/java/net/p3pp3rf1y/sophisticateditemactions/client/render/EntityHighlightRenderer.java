@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
@@ -32,7 +31,7 @@ public class EntityHighlightRenderer {
 		highlightExpireTime = Minecraft.getInstance().level.getGameTime() + HIGHLIGHT_DURATION;
 	}
 
-	public static void render(PoseStack poseStack, float partialTick, Vec3 cameraPos) {
+	public static void render(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos) {
 		Minecraft mc = Minecraft.getInstance();
 		if (highlightExpireTime < mc.level.getGameTime()) {
 			if (!highlightedStackEntityIds.isEmpty()) {
@@ -42,9 +41,8 @@ public class EntityHighlightRenderer {
 		}
 		MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
 
-		SubmitNodeStorage submitNodeStorage = mc.gameRenderer.getSubmitNodeStorage();
 		highlightedStackEntityIds.forEach((color, highlightedEntities) -> {
-			highlightedEntities.forEach(he -> submitHighlightedEntity(submitNodeStorage, poseStack, partialTick, cameraPos, he, mc, buffer, color));
+			highlightedEntities.forEach(he -> submitHighlightedEntity(submitNodeCollector, poseStack, partialTick, cameraPos, he, mc, buffer, color));
 		});
 	}
 

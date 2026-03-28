@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
@@ -32,7 +33,7 @@ public class ItemFlightAnimator {
 		startFlightFromPayload(new FlightPayload(stack.copy(), from, to, startGameTime, durationTicks), rng);
 	}
 
-	public static void submitItems(PoseStack poseStack, float partialTick, Vec3 cameraPos) {
+	public static void submitItems(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos) {
 		Minecraft mc = Minecraft.getInstance();
 		if (flights.isEmpty() || mc.level == null) return;
 
@@ -63,8 +64,8 @@ public class ItemFlightAnimator {
 			mc.getItemModelResolver().updateForTopItem(itemStackRenderState, flight.stack, ItemDisplayContext.GROUND, mc.level, null, 0);
 			itemStackRenderState.submit(
 					poseStack,
-					mc.gameRenderer.getSubmitNodeStorage(),
-					LevelRenderer.getLightColor(mc.level, new BlockPos((int) pos.x, (int) pos.y, (int) pos.z)),
+					submitNodeCollector,
+					LevelRenderer.getLightCoords(mc.level, new BlockPos((int) pos.x, (int) pos.y, (int) pos.z)),
 					OverlayTexture.NO_OVERLAY,
 					0
 			);

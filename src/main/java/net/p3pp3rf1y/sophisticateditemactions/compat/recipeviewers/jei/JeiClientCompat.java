@@ -83,9 +83,6 @@ public class JeiClientCompat {
 		if (player == null) {
 			return false;
 		}
-
-		HighlightHandler.highlightItem(player, stack);
-
-		return true;
+		return ClientEventHandler.tryHighlightItem(player, stack);
 	}
 }
