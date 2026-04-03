@@ -125,10 +125,10 @@ public class HighlightHandler {
 			player.playNotifySound(SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 1, 0.7f + RandHelper.getRandomMinusOneToOne(level.random) * 0.1F);
 		} else {
 			if (stackMatchNumber.get() > 0) {
-				message = ItemActionsTranslationHelper.INSTANCE.translStatusMessage("matching_stacks_found", Component.literal(String.valueOf(stackMatchNumber.get())).getStyle().withColor(0x4CAF50));
+				message = ItemActionsTranslationHelper.INSTANCE.translStatusMessage("matching_stacks_found", Component.literal(String.valueOf(stackMatchNumber.get())).setStyle(Style.EMPTY.withColor(0x4CAF50)));
 			}
 			if (itemMatchNumber.get() > 0) {
-				MutableComponent itemMessage = ItemActionsTranslationHelper.INSTANCE.translStatusMessage("matching_items_found", Component.literal(String.valueOf(itemMatchNumber.get())).getStyle().withColor(0x42A5F5));
+				MutableComponent itemMessage = ItemActionsTranslationHelper.INSTANCE.translStatusMessage("matching_items_found", Component.literal(String.valueOf(itemMatchNumber.get())).setStyle(Style.EMPTY.withColor(0x42A5F5)));
 				if (message != null) {
 					message = message.plainCopy().append(" ").append(itemMessage);
 				} else {
