@@ -12,8 +12,7 @@ public class NudgeEligibilityDetector {
 			return false;
 		}
 
-		Screen screen = minecraft.screen;
-		return screen instanceof AbstractContainerScreen<?>;
+		return isStorageContainerScreen(minecraft.screen);
 	}
 
 	public boolean isStorageContainerScreen(Screen screen) {
