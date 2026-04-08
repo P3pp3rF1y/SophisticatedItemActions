@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.network.SyncBlockHighlightsPayload;
+import net.p3pp3rf1y.sophisticatedcore.util.BlockHighlightGroups;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
@@ -22,7 +23,9 @@ import net.p3pp3rf1y.sophisticateditemactions.network.RequestItemHighlightsPaylo
 import net.p3pp3rf1y.sophisticateditemactions.network.SyncEntityHighlightsPayload;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,12 +36,17 @@ public class HighlightHandler {
 	private static final int HIGHLIGHT_RANGE = 32;
 	public static void highlightItem(Player player, ItemStack stack) {
 		Map<ResourceLocation, List<BlockPos>> positions = new HashMap<>();
+		Map<ResourceLocation, Map<BlockPos, BlockPos>> canonicalPositions = new HashMap<>();
 
 		WorldHelper.getBlockEntitiesInRange(player.level(), player.blockPosition(), HIGHLIGHT_RANGE)
 				.forEach(be ->
-						ItemActionHandlerRegistry.getBlockHandlerIdFor(player.level(), be.getBlockPos(), be, IBlockItemActionHandler.Action.HIGHLIGHT)
-								.ifPresent(id -> positions.computeIfAbsent(id, k -> new ArrayList<>()).add(be.getBlockPos()))
+						ItemActionHandlerRegistry.getBlockHandlerFor(player.level(), be.getBlockPos(), be, IBlockItemActionHandler.Action.HIGHLIGHT)
+								.ifPresent(handler -> {
+									BlockPos canonicalPos = handler.getInteractionPosToActOn(player.level(), be.getBlockPos(), be, IBlockItemActionHandler.Action.HIGHLIGHT);
+									canonicalPositions.computeIfAbsent(handler.id(), k -> new HashMap<>()).putIfAbsent(canonicalPos, canonicalPos);
+								})
 				);
+		canonicalPositions.forEach((handlerId, posMap) -> positions.put(handlerId, new ArrayList<>(posMap.values())));
 
 		Map<ResourceLocation, List<Integer>> entities = new HashMap<>();
 		player.level().getEntities(player, player.getBoundingBox().inflate(HIGHLIGHT_RANGE),
@@ -63,15 +71,15 @@ public class HighlightHandler {
 			return;
 		}
 
-		List<BlockPos> stackPositions = new ArrayList<>();
-		List<BlockPos> itemPositions = new ArrayList<>();
+		Map<BlockPos, List<BlockPos>> stackPositions = new LinkedHashMap<>();
+		Map<BlockPos, List<BlockPos>> itemPositions = new LinkedHashMap<>();
 
 		storagePositions.forEach((handlerId, positions) ->
 				ItemActionHandlerRegistry.getBlockHandler(handlerId).ifPresent(handler ->
 						positions.forEach(pos -> {
 							switch (handler.getItemMatch(serverPlayer, stackKey, pos, IBlockItemActionHandler.Action.HIGHLIGHT)) {
-								case MATCHING_STACK -> stackPositions.add(pos);
-								case MATCHING_ITEM -> itemPositions.add(pos);
+								case MATCHING_STACK -> stackPositions.putIfAbsent(getHighlightGroupKey(handler.getHighlightPositions(serverPlayer, pos), pos), handler.getHighlightPositions(serverPlayer, pos));
+								case MATCHING_ITEM -> itemPositions.putIfAbsent(getHighlightGroupKey(handler.getHighlightPositions(serverPlayer, pos), pos), handler.getHighlightPositions(serverPlayer, pos));
 							}
 						})
 				)
@@ -81,8 +89,8 @@ public class HighlightHandler {
 		itemMatchNumber.addAndGet(itemPositions.size());
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncBlockHighlightsPayload(
 				Map.of(
-						MATCHING_STACK_HIGHLIGHT_COLOR, stackPositions,
-						MATCHING_ITEM_HIGHLIGHT_COLOR, itemPositions
+						MATCHING_STACK_HIGHLIGHT_COLOR, new ArrayList<>(stackPositions.values()),
+						MATCHING_ITEM_HIGHLIGHT_COLOR, new ArrayList<>(itemPositions.values())
 				)
 		));
 
@@ -137,5 +145,9 @@ public class HighlightHandler {
 		}
 
 		player.displayClientMessage(message, true);
+	}
+
+	private static BlockPos getHighlightGroupKey(List<BlockPos> positions, BlockPos fallbackPos) {
+		return positions.stream().min(Comparator.comparingLong(BlockPos::asLong)).orElse(fallbackPos);
 	}
 }

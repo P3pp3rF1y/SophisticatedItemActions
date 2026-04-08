@@ -59,7 +59,7 @@ public class ItemTransferHandler {
 		WorldHelper.getBlockEntitiesInRange(level, player.blockPosition(), INTERACTION_RANGE).forEach(be -> {
 			ItemActionHandlerRegistry.getBlockHandlerFor(level, be.getBlockPos(), be, IBlockItemActionHandler.Action.DEPOSIT)
 					.ifPresent(handler -> {
-						tempStorages.computeIfAbsent(handler.id(), k -> new HashSet<>()).add(handler.getInteractionPosToActOn(be.getBlockPos(), be));
+						tempStorages.computeIfAbsent(handler.id(), k -> new HashSet<>()).add(handler.getInteractionPosToActOn(level, be.getBlockPos(), be, IBlockItemActionHandler.Action.DEPOSIT));
 					});
 		});
 
