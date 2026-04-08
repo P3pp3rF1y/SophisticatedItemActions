@@ -9,7 +9,9 @@ import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ISlotTracker;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedstorage.block.ChestBlockEntity;
+import net.p3pp3rf1y.sophisticatedstorage.block.StoragePositionGroups;
 
+import java.util.List;
 import java.util.Optional;
 
 public class ControllableStorageItemActionHandler implements IBlockEntityItemActionHandler<IControllableStorage> {
@@ -43,6 +45,7 @@ public class ControllableStorageItemActionHandler implements IBlockEntityItemAct
 
 	@Override
 	public IRestockHandler getRestockHandler(IControllableStorage storage) {
+		Vec3 center = StoragePositionGroups.getCenter(storage.getStorageBlockLevel(), storage.getStorageBlockPos());
 		return new IRestockHandler() {
 			@Override
 			public Optional<BlockPos> getPositionToOpen() {
@@ -54,7 +57,7 @@ public class ControllableStorageItemActionHandler implements IBlockEntityItemAct
 
 			@Override
 			public Vec3 getPosition() {
-				return Vec3.atCenterOf(storage.getStorageBlockPos());
+				return center;
 			}
 
 			@Override
@@ -65,13 +68,18 @@ public class ControllableStorageItemActionHandler implements IBlockEntityItemAct
 	}
 
 	@Override
-	public BlockPos getDepositPosToActOn(BlockPos pos, IControllableStorage controllableStorage) {
-		return controllableStorage.getControllerPos().orElse(pos);
+	public BlockPos getPosToActOn(BlockPos pos, IControllableStorage controllableStorage, Action action) {
+		return StoragePositionGroups.getGroup(controllableStorage.getStorageBlockLevel(), pos).anchorPos();
+	}
+
+	@Override
+	public List<BlockPos> getHighlightPositions(IControllableStorage storage) {
+		return StoragePositionGroups.getGroup(storage.getStorageBlockLevel(), storage.getStorageBlockPos()).memberPositions();
 	}
 
 	@Override
 	public IDepositHandler getDepositHandler(IControllableStorage storage) {
-		Vec3 center = Vec3.atCenterOf(storage.getStorageBlockPos());
+		Vec3 center = StoragePositionGroups.getCenter(storage.getStorageBlockLevel(), storage.getStorageBlockPos());
 		return new IDepositHandler() {
 			@Override
 			public Vec3 getPosition() {

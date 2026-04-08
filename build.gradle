@@ -89,6 +89,14 @@ repositories {
         }
     }
     maven {
+        url = "https://maven.createmod.net"
+        content {
+            includeGroup "com.simibubi.create"
+            includeGroupByRegex "net.createmod.*"
+            includeGroupByRegex "dev.engine-room.*"
+        }
+    }
+    maven {
         name = "TerraformersMC"
         url = "https://maven.terraformersmc.com/"
         content {
@@ -162,6 +170,16 @@ sourceSets.main.resources {
 dependencies {
     minecraft "net.neoforged:forge:${minecraft_version}-${neo_version}"
 
+    compileOnly fg.deobf("com.simibubi.create:create-${create_mc_version}:${create_version}:all") {
+        transitive = false
+    }
+    compileOnly fg.deobf("dev.engine-room.flywheel:flywheel-forge-${create_mc_version}:${flywheel_version}") {
+        transitive = false
+    }
+    compileOnly fg.deobf("net.createmod.ponder:Ponder-Forge-${create_mc_version}:${ponder_version}") {
+        transitive = false
+    }
+    compileOnly fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}")
     compileOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
     compileOnly fg.deobf("dev.emi:emi-forge:${emi_version}")
     compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
