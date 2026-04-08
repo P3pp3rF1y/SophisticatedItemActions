@@ -85,6 +85,14 @@ repositories {
         }
     }
     maven {
+        url = "https://maven.createmod.net"
+        content {
+            includeGroup "com.simibubi.create"
+            includeGroupByRegex "net.createmod.*"
+            includeGroupByRegex "dev.engine-room.*"
+        }
+    }
+    maven {
         name = "TerraformersMC"
         url = "https://maven.terraformersmc.com/"
         content {
@@ -179,6 +187,12 @@ configurations {
 }
 
 dependencies {
+    compileOnly("com.simibubi.create:create-${create_mc_version}:${create_version}") {
+        transitive = false
+    }
+    compileOnly("net.createmod.ponder:Ponder-NeoForge-${create_mc_version}:${ponder_version}") {
+        transitive = false
+    }
     compileOnly "mezz.jei:jei-${jei_mc_version}-api:${jei_version}"
     localRuntime "mezz.jei:jei-${jei_mc_version}:${jei_version}"
     compileOnly "dev.emi:emi-neoforge:${emi_version}"
