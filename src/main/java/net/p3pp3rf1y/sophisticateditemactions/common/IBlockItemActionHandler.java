@@ -5,8 +5,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.p3pp3rf1y.sophisticatedcore.util.BlockHighlightGroups;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IBlockItemActionHandler {
@@ -16,6 +18,17 @@ public interface IBlockItemActionHandler {
 
 	default BlockPos getInteractionPosToActOn(BlockPos pos, BlockEntity blockEntity) {
 		return pos;
+	}
+
+	default BlockPos getInteractionPosToActOn(Level level, BlockPos pos, BlockEntity blockEntity, Action action) {
+		if (action == Action.HIGHLIGHT) {
+			return BlockHighlightGroups.getCanonicalHighlightPos(level, pos);
+		}
+		return getInteractionPosToActOn(pos, blockEntity);
+	}
+
+	default List<BlockPos> getHighlightPositions(ServerPlayer player, BlockPos pos) {
+		return BlockHighlightGroups.getHighlightPositions(player.level(), pos);
 	}
 
 	ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos, Action action);
