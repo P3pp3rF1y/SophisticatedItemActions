@@ -20,8 +20,8 @@ import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
-import org.jspecify.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -120,6 +120,15 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 	@Override
 	public boolean canActOn(Level level, BlockPos pos, BlockEntity blockEntity) {
 		return level.getCapability(Capabilities.Item.BLOCK, pos, null) != null;
+	}
+
+	@Override
+	public BlockPos getInteractionPosToActOn(Level level, BlockPos pos, BlockEntity blockEntity, Action action) {
+		BlockState state = level.getBlockState(pos);
+		if (state.getBlock() == Blocks.CHEST && state.getValue(ChestBlock.TYPE) == ChestType.RIGHT) {
+			return pos.relative(ChestBlock.getConnectedDirection(state));
+		}
+		return IBlockItemActionHandler.super.getInteractionPosToActOn(level, pos, blockEntity, action);
 	}
 
 	@Override
