@@ -45,7 +45,7 @@ public class Config {
 			builder.comment("Client-only discoverability nudges for highlight, restock and deposit keybind actions").push("discoveryNudges");
 
 			enabled = builder.comment("Master toggle for discovery nudges").define("enabled", true);
-			globalCooldownTicks = builder.comment("Global cooldown between any two nudges in ticks").defineInRange("globalCooldownTicks", 6000, 0, Integer.MAX_VALUE);
+			globalCooldownTicks = builder.comment("Global cooldown between any two nudges in ticks (default: 2 hours)").defineInRange("globalCooldownTicks", 144000, 0, Integer.MAX_VALUE);
 			maxNudgesPerSession = builder.comment("Maximum total number of nudges shown during one world connection session").defineInRange("maxNudgesPerSession", 3, 0, Integer.MAX_VALUE);
 			highlightActionThreshold = builder.comment("Number of storage opens without transfers before showing highlight hint (-1 disables)").defineInRange("highlightActionThreshold", 4, -1, Integer.MAX_VALUE);
 			restockActionThreshold = builder.comment("Number of storage sessions with transfer from storage to inventory before showing restock hint (-1 disables)").defineInRange("restockActionThreshold", 3, -1, Integer.MAX_VALUE);
