@@ -112,6 +112,10 @@ public class ItemActionNudgeManager {
 
 	private void trackStorageSession(Minecraft minecraft) {
 		Screen screen = minecraft.screen;
+		if (screen == null) {
+			eligibilityDetector.clearCache();
+		}
+
 		boolean isStorageScreen = eligibilityDetector.isStorageContainerScreen(screen);
 		if (!storageScreenOpen && isStorageScreen) {
 			startStorageSession((AbstractContainerScreen<?>) screen);
@@ -196,6 +200,7 @@ public class ItemActionNudgeManager {
 
 	private void resetSessionState() {
 		sessionState.reset();
+		eligibilityDetector.clearCache();
 		NudgeActionUsageTracker.reset();
 		storageScreenOpen = false;
 		transfersObservedInSession = false;
