@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.p3pp3rf1y.sophisticateditemactions.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "AccessorAbstractGridBlockEntity",
+    "AccessorAbstractPortableGridBlockEntity"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+  ]
+}
