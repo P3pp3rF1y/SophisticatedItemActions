@@ -93,6 +93,13 @@ repositories {
         }
     }
     maven {
+        name = "RefinedStorage"
+        url = "https://maven.creeperhost.net"
+        content {
+            includeGroup "com.refinedmods.refinedstorage"
+        }
+    }
+    maven {
         name = "TerraformersMC"
         url = "https://maven.terraformersmc.com/"
         content {
@@ -187,10 +194,14 @@ configurations {
 }
 
 dependencies {
+    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
     compileOnly("com.simibubi.create:create-${create_mc_version}:${create_version}") {
         transitive = false
     }
     compileOnly("net.createmod.ponder:Ponder-NeoForge-${create_mc_version}:${ponder_version}") {
+        transitive = false
+    }
+    compileOnly("com.refinedmods.refinedstorage:refinedstorage-neoforge:${rs_version}") {
         transitive = false
     }
     compileOnly "mezz.jei:jei-${jei_mc_version}-api:${jei_version}"
@@ -242,9 +253,10 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_id              : mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
             mod_issue_tracker_url: mod_issue_tracker_url, mod_logo_file: mod_logo_file, mod_credits: mod_credits,
             mod_authors         : mod_authors, mod_description: mod_description, mod_display_url: mod_display_url,
-            mod_full_version    : "${project.mod_version}.${getBuildNumber()}${getStable()}",
-            jei_version_range   : jei_version_range,
-            ssim_version          :"[" + ssim_version.substring(ssim_version.indexOf("-") + 1, ssim_version.lastIndexOf(',')) + ",)"
+             mod_full_version    : "${project.mod_version}.${getBuildNumber()}${getStable()}",
+             jei_version_range   : jei_version_range,
+             refinedstorage_version_range: refinedstorage_version_range,
+             ssim_version          :"[" + ssim_version.substring(ssim_version.indexOf("-") + 1, ssim_version.lastIndexOf(',')) + ",)"
     ]
     inputs.properties replaceProperties
 
