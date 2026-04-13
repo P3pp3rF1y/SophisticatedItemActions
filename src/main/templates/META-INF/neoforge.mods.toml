@@ -14,6 +14,10 @@ credits="${mod_credits}"
 authors="${mod_authors}"
 description='''${mod_description}'''
 
+[[mixins]]
+config = "sophisticateditemactions-refinedstorage.mixins.json"
+requiredMods = ["refinedstorage"]
+
 [[dependencies.${mod_id}]]
 modId="sophisticatedstorageinmotion"
 type="optional"
@@ -27,6 +31,13 @@ type="optional"
 versionRange="${jei_version_range}"
 ordering="NONE"
 side="CLIENT"
+
+[[dependencies.${mod_id}]]
+modId="refinedstorage"
+type="optional"
+versionRange="${refinedstorage_version_range}"
+ordering="NONE"
+side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="neoforge"
