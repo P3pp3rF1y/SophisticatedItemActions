@@ -79,3 +79,10 @@ mandatory = false
 versionRange="${jei_version_range}"
 ordering="NONE"
 side="CLIENT"
+
+[[dependencies.sophisticateditemactions]]
+modId="refinedstorage"
+mandatory = false
+versionRange="${refinedstorage_version_range}"
+ordering="NONE"
+side="BOTH"

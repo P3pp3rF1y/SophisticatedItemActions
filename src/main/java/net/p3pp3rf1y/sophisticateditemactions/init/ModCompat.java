@@ -4,6 +4,7 @@ import net.minecraftforge.fml.ModList;
 import net.p3pp3rf1y.sophisticatedcore.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.create.CreateCompat;
+import net.p3pp3rf1y.sophisticateditemactions.compat.refinedstorage.RefinedStorageCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.emi.EmiCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.jei.JeiCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.rei.ReiCompat;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.REFINED_STORAGE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.STORAGE_IN_MOTION;
 
 public class ModCompat {
@@ -28,6 +30,7 @@ public class ModCompat {
 		compatFactories.put(CompatModIds.JEI, () -> JeiCompat::new);
 		compatFactories.put(CompatModIds.EMI, () -> EmiCompat::new);
 		compatFactories.put(CompatModIds.REI, () -> ReiCompat::new);
+		compatFactories.put(REFINED_STORAGE, () -> RefinedStorageCompat::new);
 		compatFactories.put(STORAGE_IN_MOTION, () -> StorageInMotionCompat::new);
 	}
 
