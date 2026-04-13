@@ -85,6 +85,13 @@ repositories {
         }
     }
     maven {
+        name = "RefinedStorage"
+        url = "https://maven.creeperhost.net"
+        content {
+            includeGroup "com.refinedmods.refinedstorage"
+        }
+    }
+    maven {
         name = "TerraformersMC"
         url = "https://maven.terraformersmc.com/"
         content {
@@ -179,6 +186,10 @@ configurations {
 }
 
 dependencies {
+    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+    compileOnly("com.refinedmods.refinedstorage:refinedstorage-neoforge:2.0.0") {
+        transitive = false
+    }
     compileOnly "mezz.jei:jei-${jei_mc_version}-api:${jei_version}"
     localRuntime "mezz.jei:jei-${jei_mc_version}:${jei_version}"
     compileOnly "dev.emi:emi-neoforge:${emi_version}"
