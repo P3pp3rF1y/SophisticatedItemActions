@@ -21,6 +21,9 @@ if (findProject(':SophisticatedStorageInMotion') != null) {
 if (findProject(':SophisticatedStorage') != null) {
     evaluationDependsOn(':SophisticatedStorage')
 }
+if (findProject(':SophisticatedBackpacks') != null) {
+    evaluationDependsOn(':SophisticatedBackpacks')
+}
 
 version = "${project.minecraft_version}-${project.mod_version}.${getBuildNumber()}${getStable()}"
 group = mod_group_id
@@ -76,6 +79,17 @@ repositories {
         }
         content {
             includeModule("net.p3pp3rf1y", "sophisticatedstorage")
+        }
+    }
+    maven {
+        name = "GHPBackpacks"
+        url = uri("https://maven.pkg.github.com/p3pp3rf1y/sophisticatedbackpacks")
+        credentials {
+            username = System.getenv("GITHUB_ACTOR")
+            password = System.getenv("GITHUB_TOKEN")
+        }
+        content {
+            includeModule("net.p3pp3rf1y", "sophisticatedbackpacks")
         }
     }
     maven {
@@ -177,6 +191,11 @@ neoForge {
                 sourceSet(project(':SophisticatedStorage').sourceSets.main)
             }
         }
+        if (findProject(':SophisticatedBackpacks') != null) {
+            "sophisticatedbackpacks" {
+                sourceSet(project(':SophisticatedBackpacks').sourceSets.main)
+            }
+        }
     }
 
     unitTest {
@@ -243,6 +262,17 @@ dependencies {
             transitive = false
         }
     }
+    if (findProject(':SophisticatedBackpacks') != null) {
+        dependencies.compileOnly project(':SophisticatedBackpacks')
+        dependencies.testImplementation project(':SophisticatedBackpacks')
+    } else {
+        dependencies.compileOnly("net.p3pp3rf1y:sophisticatedbackpacks:${sb_version}") {
+            transitive = false
+        }
+        dependencies.testImplementation("net.p3pp3rf1y:sophisticatedbackpacks:${sb_version}") {
+            transitive = false
+        }
+    }
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
@@ -254,9 +284,10 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_issue_tracker_url: mod_issue_tracker_url, mod_logo_file: mod_logo_file, mod_credits: mod_credits,
             mod_authors         : mod_authors, mod_description: mod_description, mod_display_url: mod_display_url,
              mod_full_version    : "${project.mod_version}.${getBuildNumber()}${getStable()}",
-             jei_version_range   : jei_version_range,
-             refinedstorage_version_range: refinedstorage_version_range,
-             ssim_version          :"[" + ssim_version.substring(ssim_version.indexOf("-") + 1, ssim_version.lastIndexOf(',')) + ",)"
+              jei_version_range   : jei_version_range,
+              refinedstorage_version_range: refinedstorage_version_range,
+              sb_version_range          :"[" + sb_version.substring(sb_version.indexOf("-") + 1, sb_version.lastIndexOf(',')) + ",)",
+              ssim_version          :"[" + ssim_version.substring(ssim_version.indexOf("-") + 1, ssim_version.lastIndexOf(',')) + ",)"
     ]
     inputs.properties replaceProperties
 
