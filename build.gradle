@@ -22,6 +22,9 @@ if (findProject(':SophisticatedStorageInMotion') != null) {
 if (findProject(':SophisticatedStorage') != null) {
     evaluationDependsOn(':SophisticatedStorage')
 }
+if (findProject(':SophisticatedBackpacks') != null) {
+    evaluationDependsOn(':SophisticatedBackpacks')
+}
 
 version = "${project.minecraft_version}-${project.mod_version}.${getBuildNumber()}${getStable()}"
 group = mod_group_id
@@ -80,6 +83,17 @@ repositories {
         }
         content {
             includeModule("net.p3pp3rf1y", "sophisticatedstorage")
+        }
+    }
+    maven {
+        name = "GHPBackpacks"
+        url = uri("https://maven.pkg.github.com/p3pp3rf1y/sophisticatedbackpacks")
+        credentials {
+            username = System.getenv("GITHUB_ACTOR")
+            password = System.getenv("GITHUB_TOKEN")
+        }
+        content {
+            includeModule("net.p3pp3rf1y", "sophisticatedbackpacks")
         }
     }
     maven {
@@ -150,6 +164,11 @@ minecraft {
                         source project(':SophisticatedStorage').sourceSets.main
                     }
                 }
+                if (findProject(':SophisticatedBackpacks') != null) {
+                    "sophisticatedbackpacks" {
+                        source project(':SophisticatedBackpacks').sourceSets.main
+                    }
+                }
             }
         }
         client {
@@ -218,6 +237,17 @@ dependencies {
             transitive = false
         }
     }
+    if (findProject(':SophisticatedBackpacks') != null) {
+        compileOnly project(':SophisticatedBackpacks')
+        testImplementation project(':SophisticatedBackpacks')
+    } else {
+        compileOnly fg.deobf("net.p3pp3rf1y:sophisticatedbackpacks:${sb_version}") {
+            transitive = false
+        }
+        testImplementation fg.deobf("net.p3pp3rf1y:sophisticatedbackpacks:${sb_version}") {
+            transitive = false
+        }
+    }
 }
 
 tasks.withType(ProcessResources).configureEach {
@@ -229,6 +259,7 @@ tasks.withType(ProcessResources).configureEach {
             mod_full_version    : "${project.mod_version}.${getBuildNumber()}",
             jei_version_range   : jei_version_range,
             refinedstorage_version_range: refinedstorage_version_range,
+            sb_version_range    : "[" + sb_version.substring(sb_version.indexOf("-") + 1, sb_version.lastIndexOf(',')) + ",)",
             sc_version          : sc_version.substring(sc_version.indexOf("-") + 1, sc_version.lastIndexOf(',')) + ".+",
             ssim_version        : "[" + ssim_version.substring(ssim_version.indexOf("-") + 1, ssim_version.lastIndexOf(',')) + ",)"
     ]
