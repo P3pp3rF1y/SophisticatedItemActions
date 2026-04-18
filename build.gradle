@@ -206,6 +206,9 @@ configurations {
 
 dependencies {
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+    compileOnly("org.appliedenergistics:appliedenergistics2:19.2.8") {
+        transitive = false
+    }
     compileOnly("com.refinedmods.refinedstorage:refinedstorage-neoforge:2.0.0") {
         transitive = false
     }
