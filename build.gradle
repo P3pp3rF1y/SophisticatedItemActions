@@ -125,6 +125,12 @@ repositories {
             includeGroup "me.shedaniel.cloth"
         }
     }
+    maven {
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 group = mod_group_id
@@ -190,6 +196,9 @@ dependencies {
     minecraft "net.neoforged:forge:${minecraft_version}-${neo_version}"
 
     compileOnly fg.deobf("com.simibubi.create:create-${create_mc_version}:${create_version}:all") {
+        transitive = false
+    }
+    compileOnly fg.deobf("maven.modrinth:ae2:${ae2_version}") {
         transitive = false
     }
     compileOnly fg.deobf("dev.engine-room.flywheel:flywheel-forge-${create_mc_version}:${flywheel_version}") {
@@ -258,6 +267,7 @@ tasks.withType(ProcessResources).configureEach {
             mod_id              : mod_id, mod_version: mod_version,
             mod_full_version    : "${project.mod_version}.${getBuildNumber()}",
             jei_version_range   : jei_version_range,
+            ae2_version_range   : ae2_version_range,
             refinedstorage_version_range: refinedstorage_version_range,
             sb_version_range    : "[" + sb_version.substring(sb_version.indexOf("-") + 1, sb_version.lastIndexOf(',')) + ",)",
             sc_version          : sc_version.substring(sc_version.indexOf("-") + 1, sc_version.lastIndexOf(',')) + ".+",

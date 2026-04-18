@@ -81,6 +81,13 @@ ordering="NONE"
 side="CLIENT"
 
 [[dependencies.sophisticateditemactions]]
+modId="ae2"
+mandatory = false
+versionRange="${ae2_version_range}"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.sophisticateditemactions]]
 modId="refinedstorage"
 mandatory = false
 versionRange="${refinedstorage_version_range}"
