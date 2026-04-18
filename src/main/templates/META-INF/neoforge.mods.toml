@@ -33,6 +33,13 @@ ordering="NONE"
 side="CLIENT"
 
 [[dependencies.${mod_id}]]
+modId="ae2"
+type="optional"
+versionRange="${ae2_version_range}"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
 modId="refinedstorage"
 type="optional"
 versionRange="${refinedstorage_version_range}"

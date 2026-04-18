@@ -220,6 +220,9 @@ dependencies {
     compileOnly("net.createmod.ponder:Ponder-NeoForge-${create_mc_version}:${ponder_version}") {
         transitive = false
     }
+    compileOnly("org.appliedenergistics:appliedenergistics2:${ae2_version}") {
+        transitive = false
+    }
     compileOnly("com.refinedmods.refinedstorage:refinedstorage-neoforge:${rs_version}") {
         transitive = false
     }
@@ -285,6 +288,7 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_authors         : mod_authors, mod_description: mod_description, mod_display_url: mod_display_url,
              mod_full_version    : "${project.mod_version}.${getBuildNumber()}${getStable()}",
               jei_version_range   : jei_version_range,
+              ae2_version_range   : ae2_version_range,
               refinedstorage_version_range: refinedstorage_version_range,
               sb_version_range          :"[" + sb_version.substring(sb_version.indexOf("-") + 1, sb_version.lastIndexOf(',')) + ",)",
               ssim_version          :"[" + ssim_version.substring(ssim_version.indexOf("-") + 1, ssim_version.lastIndexOf(',')) + ",)"
