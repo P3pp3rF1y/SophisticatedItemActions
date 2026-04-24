@@ -14,19 +14,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public record SyncEntityHighlightsPayload(Map<Integer, List<Integer>> entityHighlights) implements CustomPacketPayload {
+public record SyncEntityHighlightsPayload(Map<Integer, List<Integer>> entityHighlights, int durationTicks) implements CustomPacketPayload {
 	public static final Type<SyncEntityHighlightsPayload> TYPE = new Type<>(SophisticatedItemActions.getRL("sync_entity_highlights"));
 	public static final StreamCodec<ByteBuf, SyncEntityHighlightsPayload> STREAM_CODEC = StreamCodec.composite(
 			StreamCodecHelper.ofMap(ByteBufCodecs.INT, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new),
 			SyncEntityHighlightsPayload::entityHighlights,
+			ByteBufCodecs.INT,
+			SyncEntityHighlightsPayload::durationTicks,
 			SyncEntityHighlightsPayload::new);
-
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
 		return TYPE;
 	}
 
 	public static void handlePayload(SyncEntityHighlightsPayload payload, IPayloadContext context) {
-		EntityHighlightRenderer.addHighlightedEntities(payload.entityHighlights());
+		EntityHighlightRenderer.addHighlightedEntities(payload.entityHighlights(), payload.durationTicks());
 	}
 }
