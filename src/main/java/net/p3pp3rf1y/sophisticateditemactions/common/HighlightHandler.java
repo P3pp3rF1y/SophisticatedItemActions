@@ -21,6 +21,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
 import net.p3pp3rf1y.sophisticateditemactions.network.RequestItemHighlightsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.SyncEntityHighlightsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.SyncHighlightDirectionsPayload;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,6 +35,8 @@ public class HighlightHandler {
 	public static final int MATCHING_STACK_HIGHLIGHT_COLOR = 0x4CAF50;
 	public static final int MATCHING_ITEM_HIGHLIGHT_COLOR = 0x42A5F5;
 	private static final int HIGHLIGHT_RANGE = 32;
+	private static final int MIN_HIGHLIGHT_DURATION = 40;
+	private static final int MAX_HIGHLIGHT_DURATION = 160;
 	public static void highlightItem(Player player, ItemStack stack) {
 		Map<ResourceLocation, List<BlockPos>> positions = new HashMap<>();
 		Map<ResourceLocation, Map<BlockPos, BlockPos>> canonicalPositions = new HashMap<>();
@@ -87,12 +90,10 @@ public class HighlightHandler {
 
 		stackMatchNumber.addAndGet(stackPositions.size());
 		itemMatchNumber.addAndGet(itemPositions.size());
-		PacketDistributor.sendToPlayer(serverPlayer, new SyncBlockHighlightsPayload(
-				Map.of(
-						MATCHING_STACK_HIGHLIGHT_COLOR, new ArrayList<>(stackPositions.values()),
-						MATCHING_ITEM_HIGHLIGHT_COLOR, new ArrayList<>(itemPositions.values())
-				)
-		));
+		Map<Integer, List<List<BlockPos>>> blockHighlights = Map.of(
+				MATCHING_STACK_HIGHLIGHT_COLOR, new ArrayList<>(stackPositions.values()),
+				MATCHING_ITEM_HIGHLIGHT_COLOR, new ArrayList<>(itemPositions.values())
+		);
 
 		List<Integer> stackEntities = new ArrayList<>();
 		List<Integer> itemEntities = new ArrayList<>();
@@ -116,12 +117,14 @@ public class HighlightHandler {
 		stackMatchNumber.addAndGet(stackEntities.size());
 		itemMatchNumber.addAndGet(itemEntities.size());
 
-		PacketDistributor.sendToPlayer(serverPlayer, new SyncEntityHighlightsPayload(
-				Map.of(
-						MATCHING_STACK_HIGHLIGHT_COLOR, stackEntities,
-						MATCHING_ITEM_HIGHLIGHT_COLOR, itemEntities
-				)
-		));
+		Map<Integer, List<Integer>> entityHighlights = Map.of(
+				MATCHING_STACK_HIGHLIGHT_COLOR, stackEntities,
+				MATCHING_ITEM_HIGHLIGHT_COLOR, itemEntities
+		);
+		int highlightDuration = getHighlightDuration(serverPlayer, blockHighlights, entityHighlights);
+		PacketDistributor.sendToPlayer(serverPlayer, new SyncBlockHighlightsPayload(blockHighlights, highlightDuration));
+		PacketDistributor.sendToPlayer(serverPlayer, new SyncEntityHighlightsPayload(entityHighlights, highlightDuration));
+		PacketDistributor.sendToPlayer(serverPlayer, new SyncHighlightDirectionsPayload(blockHighlights, entityHighlights, highlightDuration));
 
 		Level level = player.level();
 
@@ -149,5 +152,40 @@ public class HighlightHandler {
 
 	private static BlockPos getHighlightGroupKey(List<BlockPos> positions, BlockPos fallbackPos) {
 		return positions.stream().min(Comparator.comparingLong(BlockPos::asLong)).orElse(fallbackPos);
+	}
+
+	private static int getHighlightDuration(ServerPlayer player, Map<Integer, List<List<BlockPos>>> blockHighlights, Map<Integer, List<Integer>> entityHighlights) {
+		double farthestDistanceSqr = 0;
+		for (List<List<BlockPos>> groups : blockHighlights.values()) {
+			for (List<BlockPos> group : groups) {
+				if (group.isEmpty()) {
+					continue;
+				}
+
+				double x = 0;
+				double y = 0;
+				double z = 0;
+				for (BlockPos pos : group) {
+					x += pos.getX() + 0.5;
+					y += pos.getY() + 0.5;
+					z += pos.getZ() + 0.5;
+				}
+
+				int count = group.size();
+				farthestDistanceSqr = Math.max(farthestDistanceSqr, player.distanceToSqr(x / count, y / count, z / count));
+			}
+		}
+
+		for (List<Integer> entityIds : entityHighlights.values()) {
+			for (int entityId : entityIds) {
+				Entity entity = player.level().getEntity(entityId);
+				if (entity != null) {
+					farthestDistanceSqr = Math.max(farthestDistanceSqr, entity.distanceToSqr(player));
+				}
+			}
+		}
+
+		double distanceRatio = Math.min(Math.sqrt(farthestDistanceSqr) / HIGHLIGHT_RANGE, 1);
+		return MIN_HIGHLIGHT_DURATION + (int) Math.round(distanceRatio * (MAX_HIGHLIGHT_DURATION - MIN_HIGHLIGHT_DURATION));
 	}
 }
