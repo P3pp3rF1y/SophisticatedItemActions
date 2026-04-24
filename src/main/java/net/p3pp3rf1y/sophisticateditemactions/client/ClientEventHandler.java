@@ -14,8 +14,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -23,6 +25,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.ItemActionNudgeManager;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeHintType;
+import net.p3pp3rf1y.sophisticateditemactions.client.gui.HighlightDirectionOverlay;
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.EntityHighlightRenderer;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.ItemFlightAnimator;
@@ -81,6 +84,7 @@ public class ClientEventHandler {
 
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addListener(ClientEventHandler::registerKeyMappings);
+		modBus.addListener(ClientEventHandler::registerOverlay);
 
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientEventHandler::handleKeyInput);
@@ -115,6 +119,10 @@ public class ClientEventHandler {
 		event.register(ITEM_HIGHLIGHT_KEYBIND);
 		event.register(ITEM_DEPOSIT_KEYBIND);
 		event.register(ITEM_RESTOCK_KEYBIND);
+	}
+
+	private static void registerOverlay(RegisterGuiOverlaysEvent event) {
+		event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "highlight_directions", HighlightDirectionOverlay.HUD_HIGHLIGHT_DIRECTIONS);
 	}
 
 	public static void handleGuiKeyPress(ScreenEvent.KeyPressed.Pre event) {

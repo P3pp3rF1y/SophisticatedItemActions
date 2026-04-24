@@ -24,10 +24,14 @@ public class EntityHighlightRenderer {
 	private static Map<Integer, List<Integer>> highlightedStackEntityIds = new HashMap<>();
 
 	public static void addHighlightedEntities(Map<Integer, List<Integer>> highlightEntities) {
+		addHighlightedEntities(highlightEntities, HIGHLIGHT_DURATION);
+	}
+
+	public static void addHighlightedEntities(Map<Integer, List<Integer>> highlightEntities, int durationTicks) {
 		highlightEntities.forEach((color, entityIds) ->
 				highlightedStackEntityIds.computeIfAbsent(color, k -> new ArrayList<>()).addAll(entityIds)
 		);
-		highlightExpireTime = Minecraft.getInstance().level.getGameTime() + HIGHLIGHT_DURATION;
+		highlightExpireTime = Minecraft.getInstance().level.getGameTime() + durationTicks;
 	}
 
 	public static void render(PoseStack poseStack, float partialTick, Vec3 cameraPos) {
