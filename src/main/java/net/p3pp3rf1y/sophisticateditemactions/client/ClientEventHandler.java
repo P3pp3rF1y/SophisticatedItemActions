@@ -13,11 +13,14 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.IKeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
+import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.ItemActionNudgeManager;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeHintType;
+import net.p3pp3rf1y.sophisticateditemactions.client.gui.HighlightDirectionOverlay;
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.EntityHighlightRenderer;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.ItemFlightAnimator;
@@ -75,6 +78,7 @@ public class ClientEventHandler {
 
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addListener(ClientEventHandler::registerKeyMappings);
+		modBus.addListener(ClientEventHandler::registerOverlay);
 
 		IEventBus eventBus = NeoForge.EVENT_BUS;
 		eventBus.addListener(ClientEventHandler::handleKeyInput);
@@ -107,6 +111,10 @@ public class ClientEventHandler {
 		event.register(ITEM_HIGHLIGHT_KEYBIND);
 		event.register(ITEM_DEPOSIT_KEYBIND);
 		event.register(ITEM_RESTOCK_KEYBIND);
+	}
+
+	private static void registerOverlay(RegisterGuiLayersEvent event) {
+		event.registerAbove(VanillaGuiLayers.HOTBAR, SophisticatedItemActions.getRL("highlight_directions"), HighlightDirectionOverlay.HUD_HIGHLIGHT_DIRECTIONS);
 	}
 
 	public static void handleGuiKeyPress(ScreenEvent.KeyPressed.Pre event) {

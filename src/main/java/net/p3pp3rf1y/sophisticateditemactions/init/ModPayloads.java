@@ -15,5 +15,6 @@ public class ModPayloads {
 		registrar.playToClient(SyncItemTransfersPayload.TYPE, SyncItemTransfersPayload.STREAM_CODEC, SyncItemTransfersPayload::handlePayload);
 		registrar.playToServer(RequestItemHighlightsPayload.TYPE, RequestItemHighlightsPayload.STREAM_CODEC, RequestItemHighlightsPayload::handlePayload);
 		registrar.playToClient(SyncEntityHighlightsPayload.TYPE, SyncEntityHighlightsPayload.STREAM_CODEC, SyncEntityHighlightsPayload::handlePayload);
+		registrar.playToClient(SyncHighlightDirectionsPayload.TYPE, SyncHighlightDirectionsPayload.STREAM_CODEC, SyncHighlightDirectionsPayload::handlePayload);
 	}
 }
