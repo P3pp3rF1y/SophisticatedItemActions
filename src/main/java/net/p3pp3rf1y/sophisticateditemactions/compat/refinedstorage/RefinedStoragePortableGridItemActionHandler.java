@@ -14,6 +14,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.IBlockItemActionHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.IDepositHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
+import net.p3pp3rf1y.sophisticateditemactions.common.SubLevelCompatHelper;
 import net.p3pp3rf1y.sophisticateditemactions.mixin.AccessorAbstractPortableGridBlockEntity;
 
 import java.util.Optional;
@@ -52,7 +53,7 @@ public class RefinedStoragePortableGridItemActionHandler implements IBlockEntity
 
 			@Override
 			public Vec3 getPosition() {
-				return Vec3.atCenterOf(portableGrid.getBlockPos());
+				return SubLevelCompatHelper.projectToWorld(portableGrid.getLevel(), Vec3.atCenterOf(portableGrid.getBlockPos()));
 			}
 
 			@Override
@@ -82,7 +83,7 @@ public class RefinedStoragePortableGridItemActionHandler implements IBlockEntity
 
 			@Override
 			public Vec3 getPosition() {
-				return Vec3.atCenterOf(portableGrid.getBlockPos());
+				return SubLevelCompatHelper.projectToWorld(portableGrid.getLevel(), Vec3.atCenterOf(portableGrid.getBlockPos()));
 			}
 
 			@Override

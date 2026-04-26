@@ -16,7 +16,7 @@ public class ControllerItemActionHandler implements IBlockEntityItemActionHandle
 
 	@Override
 	public IDepositHandler getDepositHandler(ControllerBlockEntityBase controller) {
-		Vec3 center = Vec3.atCenterOf(controller.getBlockPos());
+		Vec3 center = SubLevelCompatHelper.projectToWorld(controller.getLevel(), Vec3.atCenterOf(controller.getBlockPos()));
 		return new IDepositHandler() {
 			@Override
 			public Optional<BlockPos> getPositionToOpen() {
@@ -42,6 +42,7 @@ public class ControllerItemActionHandler implements IBlockEntityItemActionHandle
 
 	@Override
 	public IRestockHandler getRestockHandler(ControllerBlockEntityBase controller) {
+		Vec3 center = SubLevelCompatHelper.projectToWorld(controller.getLevel(), Vec3.atCenterOf(controller.getBlockPos()));
 		return new IRestockHandler() {
 			@Override
 			public Optional<BlockPos> getPositionToOpen() {
@@ -50,7 +51,7 @@ public class ControllerItemActionHandler implements IBlockEntityItemActionHandle
 
 			@Override
 			public Vec3 getPosition() {
-				return Vec3.atCenterOf(controller.getBlockPos());
+				return center;
 			}
 
 			@Override

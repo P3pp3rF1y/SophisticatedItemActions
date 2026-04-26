@@ -17,6 +17,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.IBlockItemActionHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.IDepositHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
+import net.p3pp3rf1y.sophisticateditemactions.common.SubLevelCompatHelper;
 
 import java.util.Optional;
 
@@ -66,7 +67,7 @@ public class AppliedEnergistics2TerminalItemActionHandler implements IBlockEntit
 
 			@Override
 			public Vec3 getPosition() {
-				return Vec3.atCenterOf(cableBus.getBlockPos());
+				return SubLevelCompatHelper.projectToWorld(cableBus.getLevel(), Vec3.atCenterOf(cableBus.getBlockPos()));
 			}
 
 			@Override
@@ -96,7 +97,7 @@ public class AppliedEnergistics2TerminalItemActionHandler implements IBlockEntit
 
 			@Override
 			public Vec3 getPosition() {
-				return Vec3.atCenterOf(cableBus.getBlockPos());
+				return SubLevelCompatHelper.projectToWorld(cableBus.getLevel(), Vec3.atCenterOf(cableBus.getBlockPos()));
 			}
 
 			@Override

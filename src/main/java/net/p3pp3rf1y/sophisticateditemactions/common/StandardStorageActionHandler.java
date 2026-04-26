@@ -118,7 +118,8 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 
 	@Override
 	public boolean canActOn(Level level, BlockPos pos, BlockEntity blockEntity) {
-		return level.getCapability(Capabilities.ItemHandler.BLOCK, pos, null) != null;
+		Level storageLevel = SubLevelCompatHelper.getLevelForPosition(level, pos);
+		return storageLevel.getCapability(Capabilities.ItemHandler.BLOCK, pos, null) != null;
 	}
 
 	@Override
@@ -132,21 +133,22 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 
 	@Override
 	public ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos, Action action) {
-		BlockState state = player.level().getBlockState(pos);
+		Level storageLevel = SubLevelCompatHelper.getLevelForPosition(player.level(), pos);
+		BlockState state = storageLevel.getBlockState(pos);
 		if (state.getBlock() == Blocks.CHEST && state.getValue(ChestBlock.TYPE) == ChestType.RIGHT) {
 			return ItemMatchResult.NO_MATCH;
 		}
-		return getItemMatch(stackKey, player.level().getCapability(Capabilities.ItemHandler.BLOCK, pos, null));
+		return getItemMatch(stackKey, storageLevel.getCapability(Capabilities.ItemHandler.BLOCK, pos, null));
 	}
 
 	@Override
 	public Optional<IDepositHandler> getDepositHandler(ServerPlayer player, BlockPos pos) {
-		Level level = player.level();
+		Level level = SubLevelCompatHelper.getLevelForPosition(player.level(), pos);
 		IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, null);
 		if (itemHandler == null) {
 			return Optional.empty();
 		}
-		Vec3 center = Vec3.atCenterOf(pos);
+		Vec3 center = SubLevelCompatHelper.projectToWorld(level, Vec3.atCenterOf(pos));
 		return Optional.of(new IDepositHandler() {
 			@Override
 			public Optional<BlockPos> getPositionToOpen() {
@@ -175,14 +177,16 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 
 	@Override
 	public Optional<IRestockHandler> getRestockHandler(ServerPlayer player, BlockPos pos) {
-		IItemHandler itemHandler = player.level().getCapability(Capabilities.ItemHandler.BLOCK, pos, null);
+		Level level = SubLevelCompatHelper.getLevelForPosition(player.level(), pos);
+		IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, null);
 		if (itemHandler == null) {
 			return Optional.empty();
 		}
+		Vec3 center = SubLevelCompatHelper.projectToWorld(level, Vec3.atCenterOf(pos));
 		return Optional.of(new IRestockHandler() {
 			@Override
 			public Optional<BlockPos> getPositionToOpen() {
-				if (player.level().getBlockEntity(pos) instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
+				if (level.getBlockEntity(pos) instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
 					return Optional.of(pos);
 				}
 				return Optional.empty();
@@ -190,7 +194,7 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 
 			@Override
 			public Vec3 getPosition() {
-				return Vec3.atCenterOf(pos);
+				return center;
 			}
 
 			@Override

@@ -28,7 +28,7 @@ public interface IBlockItemActionHandler {
 	}
 
 	default List<BlockPos> getHighlightPositions(ServerPlayer player, BlockPos pos) {
-		return BlockHighlightGroups.getHighlightPositions(player.level(), pos);
+		return BlockHighlightGroups.getHighlightPositions(SubLevelCompatHelper.getLevelForPosition(player.level(), pos), pos);
 	}
 
 	ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos, Action action);

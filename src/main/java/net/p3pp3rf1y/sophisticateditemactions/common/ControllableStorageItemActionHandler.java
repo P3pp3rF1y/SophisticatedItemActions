@@ -46,7 +46,7 @@ public class ControllableStorageItemActionHandler implements IBlockEntityItemAct
 
 	@Override
 	public IRestockHandler getRestockHandler(IControllableStorage storage) {
-		Vec3 center = StoragePositionGroups.getCenter(storage.getStorageBlockLevel(), storage.getStorageBlockPos());
+		Vec3 center = SubLevelCompatHelper.projectToWorld(storage.getStorageBlockLevel(), StoragePositionGroups.getCenter(storage.getStorageBlockLevel(), storage.getStorageBlockPos()));
 		return new IRestockHandler() {
 			@Override
 			public Optional<BlockPos> getPositionToOpen() {
@@ -80,7 +80,7 @@ public class ControllableStorageItemActionHandler implements IBlockEntityItemAct
 
 	@Override
 	public IDepositHandler getDepositHandler(IControllableStorage storage) {
-		Vec3 center = StoragePositionGroups.getCenter(storage.getStorageBlockLevel(), storage.getStorageBlockPos());
+		Vec3 center = SubLevelCompatHelper.projectToWorld(storage.getStorageBlockLevel(), StoragePositionGroups.getCenter(storage.getStorageBlockLevel(), storage.getStorageBlockPos()));
 		return new IDepositHandler() {
 			@Override
 			public Vec3 getPosition() {

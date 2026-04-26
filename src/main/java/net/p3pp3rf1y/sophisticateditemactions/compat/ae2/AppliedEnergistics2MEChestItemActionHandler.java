@@ -13,6 +13,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.IBlockItemActionHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.IDepositHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
+import net.p3pp3rf1y.sophisticateditemactions.common.SubLevelCompatHelper;
 
 import java.util.Optional;
 
@@ -56,7 +57,7 @@ public class AppliedEnergistics2MEChestItemActionHandler implements IBlockEntity
 
 			@Override
 			public Vec3 getPosition() {
-				return Vec3.atCenterOf(meChest.getBlockPos());
+				return SubLevelCompatHelper.projectToWorld(meChest.getLevel(), Vec3.atCenterOf(meChest.getBlockPos()));
 			}
 
 			@Override
@@ -86,7 +87,7 @@ public class AppliedEnergistics2MEChestItemActionHandler implements IBlockEntity
 
 			@Override
 			public Vec3 getPosition() {
-				return Vec3.atCenterOf(meChest.getBlockPos());
+				return SubLevelCompatHelper.projectToWorld(meChest.getLevel(), Vec3.atCenterOf(meChest.getBlockPos()));
 			}
 
 			@Override

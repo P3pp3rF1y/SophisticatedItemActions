@@ -8,6 +8,7 @@ public class CreateCompat implements ICompat {
 	@Override
 	public void init(IEventBus modBus) {
 		ItemActionHandlerRegistry.register(ItemVaultItemActionHandler.INSTANCE);
+		ItemActionHandlerRegistry.register(ContraptionStorageItemActionHandler.INSTANCE);
 	}
 
 	@Override
