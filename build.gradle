@@ -150,6 +150,15 @@ repositories {
             includeGroup "me.shedaniel.cloth"
         }
     }
+    maven {
+        url = "https://maven.ryanhcode.dev/releases"
+        content {
+            includeGroup "dev.ryanhcode.sable"
+            includeGroup "dev.ryanhcode.sable-companion"
+            includeGroup "dev.eriksonn.aeronautics"
+            includeGroup "dev.simulated_team.simulated"
+        }
+    }
 }
 
 base {
@@ -237,6 +246,15 @@ configurations {
 dependencies {
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
     compileOnly("com.simibubi.create:create-${create_mc_version}:${create_version}") {
+        transitive = false
+    }
+    compileOnly("dev.ryanhcode.sable:sable-neoforge-${minecraft_version}:${sable_version}") {
+        transitive = false
+    }
+    compileOnly("dev.ryanhcode.sable-companion:sable-companion-common-${minecraft_version}:${sable_companion_version}") {
+        transitive = false
+    }
+    compileOnly("dev.eriksonn.aeronautics:aeronautics-neoforge-${minecraft_version}:${aeronautics_version}") {
         transitive = false
     }
     compileOnly("net.createmod.ponder:Ponder-NeoForge-${create_mc_version}:${ponder_version}") {

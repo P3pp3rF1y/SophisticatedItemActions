@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticateditemactions.client.render;
+package net.p3pp3rf1y.sophisticateditemactions.compat.create;
 
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import com.simibubi.create.content.contraptions.render.ClientContraption;
@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class RenderedEntityBlockHighlightRenderer {
 	private static final Map<Integer, List<EntityBlockHighlightData>> highlightedPositions = new HashMap<>();

@@ -150,7 +150,7 @@ public class HighlightHandler {
 		);
 		int highlightDuration = getHighlightDuration(serverPlayer, blockHighlights, entityHighlights);
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncBlockHighlightsPayload(blockHighlightSplit.worldHighlights(), highlightDuration));
-		PacketDistributor.sendToPlayer(serverPlayer, new net.p3pp3rf1y.sophisticateditemactions.network.SyncRenderedBlockHighlightsPayload(blockHighlightSplit.subLevelHighlights(), highlightDuration));
+		PacketDistributor.sendToPlayer(serverPlayer, new net.p3pp3rf1y.sophisticateditemactions.network.SyncRenderedBlockHighlightsPayload(blockHighlights, highlightDuration));
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncRenderedEntityBlockHighlightsPayload(mergeRenderedEntityHighlights(renderedEntityStackHighlights, renderedEntityItemHighlights), highlightDuration));
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncEntityHighlightsPayload(entityHighlights, highlightDuration));
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncHighlightDirectionsPayload(projectedBlockHighlights, entityHighlights, highlightDuration));
