@@ -14,6 +14,8 @@ public class ModPayloads {
 		registrar.playToServer(RestockItemsPayload.TYPE, RestockItemsPayload.STREAM_CODEC, RestockItemsPayload::handlePayload);
 		registrar.playToClient(SyncItemTransfersPayload.TYPE, SyncItemTransfersPayload.STREAM_CODEC, SyncItemTransfersPayload::handlePayload);
 		registrar.playToServer(RequestItemHighlightsPayload.TYPE, RequestItemHighlightsPayload.STREAM_CODEC, RequestItemHighlightsPayload::handlePayload);
+		registrar.playToClient(SyncRenderedEntityBlockHighlightsPayload.TYPE, SyncRenderedEntityBlockHighlightsPayload.STREAM_CODEC,
+				SyncRenderedEntityBlockHighlightsPayload::handlePayload);
 		registrar.playToClient(SyncEntityHighlightsPayload.TYPE, SyncEntityHighlightsPayload.STREAM_CODEC, SyncEntityHighlightsPayload::handlePayload);
 		registrar.playToClient(SyncHighlightDirectionsPayload.TYPE, SyncHighlightDirectionsPayload.STREAM_CODEC, SyncHighlightDirectionsPayload::handlePayload);
 	}
