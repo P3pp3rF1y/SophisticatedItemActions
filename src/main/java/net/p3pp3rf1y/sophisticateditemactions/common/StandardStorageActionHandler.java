@@ -22,6 +22,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -42,6 +43,16 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 	@Override
 	public ItemMatchResult getItemMatch(ItemStackKey stackKey, Entity entity) {
 		return getItemMatch(stackKey, entity.getCapability(Capabilities.Item.ENTITY, null));
+	}
+
+	@Override
+	public Optional<List<BlockPos>> getCustomHighlightPositions(ItemStackKey stackKey, Entity entity) {
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<List<BlockPos>> getCustomRenderedHighlightPositions(ItemStackKey stackKey, Entity entity) {
+		return Optional.empty();
 	}
 
 	@Override
