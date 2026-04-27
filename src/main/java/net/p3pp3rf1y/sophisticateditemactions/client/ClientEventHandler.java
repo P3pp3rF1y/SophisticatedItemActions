@@ -25,6 +25,8 @@ import net.p3pp3rf1y.sophisticateditemactions.client.gui.HighlightDirectionOverl
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.EntityHighlightRenderer;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.ItemFlightAnimator;
+import net.p3pp3rf1y.sophisticateditemactions.client.render.RenderedBlockHighlightRenderer;
+import net.p3pp3rf1y.sophisticateditemactions.client.render.RenderedEntityBlockHighlightRenderer;
 import net.p3pp3rf1y.sophisticateditemactions.common.HighlightHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
 import org.jspecify.annotations.Nullable;
@@ -98,6 +100,8 @@ public class ClientEventHandler {
 	private static void submitCustomGeometry(SubmitCustomGeometryEvent event) {
 		float partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		ItemFlightAnimator.submitItems(event.getSubmitNodeCollector(), event.getPoseStack(), partialTick, event.getLevelRenderState().cameraRenderState.pos);
+		RenderedBlockHighlightRenderer.render(event.getSubmitNodeCollector(), event.getPoseStack(), partialTick, event.getLevelRenderState().cameraRenderState.pos);
+		RenderedEntityBlockHighlightRenderer.render(event.getSubmitNodeCollector(), event.getPoseStack(), partialTick, event.getLevelRenderState().cameraRenderState.pos);
 		EntityHighlightRenderer.render(event.getSubmitNodeCollector(), event.getPoseStack(), partialTick, event.getLevelRenderState().cameraRenderState.pos);
 	}
 

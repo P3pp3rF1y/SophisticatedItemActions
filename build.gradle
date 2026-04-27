@@ -122,6 +122,14 @@ repositories {
         }
     }
     maven {
+        url = "https://maven.createmod.net"
+        content {
+            includeGroup "com.simibubi.create"
+            includeGroupByRegex "net.createmod.*"
+            includeGroupByRegex "dev.engine-room.*"
+        }
+    }
+    maven {
         name = "RefinedStorage"
         url = "https://maven.creeperhost.net"
         content {
@@ -224,6 +232,15 @@ configurations {
 
 dependencies {
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+    compileOnly("com.simibubi.create:create-1.21.1:6.0.7-159") {
+        transitive = false
+    }
+    compileOnly("dev.engine-room.flywheel:flywheel-neoforge-1.21.1:1.0.5-32") {
+        transitive = false
+    }
+    compileOnly("net.createmod.ponder:Ponder-NeoForge-1.21.1:1.0.63") {
+        transitive = false
+    }
     compileOnly("org.appliedenergistics:appliedenergistics2:26.1.5-alpha") {
         transitive = false
     }
@@ -395,6 +412,7 @@ task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
         mainFile.addGameVersion("${it}")
     }
     mainFile.addRequirement('sophisticated-core')
+    mainFile.addOptional('create')
     mainFile.addOptional('jei')
     onlyIf { !project.ext.changelog.isEmpty() }
 }
@@ -408,6 +426,7 @@ modrinth {
     loaders = ["neoforge"]
     dependencies {
         required.project "sophisticated-core"
+        optional.project "create"
         optional.project "jei"
     }
     changelog = provider {

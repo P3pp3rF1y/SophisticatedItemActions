@@ -59,7 +59,7 @@ public interface IBlockEntityItemActionHandler<T> extends IBlockItemActionHandle
 	}
 
 	default <R> Optional<R> getFromBlockEntity(ServerPlayer player, BlockPos pos, Function<T, R> getter) {
-		return WorldHelper.getBlockEntity(player.level(), pos, getObjectClass()).map(getter);
+		return WorldHelper.getBlockEntity(SubLevelCompatHelper.getLevelForPosition(player.level(), pos), pos, getObjectClass()).map(getter);
 	}
 
 	@Override
