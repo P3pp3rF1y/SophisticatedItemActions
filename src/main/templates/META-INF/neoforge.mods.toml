@@ -40,6 +40,13 @@ ordering="NONE"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
+modId="create"
+type="optional"
+versionRange="[6.0.7,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
 modId="refinedstorage"
 type="optional"
 versionRange="[2.0.0,)"
