@@ -29,6 +29,8 @@ public class Config {
 		public final ModConfigSpec.BooleanValue enabled;
 		public final ModConfigSpec.IntValue globalCooldownTicks;
 		public final ModConfigSpec.IntValue maxNudgesPerSession;
+		public final ModConfigSpec.IntValue actionCooldownTicks;
+		public final ModConfigSpec.IntValue maxSuccessfulUsesBeforeSuppressing;
 		public final ModConfigSpec.IntValue highlightActionThreshold;
 		public final ModConfigSpec.IntValue restockActionThreshold;
 		public final ModConfigSpec.IntValue depositActionThreshold;
@@ -46,6 +48,8 @@ public class Config {
 			enabled = builder.comment("Master toggle for discovery nudges").translation(ItemActionsTranslationHelper.INSTANCE.translConfig("enabled")).define("enabled", true);
 			globalCooldownTicks = builder.comment("Global cooldown between any two nudges in ticks (default: 2 hours)").translation(ItemActionsTranslationHelper.INSTANCE.translConfig("globalCooldownTicks")).defineInRange("globalCooldownTicks", 144000, 0, Integer.MAX_VALUE);
 			maxNudgesPerSession = builder.comment("Maximum total number of nudges shown during one world connection session").translation(ItemActionsTranslationHelper.INSTANCE.translConfig("maxNudgesPerSession")).defineInRange("maxNudgesPerSession", 3, 0, Integer.MAX_VALUE);
+			actionCooldownTicks = builder.comment("Cooldown between repeated nudges or successful uses of the same action in ticks (default: 4 hours)").translation(ItemActionsTranslationHelper.INSTANCE.translConfig("actionCooldownTicks")).defineInRange("actionCooldownTicks", 288000, 0, Integer.MAX_VALUE);
+			maxSuccessfulUsesBeforeSuppressing = builder.comment("Maximum successful uses of one action before its nudge stops appearing").translation(ItemActionsTranslationHelper.INSTANCE.translConfig("maxSuccessfulUsesBeforeSuppressing")).defineInRange("maxSuccessfulUsesBeforeSuppressing", 5, 0, Integer.MAX_VALUE);
 			highlightActionThreshold = builder.comment("Number of storage opens without transfers before showing highlight hint (-1 disables)").translation(ItemActionsTranslationHelper.INSTANCE.translConfig("highlightActionThreshold")).defineInRange("highlightActionThreshold", 4, -1, Integer.MAX_VALUE);
 			restockActionThreshold = builder.comment("Number of storage sessions with transfer from storage to inventory before showing restock hint (-1 disables)").translation(ItemActionsTranslationHelper.INSTANCE.translConfig("restockActionThreshold")).defineInRange("restockActionThreshold", 3, -1, Integer.MAX_VALUE);
 			depositActionThreshold = builder.comment("Number of storage sessions with transfer from inventory to storage before showing deposit hint (-1 disables)").translation(ItemActionsTranslationHelper.INSTANCE.translConfig("depositActionThreshold")).defineInRange("depositActionThreshold", 3, -1, Integer.MAX_VALUE);
