@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -17,6 +18,8 @@ public class ItemActionNudgeManager {
 	private final NudgeToastDisplayer nudgeToastDisplayer = new NudgeToastDisplayer();
 
 	private long lastEvaluationTick = Long.MIN_VALUE;
+	private String activeConnectionKey = null;
+	private PersistedNudgeHistory persistedHistory = null;
 
 	private boolean storageScreenOpen;
 	private boolean transfersObservedInSession;
@@ -33,6 +36,7 @@ public class ItemActionNudgeManager {
 			return;
 		}
 
+		ensurePersistedHistoryLoaded(minecraft);
 		syncActionUsageSuppressions();
 		trackStorageSession(minecraft);
 
@@ -67,28 +71,45 @@ public class ItemActionNudgeManager {
 			return;
 		}
 
-		if (shouldShow(config.highlightEnabled.get(), config.highlightActionThreshold.get(), opensWithoutTransfers, NudgeHintType.HIGHLIGHT)) {
-			show(NudgeHintType.HIGHLIGHT, gameTime);
+		long playTime = getCurrentPlayTime(minecraft);
+
+		if (shouldShow(config, config.highlightEnabled.get(), config.highlightActionThreshold.get(), opensWithoutTransfers, NudgeHintType.HIGHLIGHT, playTime)) {
+			show(minecraft, NudgeHintType.HIGHLIGHT, gameTime, playTime);
 			return;
 		}
-		if (shouldShow(config.restockEnabled.get(), config.restockActionThreshold.get(), restockActionUnits, NudgeHintType.RESTOCK)) {
-			show(NudgeHintType.RESTOCK, gameTime);
+		if (shouldShow(config, config.restockEnabled.get(), config.restockActionThreshold.get(), restockActionUnits, NudgeHintType.RESTOCK, playTime)) {
+			show(minecraft, NudgeHintType.RESTOCK, gameTime, playTime);
 			return;
 		}
-		if (shouldShow(config.depositEnabled.get(), config.depositActionThreshold.get(), depositActionUnits, NudgeHintType.DEPOSIT)) {
-			show(NudgeHintType.DEPOSIT, gameTime);
+		if (shouldShow(config, config.depositEnabled.get(), config.depositActionThreshold.get(), depositActionUnits, NudgeHintType.DEPOSIT, playTime)) {
+			show(minecraft, NudgeHintType.DEPOSIT, gameTime, playTime);
 		}
 	}
 
-	private boolean shouldShow(boolean hintEnabled, int threshold, int value, NudgeHintType hintType) {
-		return hintEnabled
+	private boolean shouldShow(Config.DiscoveryNudges config, boolean hintEnabled, int threshold, int value, NudgeHintType hintType, long playTime) {
+		if (!(hintEnabled
 				&& threshold >= 0
 				&& value >= threshold
 				&& !sessionState.wasShown(hintType)
-				&& !sessionState.isSuppressed(hintType);
+				&& !sessionState.isSuppressed(hintType))) {
+			return false;
+		}
+
+		PersistedNudgeActionState actionState = getPersistedActionState(hintType);
+		if (actionState.getSuccessfulUseCount() >= config.maxSuccessfulUsesBeforeSuppressing.get()) {
+			return false;
+		}
+
+		int actionCooldownTicks = config.actionCooldownTicks.get();
+		return isCooldownComplete(playTime, actionState.getLastSuccessfulUsePlayTime(), actionCooldownTicks)
+				&& isCooldownComplete(playTime, actionState.getLastShownPlayTime(), actionCooldownTicks);
 	}
 
-	private void show(NudgeHintType hintType, long gameTime) {
+	private boolean isCooldownComplete(long currentPlayTime, long previousPlayTime, int cooldownTicks) {
+		return previousPlayTime == Long.MIN_VALUE || currentPlayTime - previousPlayTime >= cooldownTicks;
+	}
+
+	private void show(Minecraft minecraft, NudgeHintType hintType, long gameTime, long playTime) {
 		if (!nudgeToastDisplayer.showHint(hintType, getKeybindName(hintType))) {
 			if (Config.CLIENT.discoveryNudges.debugLogging.get()) {
 				SophisticatedItemActions.LOGGER.debug("Discovery nudge for {} was not displayed", hintType);
@@ -97,6 +118,9 @@ public class ItemActionNudgeManager {
 		}
 
 		sessionState.markShown(hintType, gameTime);
+		PersistedNudgeActionState actionState = getPersistedActionState(hintType);
+		actionState.recordShown(playTime);
+		savePersistedHistory(minecraft);
 		if (Config.CLIENT.discoveryNudges.debugLogging.get()) {
 			SophisticatedItemActions.LOGGER.debug("Discovery nudge shown for {}", hintType);
 		}
@@ -211,6 +235,8 @@ public class ItemActionNudgeManager {
 		restockActionUnits = 0;
 		depositActionUnits = 0;
 		lastEvaluationTick = Long.MIN_VALUE;
+		activeConnectionKey = null;
+		persistedHistory = null;
 	}
 
 	private void syncActionUsageSuppressions() {
@@ -220,7 +246,15 @@ public class ItemActionNudgeManager {
 	}
 
 	private void consumeAndSuppress(NudgeHintType hintType) {
-		if (!NudgeActionUsageTracker.consumeUsed(hintType) || sessionState.isSuppressed(hintType)) {
+		if (!NudgeActionUsageTracker.consumeUsed(hintType)) {
+			return;
+		}
+
+		PersistedNudgeActionState actionState = getPersistedActionState(hintType);
+		actionState.recordSuccessfulUse(getCurrentPlayTime(Minecraft.getInstance()));
+		savePersistedHistory(Minecraft.getInstance());
+
+		if (sessionState.isSuppressed(hintType)) {
 			return;
 		}
 
@@ -228,5 +262,37 @@ public class ItemActionNudgeManager {
 		if (Config.CLIENT.discoveryNudges.debugLogging.get()) {
 			SophisticatedItemActions.LOGGER.debug("Discovery nudge for {} suppressed after successful keybind use", hintType);
 		}
+	}
+
+	private long getCurrentPlayTime(Minecraft minecraft) {
+		return minecraft.player.getStats().getValue(Stats.CUSTOM, Stats.PLAY_TIME);
+	}
+
+	private void ensurePersistedHistoryLoaded(Minecraft minecraft) {
+		String connectionKey = PersistedNudgeHistoryStore.resolveConnectionKey(minecraft);
+		if (connectionKey == null) {
+			return;
+		}
+
+		if (connectionKey.equals(activeConnectionKey) && persistedHistory != null) {
+			return;
+		}
+
+		activeConnectionKey = connectionKey;
+		persistedHistory = PersistedNudgeHistoryStore.load(minecraft, connectionKey);
+	}
+
+	private PersistedNudgeActionState getPersistedActionState(NudgeHintType hintType) {
+		if (persistedHistory == null) {
+			persistedHistory = new PersistedNudgeHistory();
+		}
+		return persistedHistory.getActionState(hintType);
+	}
+
+	private void savePersistedHistory(Minecraft minecraft) {
+		if (persistedHistory == null || activeConnectionKey == null) {
+			return;
+		}
+		PersistedNudgeHistoryStore.save(minecraft, activeConnectionKey, persistedHistory);
 	}
 }
