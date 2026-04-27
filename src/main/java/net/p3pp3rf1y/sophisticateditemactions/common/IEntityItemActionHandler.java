@@ -4,7 +4,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 
+import java.util.List;
 import java.util.Optional;
+
+import net.minecraft.core.BlockPos;
 
 public interface IEntityItemActionHandler {
 	ResourceLocation id();
@@ -16,4 +19,12 @@ public interface IEntityItemActionHandler {
 	Optional<IDepositHandler> getDepositHandler(Entity entity);
 
 	Optional<IRestockHandler> getRestockHandler(Entity entity);
+
+	default Optional<List<BlockPos>> getCustomHighlightPositions(ItemStackKey stackKey, Entity entity) {
+		return Optional.empty();
+	}
+
+	default Optional<List<BlockPos>> getCustomRenderedHighlightPositions(ItemStackKey stackKey, Entity entity) {
+		return Optional.empty();
+	}
 }

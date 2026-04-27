@@ -22,6 +22,7 @@ import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationH
 import net.p3pp3rf1y.sophisticateditemactions.network.RequestItemHighlightsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.SyncEntityHighlightsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.SyncHighlightDirectionsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.SyncRenderedEntityBlockHighlightsPayload;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -97,6 +98,8 @@ public class HighlightHandler {
 
 		List<Integer> stackEntities = new ArrayList<>();
 		List<Integer> itemEntities = new ArrayList<>();
+		List<EntityBlockHighlightData> renderedEntityStackHighlights = new ArrayList<>();
+		List<EntityBlockHighlightData> renderedEntityItemHighlights = new ArrayList<>();
 
 		entities.forEach((handlerId, entityIds) ->
 				ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler ->
@@ -107,8 +110,20 @@ public class HighlightHandler {
 							}
 
 							switch (handler.getItemMatch(stackKey, entity)) {
-								case MATCHING_STACK -> stackEntities.add(entityId);
-								case MATCHING_ITEM -> itemEntities.add(entityId);
+								case MATCHING_STACK -> {
+									handler.getCustomHighlightPositions(stackKey, entity).ifPresentOrElse(
+											positions -> stackPositions.putIfAbsent(getHighlightGroupKey(positions, entity.blockPosition()), positions),
+											() -> stackEntities.add(entityId));
+									handler.getCustomRenderedHighlightPositions(stackKey, entity)
+											.ifPresent(positions -> renderedEntityStackHighlights.add(new EntityBlockHighlightData(entityId, positions)));
+								}
+								case MATCHING_ITEM -> {
+									handler.getCustomHighlightPositions(stackKey, entity).ifPresentOrElse(
+											positions -> itemPositions.putIfAbsent(getHighlightGroupKey(positions, entity.blockPosition()), positions),
+											() -> itemEntities.add(entityId));
+									handler.getCustomRenderedHighlightPositions(stackKey, entity)
+											.ifPresent(positions -> renderedEntityItemHighlights.add(new EntityBlockHighlightData(entityId, positions)));
+								}
 							}
 						})
 				)
@@ -123,6 +138,8 @@ public class HighlightHandler {
 		);
 		int highlightDuration = getHighlightDuration(serverPlayer, blockHighlights, entityHighlights);
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncBlockHighlightsPayload(blockHighlights, highlightDuration));
+		PacketDistributor.sendToPlayer(serverPlayer, new SyncRenderedEntityBlockHighlightsPayload(
+				Map.of(MATCHING_STACK_HIGHLIGHT_COLOR, renderedEntityStackHighlights, MATCHING_ITEM_HIGHLIGHT_COLOR, renderedEntityItemHighlights), highlightDuration));
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncEntityHighlightsPayload(entityHighlights, highlightDuration));
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncHighlightDirectionsPayload(blockHighlights, entityHighlights, highlightDuration));
 

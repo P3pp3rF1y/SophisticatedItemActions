@@ -24,6 +24,7 @@ import net.p3pp3rf1y.sophisticateditemactions.client.gui.HighlightDirectionOverl
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.EntityHighlightRenderer;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.ItemFlightAnimator;
+import net.p3pp3rf1y.sophisticateditemactions.client.render.RenderedEntityBlockHighlightRenderer;
 import net.p3pp3rf1y.sophisticateditemactions.common.HighlightHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
 import org.lwjgl.glfw.GLFW;
@@ -100,6 +101,7 @@ public class ClientEventHandler {
 		}
 		float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
 		ItemFlightAnimator.render(event.getPoseStack(), partialTick, event.getCamera().getPosition());
+		RenderedEntityBlockHighlightRenderer.render(event.getPoseStack(), partialTick, event.getCamera().getPosition());
 		EntityHighlightRenderer.render(event.getPoseStack(), partialTick, event.getCamera().getPosition());
 	}
 
