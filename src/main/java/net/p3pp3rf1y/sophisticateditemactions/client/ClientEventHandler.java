@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
@@ -27,7 +28,7 @@ import net.p3pp3rf1y.sophisticateditemactions.client.gui.HighlightDirectionOverl
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.EntityHighlightRenderer;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.ItemFlightAnimator;
-import net.p3pp3rf1y.sophisticateditemactions.client.render.RenderedEntityBlockHighlightRenderer;
+import net.p3pp3rf1y.sophisticateditemactions.client.render.RenderedBlockHighlightRenderer;
 import net.p3pp3rf1y.sophisticateditemactions.common.HighlightHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
 import org.lwjgl.glfw.GLFW;
@@ -103,9 +104,11 @@ public class ClientEventHandler {
 			return;
 		}
 		float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
-		ItemFlightAnimator.render(event.getPoseStack(), partialTick, event.getCamera().getPosition());
-		RenderedEntityBlockHighlightRenderer.render(event.getPoseStack(), partialTick, event.getCamera().getPosition());
-		EntityHighlightRenderer.render(event.getPoseStack(), partialTick, event.getCamera().getPosition());
+		Vec3 cameraPos = event.getCamera().getPosition();
+		ItemFlightAnimator.render(event.getPoseStack(), partialTick, cameraPos);
+		RenderedBlockHighlightRenderer.render(event.getPoseStack(), partialTick, cameraPos);
+		ClientCompatRenderHelper.renderLevelStage(event.getPoseStack(), partialTick, cameraPos);
+		EntityHighlightRenderer.render(event.getPoseStack(), partialTick, cameraPos);
 	}
 
 	private static void tickLevel(ClientTickEvent.Post event) {
