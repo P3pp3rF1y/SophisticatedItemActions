@@ -5,8 +5,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.p3pp3rf1y.sophisticatedcore.util.BlockHighlightGroups;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
+import net.p3pp3rf1y.sophisticatedcore.util.BlockHighlightGroups;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +28,7 @@ public interface IBlockItemActionHandler {
 	}
 
 	default List<BlockPos> getHighlightPositions(ServerPlayer player, BlockPos pos) {
-		return BlockHighlightGroups.getHighlightPositions(player.level(), pos);
+		return BlockHighlightGroups.getHighlightPositions(SubLevelCompatHelper.getLevelForPosition(player.level(), pos), pos);
 	}
 
 	ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos, Action action);
@@ -38,8 +38,6 @@ public interface IBlockItemActionHandler {
 	Optional<IRestockHandler> getRestockHandler(ServerPlayer player, BlockPos pos);
 
 	enum Action {
-		DEPOSIT,
-		RESTOCK,
-		HIGHLIGHT
+		DEPOSIT, RESTOCK, HIGHLIGHT
 	}
 }

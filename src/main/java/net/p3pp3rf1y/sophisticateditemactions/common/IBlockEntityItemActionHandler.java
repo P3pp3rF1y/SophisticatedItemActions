@@ -4,8 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.p3pp3rf1y.sophisticatedcore.util.BlockHighlightGroups;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
+import net.p3pp3rf1y.sophisticatedcore.util.BlockHighlightGroups;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.List;
@@ -59,7 +59,7 @@ public interface IBlockEntityItemActionHandler<T> extends IBlockItemActionHandle
 	}
 
 	default <R> Optional<R> getFromBlockEntity(ServerPlayer player, BlockPos pos, Function<T, R> getter) {
-		return WorldHelper.getBlockEntity(player.level(), pos, getObjectClass()).map(getter);
+		return WorldHelper.getBlockEntity(SubLevelCompatHelper.getLevelForPosition(player.level(), pos), pos, getObjectClass()).map(getter);
 	}
 
 	@Override

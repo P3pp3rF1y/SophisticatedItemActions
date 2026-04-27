@@ -1,5 +1,8 @@
 package net.p3pp3rf1y.sophisticateditemactions.client;
 
+import static net.neoforged.neoforge.client.settings.KeyConflictContext.GUI;
+import static net.neoforged.neoforge.client.settings.KeyConflictContext.IN_GAME;
+
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -24,25 +27,27 @@ import net.p3pp3rf1y.sophisticateditemactions.client.gui.HighlightDirectionOverl
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.EntityHighlightRenderer;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.ItemFlightAnimator;
+import net.p3pp3rf1y.sophisticateditemactions.client.render.RenderedEntityBlockHighlightRenderer;
 import net.p3pp3rf1y.sophisticateditemactions.common.HighlightHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import static net.neoforged.neoforge.client.settings.KeyConflictContext.GUI;
-import static net.neoforged.neoforge.client.settings.KeyConflictContext.IN_GAME;
 
 public class ClientEventHandler {
 	private static final String KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY = "key.category.sophisticateditemactions.main";
 	public static final KeyMapping ITEM_HIGHLIGHT_KEYBIND = new KeyMapping(ItemActionsTranslationHelper.INSTANCE.translKeybind("item_highlight"),
-			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_SEMICOLON), KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY);
+			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_SEMICOLON),
+			KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY);
 	public static final KeyMapping ITEM_DEPOSIT_KEYBIND = new KeyMapping(ItemActionsTranslationHelper.INSTANCE.translKeybind("deposit_item"),
-			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_APOSTROPHE), KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY);
+			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_APOSTROPHE),
+			KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY);
 	public static final KeyMapping ITEM_RESTOCK_KEYBIND = new KeyMapping(ItemActionsTranslationHelper.INSTANCE.translKeybind("restock_item"),
-			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_BACKSLASH), KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY);
+			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_BACKSLASH),
+			KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY);
 	private static final List<IHoveredStackProvider> HOVERED_STACK_PROVIDERS = new ArrayList<>();
 	private static final ItemActionNudgeManager NUDGE_MANAGER = new ItemActionNudgeManager();
 	private static final IHoveredStackProvider DEFAULT_HOVERED_STACK_PROVIDER = new IHoveredStackProvider() {
@@ -70,7 +75,6 @@ public class ClientEventHandler {
 			return containerScreen.getSlotUnderMouse().getSlotIndex();
 		}
 	};
-
 
 	public static void registerHoveredStackProvider(IHoveredStackProvider provider) {
 		HOVERED_STACK_PROVIDERS.add(provider);
@@ -100,6 +104,7 @@ public class ClientEventHandler {
 		}
 		float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
 		ItemFlightAnimator.render(event.getPoseStack(), partialTick, event.getCamera().getPosition());
+		RenderedEntityBlockHighlightRenderer.render(event.getPoseStack(), partialTick, event.getCamera().getPosition());
 		EntityHighlightRenderer.render(event.getPoseStack(), partialTick, event.getCamera().getPosition());
 	}
 
@@ -114,12 +119,14 @@ public class ClientEventHandler {
 	}
 
 	private static void registerOverlay(RegisterGuiLayersEvent event) {
-		event.registerAbove(VanillaGuiLayers.HOTBAR, SophisticatedItemActions.getRL("highlight_directions"), HighlightDirectionOverlay.HUD_HIGHLIGHT_DIRECTIONS);
+		event.registerAbove(VanillaGuiLayers.HOTBAR, SophisticatedItemActions.getRL("highlight_directions"),
+				HighlightDirectionOverlay.HUD_HIGHLIGHT_DIRECTIONS);
 	}
 
 	public static void handleGuiKeyPress(ScreenEvent.KeyPressed.Pre event) {
 		InputConstants.Key key = InputConstants.getKey(event.getKeyCode(), event.getScanCode());
-		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key) && event.getScreen() instanceof AbstractContainerScreen<?> screen && tryHighlightItem(screen.getSlotUnderMouse())) {
+		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key) && event.getScreen() instanceof AbstractContainerScreen<?> screen
+				&& tryHighlightItem(screen.getSlotUnderMouse())) {
 			NudgeActionUsageTracker.markUsed(NudgeHintType.HIGHLIGHT);
 			event.getScreen().getMinecraft().setScreen(null);
 			event.setCanceled(true);
@@ -128,7 +135,8 @@ public class ClientEventHandler {
 
 	public static void handleGuiMouseKeyPress(ScreenEvent.MouseButtonPressed.Pre event) {
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
-		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input) && event.getScreen() instanceof AbstractContainerScreen<?> screen && tryHighlightItem(screen.getSlotUnderMouse())) {
+		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input) && event.getScreen() instanceof AbstractContainerScreen<?> screen
+				&& tryHighlightItem(screen.getSlotUnderMouse())) {
 			NudgeActionUsageTracker.markUsed(NudgeHintType.HIGHLIGHT);
 			event.getScreen().getMinecraft().setScreen(null);
 			event.setCanceled(true);
@@ -289,7 +297,8 @@ public class ClientEventHandler {
 
 		@Override
 		public boolean isActive() {
-			return (IN_GAME.isActive() && Minecraft.getInstance().player != null && !Minecraft.getInstance().player.getMainHandItem().isEmpty()) || GUI.isActive();
+			return (IN_GAME.isActive() && Minecraft.getInstance().player != null && !Minecraft.getInstance().player.getMainHandItem().isEmpty())
+					|| GUI.isActive();
 		}
 
 		@Override
@@ -305,7 +314,7 @@ public class ClientEventHandler {
 
 		default int getRestockSlot(Screen screen, Player player, ItemStack filter) {
 			NonNullList<ItemStack> items = player.getInventory().items;
-			for(int slot = 0; slot < items.size(); ++slot) {
+			for (int slot = 0; slot < items.size(); ++slot) {
 				ItemStack stack = items.get(slot);
 				if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(filter, stack) && stack.getCount() < stack.getMaxStackSize()) {
 					return slot;
