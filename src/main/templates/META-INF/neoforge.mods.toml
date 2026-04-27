@@ -54,6 +54,13 @@ ordering="NONE"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
+modId="sable"
+type="optional"
+versionRange="[1.1.3,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
 modId="sophisticatedbackpacks"
 type="optional"
 versionRange="${sb_version_range}"

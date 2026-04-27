@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticateditemactions.client.render;
+package net.p3pp3rf1y.sophisticateditemactions.compat.create;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;

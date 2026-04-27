@@ -151,6 +151,15 @@ repositories {
             includeGroup "me.shedaniel.cloth"
         }
     }
+    maven {
+        url = "https://maven.ryanhcode.dev/releases"
+        content {
+            includeGroup "dev.ryanhcode.sable"
+            includeGroup "dev.ryanhcode.sable-companion"
+            includeGroup "dev.eriksonn.aeronautics"
+            includeGroup "dev.simulated_team.simulated"
+        }
+    }
 }
 
 base {
@@ -239,6 +248,15 @@ dependencies {
         transitive = false
     }
     compileOnly("net.createmod.ponder:Ponder-NeoForge-1.21.1:1.0.63") {
+        transitive = false
+    }
+    compileOnly("dev.ryanhcode.sable:sable-neoforge-1.21.1:1.1.3") {
+        transitive = false
+    }
+    compileOnly("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:1.6.0") {
+        transitive = false
+    }
+    compileOnly("dev.eriksonn.aeronautics:aeronautics-neoforge-1.21.1:1.1.0") {
         transitive = false
     }
     compileOnly("org.appliedenergistics:appliedenergistics2:26.1.5-alpha") {
@@ -414,6 +432,7 @@ task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     mainFile.addRequirement('sophisticated-core')
     mainFile.addOptional('create')
     mainFile.addOptional('jei')
+    mainFile.addOptional('sable')
     onlyIf { !project.ext.changelog.isEmpty() }
 }
 
@@ -428,6 +447,7 @@ modrinth {
         required.project "sophisticated-core"
         optional.project "create"
         optional.project "jei"
+        optional.project "sable"
     }
     changelog = provider {
         project.ext.changelog
