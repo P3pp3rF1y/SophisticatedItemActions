@@ -18,5 +18,6 @@ public class ItemActionsPacketHandler extends PacketHandler {
 		registerMessage(SyncEntityHighlightsMessage.class, SyncEntityHighlightsMessage::encode, SyncEntityHighlightsMessage::decode, SyncEntityHighlightsMessage::onMessage);
 		registerMessage(SyncHighlightDirectionsMessage.class, SyncHighlightDirectionsMessage::encode, SyncHighlightDirectionsMessage::decode, SyncHighlightDirectionsMessage::onMessage);
 		registerMessage(SyncItemTransfersMessage.class, SyncItemTransfersMessage::encode, SyncItemTransfersMessage::decode, SyncItemTransfersMessage::onMessage);
+		registerMessage(SyncRenderedEntityBlockHighlightsMessage.class, SyncRenderedEntityBlockHighlightsMessage::encode, SyncRenderedEntityBlockHighlightsMessage::decode, SyncRenderedEntityBlockHighlightsMessage::onMessage);
 	}
 }

@@ -105,6 +105,7 @@ public class ClientEventHandler {
 			return;
 		}
 		ItemFlightAnimator.render(event.getPoseStack(), event.getPartialTick(), event.getCamera().getPosition());
+		ClientCompatRenderHelper.renderLevelStage(event.getPoseStack(), event.getPartialTick(), event.getCamera().getPosition());
 		EntityHighlightRenderer.render(event.getPoseStack(), event.getPartialTick(), event.getCamera().getPosition());
 	}
 
