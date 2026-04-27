@@ -7,7 +7,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
-import net.p3pp3rf1y.sophisticateditemactions.client.render.RenderedEntityBlockHighlightRenderer;
+import net.p3pp3rf1y.sophisticateditemactions.client.ClientCompatRenderHelper;
 import net.p3pp3rf1y.sophisticateditemactions.common.EntityBlockHighlightData;
 
 import java.util.HashMap;
@@ -32,6 +32,6 @@ public record SyncRenderedEntityBlockHighlightsPayload(Map<Integer, List<EntityB
 	}
 
 	public static void handlePayload(SyncRenderedEntityBlockHighlightsPayload payload, IPayloadContext context) {
-		RenderedEntityBlockHighlightRenderer.addHighlightedPositions(payload.highlightPositions(), payload.durationTicks());
+		ClientCompatRenderHelper.addEntityBlockHighlights(payload.highlightPositions(), payload.durationTicks());
 	}
 }

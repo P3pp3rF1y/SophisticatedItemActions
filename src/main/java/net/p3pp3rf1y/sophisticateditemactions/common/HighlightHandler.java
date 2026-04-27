@@ -22,6 +22,7 @@ import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationH
 import net.p3pp3rf1y.sophisticateditemactions.network.RequestItemHighlightsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.SyncEntityHighlightsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.SyncHighlightDirectionsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.SyncRenderedBlockHighlightsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.SyncRenderedEntityBlockHighlightsPayload;
 
 import java.util.ArrayList;
@@ -146,7 +147,9 @@ public class HighlightHandler {
 				MATCHING_ITEM_HIGHLIGHT_COLOR, itemEntities
 		);
 		int highlightDuration = getHighlightDuration(serverPlayer, blockHighlights, entityHighlights);
-		PacketDistributor.sendToPlayer(serverPlayer, new SyncBlockHighlightsPayload(blockHighlights, highlightDuration));
+		BlockHighlightSplit blockHighlightSplit = splitBlockHighlights(serverPlayer, blockHighlights);
+		PacketDistributor.sendToPlayer(serverPlayer, new SyncBlockHighlightsPayload(blockHighlightSplit.worldHighlights(), highlightDuration));
+		PacketDistributor.sendToPlayer(serverPlayer, new SyncRenderedBlockHighlightsPayload(blockHighlightSplit.subLevelHighlights(), highlightDuration));
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncRenderedEntityBlockHighlightsPayload(
 				mergeRenderedEntityHighlights(renderedEntityStackHighlights, renderedEntityItemHighlights), highlightDuration));
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncEntityHighlightsPayload(entityHighlights, highlightDuration));
@@ -178,6 +181,16 @@ public class HighlightHandler {
 
 	private static BlockPos getHighlightGroupKey(List<BlockPos> positions, BlockPos fallbackPos) {
 		return positions.stream().min(Comparator.comparingLong(BlockPos::asLong)).orElse(fallbackPos);
+	}
+
+	private static BlockHighlightSplit splitBlockHighlights(ServerPlayer player, Map<Integer, List<List<BlockPos>>> blockHighlights) {
+		Map<Integer, List<List<BlockPos>>> worldHighlights = new HashMap<>();
+		Map<Integer, List<List<BlockPos>>> subLevelHighlights = new HashMap<>();
+		blockHighlights.forEach((color, groups) -> groups.forEach(group -> {
+			boolean hasSubLevelPos = group.stream().anyMatch(pos -> SubLevelCompatHelper.getLevelForPosition(player.level(), pos) != player.level());
+			(hasSubLevelPos ? subLevelHighlights : worldHighlights).computeIfAbsent(color, k -> new ArrayList<>()).add(group);
+		}));
+		return new BlockHighlightSplit(worldHighlights, subLevelHighlights);
 	}
 
 	private static Map<Integer, List<List<BlockPos>>> projectBlockHighlights(ServerPlayer player, Map<Integer, List<List<BlockPos>>> blockHighlights) {
