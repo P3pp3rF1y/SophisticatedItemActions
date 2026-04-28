@@ -7,12 +7,12 @@ import net.minecraft.network.codec.StreamCodec;
 
 import java.util.List;
 
-public record EntityBlockHighlightData(int entityId, List<BlockPos> positions) {
+public record EntityBlockHighlightData(int entityId, List<List<BlockPos>> positionGroups) {
 	public static final StreamCodec<ByteBuf, EntityBlockHighlightData> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.INT,
 			EntityBlockHighlightData::entityId,
-			BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()),
-			EntityBlockHighlightData::positions,
+			BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()).apply(ByteBufCodecs.list()),
+			EntityBlockHighlightData::positionGroups,
 			EntityBlockHighlightData::new
 	);
 }

@@ -321,17 +321,20 @@ public class ItemTransferHandler {
 		int totalExtracted = 0;
 		int originalCount = stackToExtract.getCount();
 		for (IRestockHandler handler : restockHandlers) {
-			int extracted = handler.extractItem(stackToExtract);
-			if (extracted > 0) {
-				ItemStack extractedStack = stackToExtract.copyWithCount(extracted);
-				restocked.computeIfAbsent(handler.getPosition(), k -> new ItemTransferData(handler.getPositionToOpen().orElse(null), handler.getPosition(), new ArrayList<>())).itemsTransferred().add(extractedStack.copy());
-				if (playerInventoryStack.isEmpty()) {
-					playerInventoryStack = extractedStack;
-				} else {
-					playerInventoryStack.grow(extracted);
+			List<IRestockHandler.RestockTransfer> transfers = handler.extractTransfers(stackToExtract);
+			if (!transfers.isEmpty()) {
+				int extracted = 0;
+				for (IRestockHandler.RestockTransfer transfer : transfers) {
+					restocked.computeIfAbsent(transfer.position(), k -> new ItemTransferData(transfer.positionToOpen(), transfer.position(), new ArrayList<>())).itemsTransferred().add(transfer.stack().copy());
+					if (playerInventoryStack.isEmpty()) {
+						playerInventoryStack = transfer.stack().copy();
+					} else {
+						playerInventoryStack.grow(transfer.stack().getCount());
+					}
+					player.getInventory().setItem(playerInventorySlot, playerInventoryStack);
+					restockedPlayerSlots.add(playerInventorySlot);
+					extracted += transfer.stack().getCount();
 				}
-				player.getInventory().setItem(playerInventorySlot, playerInventoryStack);
-				restockedPlayerSlots.add(playerInventorySlot);
 				totalExtracted += extracted;
 				stackToExtract = stackToExtract.copyWithCount(stackToExtract.getCount() - extracted);
 			}
