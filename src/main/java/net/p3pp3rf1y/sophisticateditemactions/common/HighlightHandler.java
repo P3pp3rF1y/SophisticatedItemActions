@@ -7,7 +7,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -31,6 +30,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HighlightHandler {
@@ -43,32 +43,32 @@ public class HighlightHandler {
 		Map<Identifier, List<BlockPos>> positions = new HashMap<>();
 		Map<Identifier, Map<BlockPos, BlockPos>> canonicalPositions = new HashMap<>();
 
-		SubLevelCompatHelper.getBlockEntitiesInRange(player.level(), player.blockPosition(), HIGHLIGHT_RANGE).forEach(be -> ItemActionHandlerRegistry
-				.getBlockHandlerFor(be.getLevel() == null ? player.level() : be.getLevel(), be.getBlockPos(), be, IBlockItemActionHandler.Action.HIGHLIGHT)
-				.ifPresent(handler -> {
-					Level storageLevel = be.getLevel() == null ? player.level() : be.getLevel();
-					BlockPos canonicalPos = handler.getInteractionPosToActOn(storageLevel, be.getBlockPos(), be, IBlockItemActionHandler.Action.HIGHLIGHT);
-					canonicalPositions.computeIfAbsent(handler.id(), k -> new HashMap<>()).putIfAbsent(canonicalPos, canonicalPos);
-				}));
+		SubLevelCompatHelper.getBlockEntitiesInRange(player.level(), player.blockPosition(), HIGHLIGHT_RANGE).forEach(be ->
+				ItemActionHandlerRegistry.getBlockHandlerFor(be.getLevel() == null ? player.level() : be.getLevel(), be.getBlockPos(), be, IBlockItemActionHandler.Action.HIGHLIGHT)
+						.ifPresent(handler -> {
+							Level storageLevel = be.getLevel() == null ? player.level() : be.getLevel();
+							BlockPos canonicalPos = handler.getInteractionPosToActOn(storageLevel, be.getBlockPos(), be, IBlockItemActionHandler.Action.HIGHLIGHT);
+							canonicalPositions.computeIfAbsent(handler.id(), k -> new HashMap<>()).putIfAbsent(canonicalPos, canonicalPos);
+						}));
 		canonicalPositions.forEach((handlerId, posMap) -> positions.put(handlerId, new ArrayList<>(posMap.values())));
 
 		Map<Identifier, List<Integer>> entities = new HashMap<>();
 		double highlightRangeSqr = HIGHLIGHT_RANGE * HIGHLIGHT_RANGE;
 		player.level().getEntities(player, player.getBoundingBox().inflate(HIGHLIGHT_RANGE),
-				e -> !(e instanceof Player) && SubLevelCompatHelper.distanceSquared(player.level(), player.position(), e.position()) <= highlightRangeSqr)
-				.forEach(e -> ItemActionHandlerRegistry.getEntityHandlerIdFor(e)
-						.ifPresent(id -> entities.computeIfAbsent(id, k -> new ArrayList<>()).add(e.getId())));
+						e -> !(e instanceof Player) && SubLevelCompatHelper.distanceSquared(player.level(), player.position(), e.position()) <= highlightRangeSqr)
+				.forEach(e ->
+						ItemActionHandlerRegistry.getEntityHandlerIdFor(e)
+								.ifPresent(id -> entities.computeIfAbsent(id, k -> new ArrayList<>()).add(e.getId()))
+				);
 		if (!positions.isEmpty() || !entities.isEmpty()) {
 			ClientPacketDistributor.sendToServer(new RequestItemHighlightsPayload(stack, positions, entities));
 		} else {
-			player.displayClientMessage(
-					ItemActionsTranslationHelper.INSTANCE.translStatusMessage("no_storage_in_range").setStyle(Style.EMPTY.withColor(0xFF5555)), true);
+			player.displayClientMessage(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("no_storage_in_range").setStyle(Style.EMPTY.withColor(0xFF5555)), true);
 			player.playSound(SoundEvents.NOTE_BLOCK_BASS.value(), 1, 0.45f + RandHelper.getRandomMinusOneToOne(player.level().random) * 0.1F);
 		}
 	}
 
-	public static void handleHighlight(Player player, ItemStackKey stackKey, Map<Identifier, List<BlockPos>> storagePositions,
-			Map<Identifier, List<Integer>> entities) {
+	public static void handleHighlight(Player player, ItemStackKey stackKey, Map<Identifier, List<BlockPos>> storagePositions, Map<Identifier, List<Integer>> entities) {
 		AtomicInteger stackMatchNumber = new AtomicInteger(0);
 		AtomicInteger itemMatchNumber = new AtomicInteger(0);
 
@@ -78,64 +78,73 @@ public class HighlightHandler {
 
 		Map<BlockPos, List<BlockPos>> stackPositions = new LinkedHashMap<>();
 		Map<BlockPos, List<BlockPos>> itemPositions = new LinkedHashMap<>();
-		Map<Integer, List<EntityBlockHighlightData>> renderedEntityStackHighlights = new HashMap<>();
+ 		Map<Integer, List<EntityBlockHighlightData>> renderedEntityStackHighlights = new HashMap<>();
 		Map<Integer, List<EntityBlockHighlightData>> renderedEntityItemHighlights = new HashMap<>();
 
-		storagePositions.forEach((handlerId, positions) -> ItemActionHandlerRegistry.getBlockHandler(handlerId).ifPresent(handler -> positions.forEach(pos -> {
-			switch (handler.getItemMatch(serverPlayer, stackKey, pos, IBlockItemActionHandler.Action.HIGHLIGHT)) {
-				case MATCHING_STACK -> stackPositions.putIfAbsent(getHighlightGroupKey(handler.getHighlightPositions(serverPlayer, pos), pos),
-						handler.getHighlightPositions(serverPlayer, pos));
-				case MATCHING_ITEM -> itemPositions.putIfAbsent(getHighlightGroupKey(handler.getHighlightPositions(serverPlayer, pos), pos),
-						handler.getHighlightPositions(serverPlayer, pos));
-			}
-		})));
-
-		stackMatchNumber.addAndGet(stackPositions.size());
-		itemMatchNumber.addAndGet(itemPositions.size());
+		storagePositions.forEach((handlerId, positions) ->
+				ItemActionHandlerRegistry.getBlockHandler(handlerId).ifPresent(handler ->
+						positions.forEach(pos -> {
+							switch (handler.getItemMatch(serverPlayer, stackKey, pos, IBlockItemActionHandler.Action.HIGHLIGHT)) {
+								case MATCHING_STACK -> stackPositions.putIfAbsent(getHighlightGroupKey(handler.getHighlightPositions(serverPlayer, pos), pos), handler.getHighlightPositions(serverPlayer, pos));
+								case MATCHING_ITEM -> itemPositions.putIfAbsent(getHighlightGroupKey(handler.getHighlightPositions(serverPlayer, pos), pos), handler.getHighlightPositions(serverPlayer, pos));
+							}
+						})
+				)
+		);
 
 		List<Integer> stackEntities = new ArrayList<>();
 		List<Integer> itemEntities = new ArrayList<>();
 
-		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
-			Entity entity = player.level().getEntity(entityId);
-			if (entity == null) {
-				return;
-			}
+		entities.forEach((handlerId, entityIds) ->
+				ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler ->
+						entityIds.forEach(entityId -> {
+							Entity entity = player.level().getEntity(entityId);
+							if (entity == null) {
+								return;
+							}
 
-			var customRenderedHighlightPositions = handler.getCustomRenderedHighlightPositions(stackKey, entity);
-			if (customRenderedHighlightPositions.isPresent()) {
-				switch (handler.getItemMatch(stackKey, entity)) {
-					case MATCHING_STACK -> renderedEntityStackHighlights.computeIfAbsent(MATCHING_STACK_HIGHLIGHT_COLOR, k -> new ArrayList<>())
-							.add(new EntityBlockHighlightData(entityId, customRenderedHighlightPositions.get()));
-					case MATCHING_ITEM -> renderedEntityItemHighlights.computeIfAbsent(MATCHING_ITEM_HIGHLIGHT_COLOR, k -> new ArrayList<>())
-							.add(new EntityBlockHighlightData(entityId, customRenderedHighlightPositions.get()));
+		Optional<List<IEntityItemActionHandler.HighlightGroup>> customRenderedHighlightGroups = handler.getCustomRenderedHighlightGroupsWithMatch(stackKey, entity);
+		if (customRenderedHighlightGroups.isPresent()) {
+			customRenderedHighlightGroups.get().forEach(group -> {
+				switch (group.matchResult()) {
+					case MATCHING_STACK -> renderedEntityStackHighlights.computeIfAbsent(MATCHING_STACK_HIGHLIGHT_COLOR, k -> new ArrayList<>()).add(new EntityBlockHighlightData(entityId, List.of(group.positions())));
+					case MATCHING_ITEM -> renderedEntityItemHighlights.computeIfAbsent(MATCHING_ITEM_HIGHLIGHT_COLOR, k -> new ArrayList<>()).add(new EntityBlockHighlightData(entityId, List.of(group.positions())));
 				}
-			}
+			});
+		}
 
-			var customHighlightPositions = handler.getCustomHighlightPositions(stackKey, entity);
-			if (customHighlightPositions.isPresent()) {
-				switch (handler.getItemMatch(stackKey, entity)) {
-					case MATCHING_STACK -> stackPositions.putIfAbsent(
-							getHighlightGroupKey(customHighlightPositions.get(), BlockPos.containing(entity.position())), customHighlightPositions.get());
-					case MATCHING_ITEM -> itemPositions.putIfAbsent(
-							getHighlightGroupKey(customHighlightPositions.get(), BlockPos.containing(entity.position())), customHighlightPositions.get());
+		Optional<List<IEntityItemActionHandler.HighlightGroup>> customHighlightPositionGroups = handler.getCustomHighlightGroupsWithMatch(stackKey, entity);
+		if (customHighlightPositionGroups.isPresent()) {
+			customHighlightPositionGroups.get().forEach(group -> {
+				switch (group.matchResult()) {
+					case MATCHING_STACK -> stackPositions.putIfAbsent(getHighlightGroupKey(group.positions(), BlockPos.containing(entity.position())), group.positions());
+					case MATCHING_ITEM -> itemPositions.putIfAbsent(getHighlightGroupKey(group.positions(), BlockPos.containing(entity.position())), group.positions());
 				}
-				return;
-			}
+			});
+			return;
+		}
 
-			switch (handler.getItemMatch(stackKey, entity)) {
-				case MATCHING_STACK -> stackEntities.add(entityId);
-				case MATCHING_ITEM -> itemEntities.add(entityId);
-			}
-		})));
+							switch (handler.getItemMatch(stackKey, entity)) {
+								case MATCHING_STACK -> stackEntities.add(entityId);
+								case MATCHING_ITEM -> itemEntities.add(entityId);
+							}
+						})
+				)
+		);
+
 
 		stackMatchNumber.set(stackPositions.size() + stackEntities.size());
 		itemMatchNumber.set(itemPositions.size() + itemEntities.size());
 
-		Map<Integer, List<List<BlockPos>>> blockHighlights = Map.of(MATCHING_STACK_HIGHLIGHT_COLOR, new ArrayList<>(stackPositions.values()),
-				MATCHING_ITEM_HIGHLIGHT_COLOR, new ArrayList<>(itemPositions.values()));
+		Map<Integer, List<List<BlockPos>>> blockHighlights = Map.of(
+				MATCHING_STACK_HIGHLIGHT_COLOR, new ArrayList<>(stackPositions.values()),
+				MATCHING_ITEM_HIGHLIGHT_COLOR, new ArrayList<>(itemPositions.values())
+		);
 
-		Map<Integer, List<Integer>> entityHighlights = Map.of(MATCHING_STACK_HIGHLIGHT_COLOR, stackEntities, MATCHING_ITEM_HIGHLIGHT_COLOR, itemEntities);
+		Map<Integer, List<Integer>> entityHighlights = Map.of(
+				MATCHING_STACK_HIGHLIGHT_COLOR, stackEntities,
+				MATCHING_ITEM_HIGHLIGHT_COLOR, itemEntities
+		);
 		int highlightDuration = getHighlightDuration(serverPlayer, blockHighlights, entityHighlights);
 		BlockHighlightSplit blockHighlightSplit = splitBlockHighlights(serverPlayer, blockHighlights);
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncBlockHighlightsPayload(blockHighlightSplit.worldHighlights(), highlightDuration));
@@ -143,32 +152,27 @@ public class HighlightHandler {
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncRenderedEntityBlockHighlightsPayload(
 				mergeRenderedEntityHighlights(renderedEntityStackHighlights, renderedEntityItemHighlights), highlightDuration));
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncEntityHighlightsPayload(entityHighlights, highlightDuration));
-		PacketDistributor.sendToPlayer(serverPlayer,
-				new SyncHighlightDirectionsPayload(projectBlockHighlights(serverPlayer, blockHighlights), entityHighlights, highlightDuration));
+		PacketDistributor.sendToPlayer(serverPlayer, new SyncHighlightDirectionsPayload(projectBlockHighlights(serverPlayer, blockHighlights), entityHighlights, highlightDuration));
 
 		Level level = player.level();
 
 		Component message = null;
 		if (stackMatchNumber.get() == 0 && itemMatchNumber.get() == 0) {
 			message = ItemActionsTranslationHelper.INSTANCE.translStatusMessage("no_matching_items_found");
-			level.playSound(null, player, SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 1,
-					0.7f + RandHelper.getRandomMinusOneToOne(level.random) * 0.1F);
+			player.playSound(SoundEvents.NOTE_BLOCK_BASS.value(), 1, 0.45f + RandHelper.getRandomMinusOneToOne(level.random) * 0.1F);
 		} else {
 			if (stackMatchNumber.get() > 0) {
-				message = ItemActionsTranslationHelper.INSTANCE.translStatusMessage("matching_stacks_found",
-						Component.literal(String.valueOf(stackMatchNumber.get())).withColor(0x4CAF50));
+				message = ItemActionsTranslationHelper.INSTANCE.translStatusMessage("matching_stacks_found", Component.literal(String.valueOf(stackMatchNumber.get())).withColor(0x4CAF50));
 			}
 			if (itemMatchNumber.get() > 0) {
-				MutableComponent itemMessage = ItemActionsTranslationHelper.INSTANCE.translStatusMessage("matching_items_found",
-						Component.literal(String.valueOf(itemMatchNumber.get())).withColor(0x42A5F5));
+				MutableComponent itemMessage = ItemActionsTranslationHelper.INSTANCE.translStatusMessage("matching_items_found", Component.literal(String.valueOf(itemMatchNumber.get())).withColor(0x42A5F5));
 				if (message != null) {
 					message = message.plainCopy().append(" ").append(itemMessage);
 				} else {
 					message = itemMessage;
 				}
 			}
-			level.playSound(null, player, SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.PLAYERS, 1,
-					0.95f + RandHelper.getRandomMinusOneToOne(level.random) * 0.1F);
+			player.playSound(SoundEvents.NOTE_BLOCK_CHIME.value(), 1, 0.95f + RandHelper.getRandomMinusOneToOne(level.random) * 0.1F);
 		}
 
 		player.displayClientMessage(message, true);
@@ -206,8 +210,7 @@ public class HighlightHandler {
 		return renderedHighlights;
 	}
 
-	private static int getHighlightDuration(ServerPlayer player, Map<Integer, List<List<BlockPos>>> blockHighlights,
-			Map<Integer, List<Integer>> entityHighlights) {
+	private static int getHighlightDuration(ServerPlayer player, Map<Integer, List<List<BlockPos>>> blockHighlights, Map<Integer, List<Integer>> entityHighlights) {
 		double farthestDistanceSqr = 0;
 		for (List<List<BlockPos>> groups : blockHighlights.values()) {
 			for (List<BlockPos> group : groups) {
@@ -235,8 +238,7 @@ public class HighlightHandler {
 			for (int entityId : entityIds) {
 				Entity entity = player.level().getEntity(entityId);
 				if (entity != null) {
-					farthestDistanceSqr = Math.max(farthestDistanceSqr,
-							SubLevelCompatHelper.distanceSquared(player.level(), player.position(), entity.position()));
+					farthestDistanceSqr = Math.max(farthestDistanceSqr, SubLevelCompatHelper.distanceSquared(player.level(), player.position(), entity.position()));
 				}
 			}
 		}
