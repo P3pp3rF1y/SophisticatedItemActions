@@ -5,13 +5,13 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.List;
 
-public record EntityBlockHighlightData(int entityId, List<BlockPos> positions) {
+public record EntityBlockHighlightData(int entityId, List<List<BlockPos>> positionGroups) {
 	public void encode(FriendlyByteBuf buffer) {
 		buffer.writeInt(entityId);
-		buffer.writeCollection(positions, FriendlyByteBuf::writeBlockPos);
+		buffer.writeCollection(positionGroups, (groupBuffer, group) -> groupBuffer.writeCollection(group, FriendlyByteBuf::writeBlockPos));
 	}
 
 	public static EntityBlockHighlightData decode(FriendlyByteBuf buffer) {
-		return new EntityBlockHighlightData(buffer.readInt(), buffer.readList(FriendlyByteBuf::readBlockPos));
+		return new EntityBlockHighlightData(buffer.readInt(), buffer.readList(groupBuffer -> groupBuffer.readList(FriendlyByteBuf::readBlockPos)));
 	}
 }

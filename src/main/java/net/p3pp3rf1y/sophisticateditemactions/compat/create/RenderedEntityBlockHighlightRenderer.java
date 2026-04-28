@@ -2,11 +2,13 @@ package net.p3pp3rf1y.sophisticateditemactions.compat.create;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
+import com.simibubi.create.content.contraptions.render.ClientContraption;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.Vec3;
@@ -86,17 +88,38 @@ public class RenderedEntityBlockHighlightRenderer {
 			return null;
 		}
 
+		List<RenderedHighlight> highlights = new ArrayList<>();
+		ClientContraption clientContraption = contraptionEntity.getContraption().getOrCreateClientContraptionLazy();
+		Level renderLevel = clientContraption.getRenderLevel();
+		for (List<BlockPos> group : highlightData.positionGroups()) {
+			RenderedHighlight highlight = createRenderedHighlight(contraptionEntity, renderLevel, group);
+			if (highlight != null) {
+				highlights.add(highlight);
+			}
+		}
+
+		if (highlights.isEmpty()) {
+			return null;
+		}
+
+		return new CachedEntityHighlight(highlightData.entityId(), highlightData.positionGroups(), List.copyOf(highlights));
+	}
+
+	@Nullable
+	private static RenderedHighlight createRenderedHighlight(AbstractContraptionEntity contraptionEntity, Level renderLevel, List<BlockPos> positions) {
+		List<VoxelOutliner.Edge> edges = new ArrayList<>();
 		VoxelShape shape = Shapes.empty();
 		Vec3 pivotSum = Vec3.ZERO;
 		int count = 0;
-		for (BlockPos pos : highlightData.positions()) {
+
+		for (BlockPos pos : positions) {
 			StructureTemplate.StructureBlockInfo blockInfo = contraptionEntity.getContraption().getBlocks().get(pos);
 			if (blockInfo == null) {
 				continue;
 			}
 
-			BlockState blockState = blockInfo.state();
-			shape = Shapes.join(shape, blockState.getShape(mc.level, pos).move(pos.getX(), pos.getY(), pos.getZ()), BooleanOp.OR);
+			BlockState blockState = renderLevel.getBlockState(pos);
+			shape = Shapes.join(shape, blockState.getShape(renderLevel, pos).move(pos.getX(), pos.getY(), pos.getZ()), BooleanOp.OR);
 			pivotSum = pivotSum.add(Vec3.atCenterOf(pos));
 			count++;
 		}
@@ -105,7 +128,11 @@ public class RenderedEntityBlockHighlightRenderer {
 			return null;
 		}
 
-		return new CachedEntityHighlight(highlightData.entityId(), List.copyOf(highlightData.positions()), VoxelOutliner.linesFromVoxelShapeSimplified(shape, BlockPos.ZERO), pivotSum.scale(1D / count));
+		for (VoxelOutliner.Edge edge : VoxelOutliner.linesFromVoxelShapeSimplified(shape, BlockPos.ZERO)) {
+			edges.add(new VoxelOutliner.Edge(edge.a(), edge.b()));
+		}
+
+		return new RenderedHighlight(edges, pivotSum.scale(1D / count));
 	}
 
 	private static void renderHighlightedBlock(PoseStack poseStack, float partialTick, Vec3 cameraPos, CachedEntityHighlight cachedHighlight, Minecraft mc, MultiBufferSource.BufferSource buffer, int color) {
@@ -118,17 +145,24 @@ public class RenderedEntityBlockHighlightRenderer {
 		poseStack.translate(-cameraPos.x(), -cameraPos.y(), -cameraPos.z());
 		poseStack.translate(Mth.lerp(partialTick, entity.xOld, entity.getX()), Mth.lerp(partialTick, entity.yOld, entity.getY()), Mth.lerp(partialTick, entity.zOld, entity.getZ()));
 		contraptionEntity.applyLocalTransforms(poseStack, partialTick);
-		poseStack.translate(cachedHighlight.pivot().x, cachedHighlight.pivot().y, cachedHighlight.pivot().z);
-		float scale = 1 + Easing.EASE_IN_OUT_CUBIC.ease((float) BlockHighlightRenderer.tri01(mc.level.getGameTime(), 15, partialTick)) * 0.05f;
-		poseStack.scale(scale, scale, scale);
-		poseStack.translate(-cachedHighlight.pivot().x, -cachedHighlight.pivot().y, -cachedHighlight.pivot().z);
-		BlockHighlightRenderHelper.renderThickEdges(poseStack, buffer, color, cachedHighlight.edges(), 0, 0, 0);
+		for (RenderedHighlight highlight : cachedHighlight.highlights()) {
+			poseStack.pushPose();
+			poseStack.translate(highlight.pivot().x, highlight.pivot().y, highlight.pivot().z);
+			float scale = 1 + Easing.EASE_IN_OUT_CUBIC.ease((float) BlockHighlightRenderer.tri01(mc.level.getGameTime(), 15, partialTick)) * 0.05f;
+			poseStack.scale(scale, scale, scale);
+			poseStack.translate(-highlight.pivot().x, -highlight.pivot().y, -highlight.pivot().z);
+			BlockHighlightRenderHelper.renderThickEdges(poseStack, buffer, color, highlight.edges(), 0, 0, 0);
+			poseStack.popPose();
+		}
 		poseStack.popPose();
 	}
 
-	private record CachedEntityHighlight(int entityId, List<BlockPos> positions, List<VoxelOutliner.Edge> edges, Vec3 pivot) {
+	private record CachedEntityHighlight(int entityId, List<List<BlockPos>> positionGroups, List<RenderedHighlight> highlights) {
 		private boolean matches(EntityBlockHighlightData highlightData) {
-			return entityId == highlightData.entityId() && positions.equals(highlightData.positions());
+			return entityId == highlightData.entityId() && positionGroups.equals(highlightData.positionGroups());
 		}
+	}
+
+	private record RenderedHighlight(List<VoxelOutliner.Edge> edges, Vec3 pivot) {
 	}
 }
