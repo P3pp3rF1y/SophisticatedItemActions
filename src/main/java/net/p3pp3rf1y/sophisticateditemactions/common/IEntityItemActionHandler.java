@@ -19,11 +19,32 @@ public interface IEntityItemActionHandler {
 		return Optional.empty();
 	}
 
+	default Optional<List<List<BlockPos>>> getCustomHighlightPositionGroups(ItemStackKey stackKey, Entity entity) {
+		return getCustomHighlightPositions(stackKey, entity).map(List::of);
+	}
+
+	default Optional<List<HighlightGroup>> getCustomHighlightGroupsWithMatch(ItemStackKey stackKey, Entity entity) {
+		return getCustomHighlightPositionGroups(stackKey, entity)
+				.map(groups -> groups.stream().map(group -> new HighlightGroup(group, getItemMatch(stackKey, entity))).toList());
+	}
+
 	default Optional<List<BlockPos>> getCustomRenderedHighlightPositions(ItemStackKey stackKey, Entity entity) {
 		return Optional.empty();
+	}
+
+	default Optional<List<List<BlockPos>>> getCustomRenderedHighlightGroups(ItemStackKey stackKey, Entity entity) {
+		return getCustomRenderedHighlightPositions(stackKey, entity).map(List::of);
+	}
+
+	default Optional<List<HighlightGroup>> getCustomRenderedHighlightGroupsWithMatch(ItemStackKey stackKey, Entity entity) {
+		return getCustomRenderedHighlightGroups(stackKey, entity)
+				.map(groups -> groups.stream().map(group -> new HighlightGroup(group, getItemMatch(stackKey, entity))).toList());
 	}
 
 	Optional<IDepositHandler> getDepositHandler(Entity entity);
 
 	Optional<IRestockHandler> getRestockHandler(Entity entity);
+
+	record HighlightGroup(List<BlockPos> positions, ItemMatchResult matchResult) {
+	}
 }
