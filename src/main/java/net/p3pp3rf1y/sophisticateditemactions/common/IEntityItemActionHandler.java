@@ -2,12 +2,11 @@ package net.p3pp3rf1y.sophisticateditemactions.common;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 
 import java.util.List;
 import java.util.Optional;
-
-import net.minecraft.core.BlockPos;
 
 public interface IEntityItemActionHandler {
 	ResourceLocation id();
@@ -24,7 +23,28 @@ public interface IEntityItemActionHandler {
 		return Optional.empty();
 	}
 
+	default Optional<List<List<BlockPos>>> getCustomHighlightPositionGroups(ItemStackKey stackKey, Entity entity) {
+		return getCustomHighlightPositions(stackKey, entity).map(List::of);
+	}
+
+	default Optional<List<HighlightGroup>> getCustomHighlightGroupsWithMatch(ItemStackKey stackKey, Entity entity) {
+		return getCustomHighlightPositionGroups(stackKey, entity)
+				.map(groups -> groups.stream().map(group -> new HighlightGroup(group, getItemMatch(stackKey, entity))).toList());
+	}
+
 	default Optional<List<BlockPos>> getCustomRenderedHighlightPositions(ItemStackKey stackKey, Entity entity) {
 		return Optional.empty();
+	}
+
+	default Optional<List<List<BlockPos>>> getCustomRenderedHighlightGroups(ItemStackKey stackKey, Entity entity) {
+		return getCustomRenderedHighlightPositions(stackKey, entity).map(List::of);
+	}
+
+	default Optional<List<HighlightGroup>> getCustomRenderedHighlightGroupsWithMatch(ItemStackKey stackKey, Entity entity) {
+		return getCustomRenderedHighlightGroups(stackKey, entity)
+				.map(groups -> groups.stream().map(group -> new HighlightGroup(group, getItemMatch(stackKey, entity))).toList());
+	}
+
+	record HighlightGroup(List<BlockPos> positions, ItemMatchResult matchResult) {
 	}
 }
