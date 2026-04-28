@@ -18,6 +18,7 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
 import net.p3pp3rf1y.sophisticateditemactions.network.DepositItemsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.RestockItemsPayload;
@@ -58,12 +59,12 @@ public class ItemTransferHandler {
 		Level level = player.level();
 		SubLevelCompatHelper.getBlockEntitiesInRange(level, player.blockPosition(), INTERACTION_RANGE).forEach(be -> {
 			Level storageLevel = be.getLevel() == null ? level : be.getLevel();
-			ItemActionHandlerRegistry.getBlockHandlerFor(storageLevel, be.getBlockPos(), be, IBlockItemActionHandler.Action.DEPOSIT).ifPresent(handler -> {
-				if (SubLevelCompatHelper.mayInteract(player, level, be.getBlockPos())) {
-					tempStorages.computeIfAbsent(handler.id(), k -> new HashSet<>())
-							.add(handler.getInteractionPosToActOn(storageLevel, be.getBlockPos(), be, IBlockItemActionHandler.Action.DEPOSIT));
-				}
-			});
+			ItemActionHandlerRegistry.getBlockHandlerFor(storageLevel, be.getBlockPos(), be, IBlockItemActionHandler.Action.DEPOSIT)
+					.ifPresent(handler -> {
+						if (SubLevelCompatHelper.mayInteract(player, level, be.getBlockPos())) {
+							tempStorages.computeIfAbsent(handler.id(), k -> new HashSet<>()).add(handler.getInteractionPosToActOn(storageLevel, be.getBlockPos(), be, IBlockItemActionHandler.Action.DEPOSIT));
+						}
+					});
 		});
 
 		Map<ResourceLocation, List<BlockPos>> storages = new HashMap<>();
@@ -313,18 +314,20 @@ public class ItemTransferHandler {
 		int totalExtracted = 0;
 		int originalCount = stackToExtract.getCount();
 		for (IRestockHandler handler : restockHandlers) {
-			ItemStack extracted = handler.extractItem(stackToExtract);
-			if (!extracted.isEmpty()) {
-				restocked.computeIfAbsent(handler.getPosition(), k -> new ItemTransferData(handler.getPositionToOpen().orElse(null), handler.getPosition(), new ArrayList<>())).itemsTransferred().add(extracted.copy());
-				if (playerInventoryStack.isEmpty()) {
-					playerInventoryStack = extracted.copy();
-				} else {
-					playerInventoryStack.grow(extracted.getCount());
+			List<IRestockHandler.RestockTransfer> transfers = handler.extractTransfers(stackToExtract);
+			if (!transfers.isEmpty()) {
+				for (IRestockHandler.RestockTransfer transfer : transfers) {
+					restocked.computeIfAbsent(transfer.position(), k -> new ItemTransferData(transfer.positionToOpen(), transfer.position(), new ArrayList<>())).itemsTransferred().add(transfer.stack().copy());
+					if (playerInventoryStack.isEmpty()) {
+						playerInventoryStack = transfer.stack().copy();
+					} else {
+						playerInventoryStack.grow(transfer.stack().getCount());
+					}
+					player.getInventory().setItem(playerInventorySlot, playerInventoryStack);
+					restockedPlayerSlots.add(playerInventorySlot);
+					totalExtracted += transfer.stack().getCount();
 				}
-				player.getInventory().setItem(playerInventorySlot, playerInventoryStack);
-				restockedPlayerSlots.add(playerInventorySlot);
-				totalExtracted += extracted.getCount();
-				stackToExtract = stackToExtract.copyWithCount(stackToExtract.getCount() - extracted.getCount());
+				stackToExtract = stackToExtract.copyWithCount(Math.max(0, stackToExtract.getCount() - transfers.stream().mapToInt(transfer -> transfer.stack().getCount()).sum()));
 			}
 			if (totalExtracted >= originalCount) {
 				break;
