@@ -109,20 +109,24 @@ public class HighlightHandler {
 								return;
 							}
 
-							Optional<List<BlockPos>> customRenderedHighlightPositions = handler.getCustomRenderedHighlightPositions(stackKey, entity);
-							if (customRenderedHighlightPositions.isPresent()) {
-								switch (handler.getItemMatch(stackKey, entity)) {
-									case MATCHING_STACK -> renderedEntityStackHighlights.computeIfAbsent(MATCHING_STACK_HIGHLIGHT_COLOR, k -> new ArrayList<>()).add(new EntityBlockHighlightData(entityId, customRenderedHighlightPositions.get()));
-									case MATCHING_ITEM -> renderedEntityItemHighlights.computeIfAbsent(MATCHING_ITEM_HIGHLIGHT_COLOR, k -> new ArrayList<>()).add(new EntityBlockHighlightData(entityId, customRenderedHighlightPositions.get()));
-								}
+							Optional<List<IEntityItemActionHandler.HighlightGroup>> customRenderedHighlightGroups = handler.getCustomRenderedHighlightGroupsWithMatch(stackKey, entity);
+							if (customRenderedHighlightGroups.isPresent()) {
+								customRenderedHighlightGroups.get().forEach(group -> {
+									switch (group.matchResult()) {
+										case MATCHING_STACK -> renderedEntityStackHighlights.computeIfAbsent(MATCHING_STACK_HIGHLIGHT_COLOR, k -> new ArrayList<>()).add(new EntityBlockHighlightData(entityId, List.of(group.positions())));
+										case MATCHING_ITEM -> renderedEntityItemHighlights.computeIfAbsent(MATCHING_ITEM_HIGHLIGHT_COLOR, k -> new ArrayList<>()).add(new EntityBlockHighlightData(entityId, List.of(group.positions())));
+									}
+								});
 							}
 
-							Optional<List<BlockPos>> customHighlightPositions = handler.getCustomHighlightPositions(stackKey, entity);
-							if (customHighlightPositions.isPresent()) {
-								switch (handler.getItemMatch(stackKey, entity)) {
-									case MATCHING_STACK -> stackPositions.putIfAbsent(getHighlightGroupKey(customHighlightPositions.get(), BlockPos.containing(entity.position())), customHighlightPositions.get());
-									case MATCHING_ITEM -> itemPositions.putIfAbsent(getHighlightGroupKey(customHighlightPositions.get(), BlockPos.containing(entity.position())), customHighlightPositions.get());
-								}
+							Optional<List<IEntityItemActionHandler.HighlightGroup>> customHighlightPositionGroups = handler.getCustomHighlightGroupsWithMatch(stackKey, entity);
+							if (customHighlightPositionGroups.isPresent()) {
+								customHighlightPositionGroups.get().forEach(group -> {
+									switch (group.matchResult()) {
+										case MATCHING_STACK -> stackPositions.putIfAbsent(getHighlightGroupKey(group.positions(), BlockPos.containing(entity.position())), group.positions());
+										case MATCHING_ITEM -> itemPositions.putIfAbsent(getHighlightGroupKey(group.positions(), BlockPos.containing(entity.position())), group.positions());
+									}
+								});
 								return;
 							}
 
@@ -248,4 +252,5 @@ public class HighlightHandler {
 		double distanceRatio = Math.min(Math.sqrt(farthestDistanceSqr) / HIGHLIGHT_RANGE, 1);
 		return MIN_HIGHLIGHT_DURATION + (int) Math.round(distanceRatio * (MAX_HIGHLIGHT_DURATION - MIN_HIGHLIGHT_DURATION));
 	}
+
 }
