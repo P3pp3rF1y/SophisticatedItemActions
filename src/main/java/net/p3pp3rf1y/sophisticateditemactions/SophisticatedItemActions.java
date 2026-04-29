@@ -19,8 +19,10 @@ import org.apache.logging.log4j.Logger;
 public class SophisticatedItemActions {
 	public static final String MOD_ID = "sophisticateditemactions";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+	private static String networkProtocolVersion;
 
 	public SophisticatedItemActions(IEventBus modBus, Dist dist, ModContainer container) {
+		networkProtocolVersion = container.getModInfo().getVersion().toString();
 		container.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC);
 		if (dist == Dist.CLIENT && !ModList.get().isLoaded("configured")) {
 			container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
@@ -38,5 +40,9 @@ public class SophisticatedItemActions {
 
 	public static String getRegistryName(String regName) {
 		return MOD_ID + ":" + regName;
+	}
+
+	public static String getNetworkProtocolVersion() {
+		return networkProtocolVersion;
 	}
 }
