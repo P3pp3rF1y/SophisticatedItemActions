@@ -10,7 +10,7 @@ public class ModPayloads {
 	}
 
 	public static void registerPayloads(final RegisterPayloadHandlersEvent event) {
-		final PayloadRegistrar registrar = event.registrar(SophisticatedItemActions.MOD_ID).versioned("1.0");
+		final PayloadRegistrar registrar = event.registrar(SophisticatedItemActions.MOD_ID).versioned(SophisticatedItemActions.getNetworkProtocolVersion());
 		registrar.playToServer(DepositItemsPayload.TYPE, DepositItemsPayload.STREAM_CODEC, DepositItemsPayload::handlePayload);
 		registrar.playToServer(RestockItemsPayload.TYPE, RestockItemsPayload.STREAM_CODEC, RestockItemsPayload::handlePayload);
 		registrar.playToClient(SyncItemTransfersPayload.TYPE, SyncItemTransfersPayload.STREAM_CODEC, SyncItemTransfersPayload::handlePayload);
