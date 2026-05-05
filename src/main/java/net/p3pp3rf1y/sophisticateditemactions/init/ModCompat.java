@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.emi.EmiCompat
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.jei.JeiCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.rei.ReiCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedbackpacks.SophisticatedBackpacksCompat;
+import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorage.SophisticatedStorageCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorageinmotion.StorageInMotionCompat;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 
@@ -20,6 +21,7 @@ import java.util.function.Supplier;
 
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.REFINED_STORAGE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_BACKPACKS;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_STORAGE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.STORAGE_IN_MOTION;
 
 public class ModCompat {
@@ -36,6 +38,7 @@ public class ModCompat {
 		compatFactories.put(CompatModIds.REI, () -> ReiCompat::new);
 		compatFactories.put(REFINED_STORAGE, () -> RefinedStorageCompat::new);
 		compatFactories.put(SOPHISTICATED_BACKPACKS, () -> SophisticatedBackpacksCompat::new);
+		compatFactories.put(SOPHISTICATED_STORAGE, () -> SophisticatedStorageCompat::new);
 		compatFactories.put(STORAGE_IN_MOTION, () -> StorageInMotionCompat::new);
 	}
 
