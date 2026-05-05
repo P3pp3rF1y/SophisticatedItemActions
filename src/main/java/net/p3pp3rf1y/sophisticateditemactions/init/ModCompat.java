@@ -4,6 +4,7 @@ import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.CREATE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.REFINED_STORAGE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SABLE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_BACKPACKS;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_STORAGE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.STORAGE_IN_MOTION;
 
 import net.p3pp3rf1y.sophisticatedcore.compat.CompatInfo;
@@ -17,6 +18,7 @@ import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.rei.ReiCompat
 import net.p3pp3rf1y.sophisticateditemactions.compat.refinedstorage.RefinedStorageCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.sable.SableCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedbackpacks.SophisticatedBackpacksCompat;
+import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorage.SophisticatedStorageCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorageinmotion.StorageInMotionCompat;
 
 public class ModCompat {
@@ -32,6 +34,7 @@ public class ModCompat {
 		CompatRegistry.registerCompat(new CompatInfo(REFINED_STORAGE), () -> modBus -> new RefinedStorageCompat());
 		CompatRegistry.registerCompat(new CompatInfo(SABLE), () -> modBus -> new SableCompat());
 		CompatRegistry.registerCompat(new CompatInfo(SOPHISTICATED_BACKPACKS), () -> modBus -> new SophisticatedBackpacksCompat());
+		CompatRegistry.registerCompat(new CompatInfo(SOPHISTICATED_STORAGE), () -> modBus -> new SophisticatedStorageCompat());
 		CompatRegistry.registerCompat(new CompatInfo(STORAGE_IN_MOTION), () -> modBus -> new StorageInMotionCompat());
 	}
 }
