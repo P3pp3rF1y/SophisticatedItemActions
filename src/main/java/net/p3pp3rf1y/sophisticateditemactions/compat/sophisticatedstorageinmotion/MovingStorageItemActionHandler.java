@@ -13,6 +13,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.IDepositHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.IEntityItemActionHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
+import net.p3pp3rf1y.sophisticateditemactions.common.StorageItemHandlerTarget;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 
@@ -100,5 +101,14 @@ public class MovingStorageItemActionHandler implements IEntityItemActionHandler 
 				return InventoryHelper.extract(movingStorage.getStorageHolder().getStorageWrapper().getInventoryForInputOutput(), stack);
 			}
 		});
+	}
+
+	@Override
+	public Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(Entity entity) {
+		if (!(entity instanceof IMovingStorageEntity movingStorage)) {
+			return Optional.empty();
+		}
+
+		return Optional.of(new StorageItemHandlerTarget(null, entity.position(), movingStorage.getStorageHolder().getStorageWrapper().getInventoryForInputOutput(), stackKey -> getItemMatch(stackKey, entity, true)));
 	}
 }

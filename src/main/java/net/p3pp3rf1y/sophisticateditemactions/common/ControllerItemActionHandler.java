@@ -61,6 +61,11 @@ public class ControllerItemActionHandler implements IBlockEntityItemActionHandle
 		};
 	}
 
+	@Override
+	public Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(ControllerBlockEntityBase controller) {
+		return Optional.of(new StorageItemHandlerTarget(null, Vec3.atCenterOf(controller.getBlockPos()), controller, stackKey -> getItemMatch(stackKey, controller)));
+	}
+
 	private ItemMatchResult getItemMatch(ItemStackKey stackKey, ControllerBlockEntityBase controller) {
 		if (controller.hasMatchingStack(stackKey)) {
 			return ItemMatchResult.MATCHING_STACK;
