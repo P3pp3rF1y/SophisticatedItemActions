@@ -37,6 +37,14 @@ public interface IBlockItemActionHandler {
 
 	Optional<IRestockHandler> getRestockHandler(ServerPlayer player, BlockPos pos);
 
+	default Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(ServerPlayer player, BlockPos pos) {
+		return Optional.empty();
+	}
+
+	default List<StorageItemHandlerTarget> getStorageItemHandlerTargets(ServerPlayer player, BlockPos pos) {
+		return getStorageItemHandlerTarget(player, pos).map(List::of).orElseGet(List::of);
+	}
+
 	enum Action {
 		DEPOSIT, RESTOCK, HIGHLIGHT
 	}
