@@ -76,6 +76,20 @@ public interface IBlockEntityItemActionHandler<T> extends IBlockItemActionHandle
 
 	IRestockHandler getRestockHandler(T object);
 
+	@Override
+	default Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(ServerPlayer player, BlockPos pos) {
+		return getFromBlockEntity(player, pos, object -> getStorageItemHandlerTarget(object).orElse(null));
+	}
+
+	@Override
+	default List<StorageItemHandlerTarget> getStorageItemHandlerTargets(ServerPlayer player, BlockPos pos) {
+		return getStorageItemHandlerTarget(player, pos).map(List::of).orElseGet(List::of);
+	}
+
+	default Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(T object) {
+		return Optional.empty();
+	}
+
 	ItemMatchResult getItemMatch(ItemStackKey stackKey, T object, Action action);
 
 	Class<T> getObjectClass();

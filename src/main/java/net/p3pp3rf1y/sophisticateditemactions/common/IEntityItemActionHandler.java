@@ -45,6 +45,14 @@ public interface IEntityItemActionHandler {
 
 	Optional<IRestockHandler> getRestockHandler(Entity entity);
 
+	default Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(Entity entity) {
+		return Optional.empty();
+	}
+
+	default List<StorageItemHandlerTarget> getStorageItemHandlerTargets(Entity entity) {
+		return getStorageItemHandlerTarget(entity).map(List::of).orElseGet(List::of);
+	}
+
 	record HighlightGroup(List<BlockPos> positions, ItemMatchResult matchResult) {
 	}
 }
