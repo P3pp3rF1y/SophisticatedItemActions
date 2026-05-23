@@ -16,6 +16,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.IBlockEntityItemActionHandl
 import net.p3pp3rf1y.sophisticateditemactions.common.IDepositHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
+import net.p3pp3rf1y.sophisticateditemactions.common.StorageItemHandlerTarget;
 import net.p3pp3rf1y.sophisticateditemactions.common.SubLevelCompatHelper;
 
 import javax.annotation.Nullable;
@@ -106,6 +107,18 @@ public class ItemVaultItemActionHandler implements IBlockEntityItemActionHandler
 				return InventoryHelper.extractFromInventory(stack, itemHandler, false);
 			}
 		};
+	}
+
+	@Override
+	public Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(ItemVaultBlockEntity vault) {
+		ItemVaultBlockEntity controller = getController(vault);
+		IItemHandler itemHandler = getVaultItemHandler(vault);
+		if (itemHandler == null) {
+			return Optional.empty();
+		}
+
+		ItemVaultBlockEntity targetVault = controller != null ? controller : vault;
+		return Optional.of(new StorageItemHandlerTarget(targetVault.getBlockPos(), getVaultCenter(targetVault), itemHandler, stackKey -> getItemMatch(stackKey, itemHandler)));
 	}
 
 	private static ItemMatchResult getItemMatch(ItemStackKey stackKey, @Nullable IItemHandler itemHandler) {
