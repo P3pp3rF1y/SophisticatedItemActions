@@ -98,6 +98,16 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 		});
 	}
 
+	@Override
+	public Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(Entity entity) {
+		IItemHandler cap = entity.getCapability(Capabilities.ItemHandler.ENTITY, null);
+		if (cap == null) {
+			return Optional.empty();
+		}
+
+		return Optional.of(new StorageItemHandlerTarget(null, entity.position(), cap));
+	}
+
 	private static ItemMatchResult getItemMatch(ItemStackKey stackKey, @Nullable IItemHandler cap) {
 		if (cap == null) {
 			return ItemMatchResult.NO_MATCH;
@@ -202,5 +212,20 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 				return InventoryHelper.extractFromInventory(stack, itemHandler, false);
 			}
 		});
+	}
+
+	@Override
+	public Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(ServerPlayer player, BlockPos pos) {
+		Level level = SubLevelCompatHelper.getLevelForPosition(player.level(), pos);
+		IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, null);
+		if (itemHandler == null) {
+			return Optional.empty();
+		}
+
+		BlockPos positionToOpen = null;
+		if (level.getBlockEntity(pos) instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
+			positionToOpen = pos;
+		}
+		return Optional.of(new StorageItemHandlerTarget(positionToOpen, SubLevelCompatHelper.projectToWorld(level, Vec3.atCenterOf(pos)), itemHandler));
 	}
 }

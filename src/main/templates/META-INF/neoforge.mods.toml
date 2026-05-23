@@ -51,7 +51,7 @@ modId="sophisticatedbackpacks"
 type="optional"
 versionRange="${sb_version_range}"
 ordering="NONE"
-side="CLIENT"
+side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="neoforge"

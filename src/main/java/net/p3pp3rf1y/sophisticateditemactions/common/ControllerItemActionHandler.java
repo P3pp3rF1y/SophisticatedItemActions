@@ -61,6 +61,12 @@ public class ControllerItemActionHandler implements IBlockEntityItemActionHandle
 		};
 	}
 
+	@Override
+	public Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(ControllerBlockEntityBase controller) {
+		Vec3 center = SubLevelCompatHelper.projectToWorld(controller.getLevel(), Vec3.atCenterOf(controller.getBlockPos()));
+		return Optional.of(new StorageItemHandlerTarget(null, center, controller, stackKey -> getItemMatch(stackKey, controller)));
+	}
+
 	private ItemMatchResult getItemMatch(ItemStackKey stackKey, ControllerBlockEntityBase controller) {
 		if (controller.hasMatchingStack(stackKey)) {
 			return ItemMatchResult.MATCHING_STACK;
