@@ -17,12 +17,14 @@ import net.p3pp3rf1y.sophisticateditemactions.common.IBlockEntityItemActionHandl
 import net.p3pp3rf1y.sophisticateditemactions.common.IDepositHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
+import net.p3pp3rf1y.sophisticateditemactions.common.StorageItemHandlerTarget;
 import net.p3pp3rf1y.sophisticateditemactions.common.SubLevelCompatHelper;
 
 import javax.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ItemVaultItemActionHandler implements IBlockEntityItemActionHandler<ItemVaultBlockEntity> {
@@ -107,6 +109,18 @@ public class ItemVaultItemActionHandler implements IBlockEntityItemActionHandler
 				return InventoryHelper.extract(itemHandler, stack);
 			}
 		};
+	}
+
+	@Override
+	public Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(ItemVaultBlockEntity vault) {
+		ItemVaultBlockEntity controller = getController(vault);
+		ResourceHandler<ItemResource> itemHandler = getVaultItemHandler(vault);
+		if (itemHandler == null) {
+			return Optional.empty();
+		}
+
+		ItemVaultBlockEntity targetVault = controller != null ? controller : vault;
+		return Optional.of(new StorageItemHandlerTarget(targetVault.getBlockPos(), getVaultCenter(targetVault), itemHandler, stackKey -> getItemMatch(stackKey, itemHandler)));
 	}
 
 	private static ItemMatchResult getItemMatch(ItemStackKey stackKey, @Nullable ResourceHandler<ItemResource> itemHandler) {

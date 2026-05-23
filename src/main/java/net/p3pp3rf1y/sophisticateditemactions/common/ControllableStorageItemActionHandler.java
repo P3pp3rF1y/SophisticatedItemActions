@@ -107,4 +107,15 @@ public class ControllableStorageItemActionHandler implements IBlockEntityItemAct
 			}
 		};
 	}
+
+	@Override
+	public Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(IControllableStorage storage) {
+		Vec3 center = StoragePositionGroups.getCenter(storage.getStorageBlockLevel(), storage.getStorageBlockPos());
+		BlockPos positionToOpen = null;
+		if (storage instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
+			positionToOpen = storage.getStorageBlockPos();
+		}
+		return Optional.of(new StorageItemHandlerTarget(positionToOpen, center, storage.getStorageWrapper().getInventoryForInputOutput(),
+				stackKey -> getItemMatchResult(stackKey, storage.getStorageWrapper().getInventoryHandler().getSlotTracker(), true)));
+	}
 }
