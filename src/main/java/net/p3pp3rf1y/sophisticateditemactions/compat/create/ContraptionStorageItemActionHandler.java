@@ -21,6 +21,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.IDepositHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.IEntityItemActionHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
+import net.p3pp3rf1y.sophisticateditemactions.common.StorageItemHandlerTarget;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -120,6 +121,22 @@ public class ContraptionStorageItemActionHandler implements IEntityItemActionHan
 				return extractTransfersFromMountedStorages(contraptionEntity, storages, stack, lastTransferPosition);
 			}
 		});
+	}
+
+	@Override
+	public List<StorageItemHandlerTarget> getStorageItemHandlerTargets(Entity entity) {
+		if (!(entity instanceof AbstractContraptionEntity contraptionEntity)) {
+			return List.of();
+		}
+
+		Map<BlockPos, MountedStorageInfo> storages = getMountedStoragesSnapshot(contraptionEntity);
+		if (storages.isEmpty()) {
+			return List.of();
+		}
+
+		return storages.entrySet().stream()
+				.map(storageEntry -> new StorageItemHandlerTarget(null, getStoragePosition(contraptionEntity, storageEntry.getKey()), storageEntry.getValue().itemHandler()))
+				.toList();
 	}
 
 	@Override

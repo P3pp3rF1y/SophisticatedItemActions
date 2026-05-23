@@ -72,6 +72,12 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 	}
 
 	@Override
+	public Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(Entity entity) {
+		return entity.getCapability(ForgeCapabilities.ITEM_HANDLER, null)
+				.map(cap -> new StorageItemHandlerTarget(null, entity.position(), cap));
+	}
+
+	@Override
 	public Optional<IRestockHandler> getRestockHandler(Entity entity) {
 		return entity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).map(cap -> new IRestockHandler() {
 			@Override
@@ -161,6 +167,17 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 					};
 				}
 		));
+	}
+
+	@Override
+	public Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(ServerPlayer player, BlockPos pos) {
+		return WorldHelper.getBlockEntity(player.level(), pos).flatMap(blockEntity -> blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).map(cap -> {
+			BlockPos positionToOpen = null;
+			if (player.level().getBlockEntity(pos) instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
+				positionToOpen = pos;
+			}
+			return new StorageItemHandlerTarget(positionToOpen, Vec3.atCenterOf(pos), cap);
+		}));
 	}
 
 	@Override

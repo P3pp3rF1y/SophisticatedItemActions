@@ -78,7 +78,7 @@ modId="jei"
 mandatory = false
 versionRange="${jei_version_range}"
 ordering="NONE"
-side="CLIENT"
+side="BOTH"
 
 [[dependencies.sophisticateditemactions]]
 modId="ae2"

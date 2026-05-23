@@ -13,6 +13,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemActionHandlerRegistry;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
 import net.p3pp3rf1y.sophisticateditemactions.common.StandardStorageActionHandler;
+import net.p3pp3rf1y.sophisticateditemactions.common.StorageItemHandlerTarget;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageIOBlockEntity;
 
 import java.util.Optional;
@@ -54,5 +55,10 @@ public class StorageIOItemActionHandler implements IBlockItemActionHandler {
 	@Override
 	public Optional<IRestockHandler> getRestockHandler(ServerPlayer player, BlockPos pos) {
 		return StandardStorageActionHandler.INSTANCE.getRestockHandler(player, pos);
+	}
+
+	@Override
+	public Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(ServerPlayer player, BlockPos pos) {
+		return StandardStorageActionHandler.INSTANCE.getStorageItemHandlerTarget(player, pos);
 	}
 }
