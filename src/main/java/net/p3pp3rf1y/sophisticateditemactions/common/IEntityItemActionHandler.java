@@ -19,6 +19,14 @@ public interface IEntityItemActionHandler {
 
 	Optional<IRestockHandler> getRestockHandler(Entity entity);
 
+	default Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(Entity entity) {
+		return Optional.empty();
+	}
+
+	default List<StorageItemHandlerTarget> getStorageItemHandlerTargets(Entity entity) {
+		return getStorageItemHandlerTarget(entity).map(List::of).orElseGet(List::of);
+	}
+
 	default Optional<List<BlockPos>> getCustomHighlightPositions(ItemStackKey stackKey, Entity entity) {
 		return Optional.empty();
 	}
