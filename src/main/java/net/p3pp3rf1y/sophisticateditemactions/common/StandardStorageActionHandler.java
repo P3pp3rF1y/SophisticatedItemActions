@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticateditemactions.common;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -21,12 +22,15 @@ import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class StandardStorageActionHandler implements IBlockItemActionHandler, IEntityItemActionHandler {
 	public static final StandardStorageActionHandler INSTANCE = new StandardStorageActionHandler();
 	public static final ResourceLocation ID = SophisticatedItemActions.getRL("item_handler");
+	private static final Direction[] DEPOSIT_DIRECTIONS = {Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST};
 
 	@Override
 	public ResourceLocation id() {
@@ -133,40 +137,120 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 			if (state.getBlock() == Blocks.CHEST && state.getValue(ChestBlock.TYPE) == ChestType.RIGHT) {
 				return ItemMatchResult.NO_MATCH;
 			}
-			return blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).map(cap -> getItemMatch(stackKey, cap)).orElse(ItemMatchResult.NO_MATCH);
+			return action == Action.DEPOSIT ? getDepositItemMatch(stackKey, blockEntity) : blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, null)
+					.map(cap -> getItemMatch(stackKey, cap)).orElse(ItemMatchResult.NO_MATCH);
 		}).orElse(ItemMatchResult.NO_MATCH);
+	}
+
+	private static ItemMatchResult getDepositItemMatch(ItemStackKey stackKey, BlockEntity blockEntity) {
+		ItemMatchResult matchResult = ItemMatchResult.NO_MATCH;
+		for (IItemHandler itemHandler : getDepositItemHandlers(blockEntity)) {
+			ItemMatchResult itemHandlerMatch = getItemMatch(stackKey, itemHandler);
+			if (itemHandlerMatch == ItemMatchResult.MATCHING_STACK) {
+				return ItemMatchResult.MATCHING_STACK;
+			}
+			if (itemHandlerMatch == ItemMatchResult.MATCHING_ITEM) {
+				matchResult = ItemMatchResult.MATCHING_ITEM;
+			}
+		}
+		return matchResult;
+	}
+
+	private static List<IItemHandler> getDepositItemHandlers(BlockEntity blockEntity) {
+		List<IItemHandler> itemHandlers = new ArrayList<>();
+		for (Direction direction : DEPOSIT_DIRECTIONS) {
+			blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction).ifPresent(itemHandlers::add);
+		}
+		if (itemHandlers.isEmpty()) {
+			blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).ifPresent(itemHandlers::add);
+		}
+		return itemHandlers;
+	}
+
+	private static ItemStack insertIntoDepositItemHandlers(ItemStack stack, List<IItemHandler> itemHandlers) {
+		ItemStack remainingStack = stack.copy();
+		ItemStack stackToInsert = remainingStack;
+		List<IItemHandler> matchingItemHandlers = itemHandlers.stream().filter(itemHandler -> hasMatchingSlot(stackToInsert, itemHandler)).toList();
+		List<IItemHandler> handlersToInsertInto = matchingItemHandlers.isEmpty() ? itemHandlers : matchingItemHandlers;
+		for (IItemHandler itemHandler : handlersToInsertInto) {
+			remainingStack = insertIntoMatchingSlots(remainingStack, itemHandler);
+			if (remainingStack.isEmpty()) {
+				return ItemStack.EMPTY;
+			}
+		}
+		for (IItemHandler itemHandler : handlersToInsertInto) {
+			remainingStack = insertIntoEmptySlots(remainingStack, itemHandler);
+			if (remainingStack.isEmpty()) {
+				return ItemStack.EMPTY;
+			}
+		}
+		return remainingStack;
+	}
+
+	private static boolean hasMatchingSlot(ItemStack stack, IItemHandler itemHandler) {
+		for (int slot = 0; slot < itemHandler.getSlots(); slot++) {
+			ItemStack slotStack = itemHandler.getStackInSlot(slot);
+			if (!slotStack.isEmpty() && ItemStack.isSameItemSameTags(slotStack, stack)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static ItemStack insertIntoMatchingSlots(ItemStack stack, IItemHandler itemHandler) {
+		ItemStack remainingStack = stack;
+		for (int slot = 0; slot < itemHandler.getSlots() && !remainingStack.isEmpty(); slot++) {
+			ItemStack slotStack = itemHandler.getStackInSlot(slot);
+			if (!slotStack.isEmpty() && ItemStack.isSameItemSameTags(slotStack, remainingStack)) {
+				remainingStack = itemHandler.insertItem(slot, remainingStack, false);
+			}
+		}
+		return remainingStack;
+	}
+
+	private static ItemStack insertIntoEmptySlots(ItemStack stack, IItemHandler itemHandler) {
+		ItemStack remainingStack = stack;
+		for (int slot = 0; slot < itemHandler.getSlots() && !remainingStack.isEmpty(); slot++) {
+			if (itemHandler.getStackInSlot(slot).isEmpty()) {
+				remainingStack = itemHandler.insertItem(slot, remainingStack, false);
+			}
+		}
+		return remainingStack;
 	}
 
 	@Override
 	public Optional<IDepositHandler> getDepositHandler(ServerPlayer player, BlockPos pos) {
-		return WorldHelper.getBlockEntity(player.level(), pos).flatMap(blockEntity -> blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).map(cap -> {
-					Vec3 center = Vec3.atCenterOf(blockEntity.getBlockPos());
-					return new IDepositHandler() {
-						@Override
-						public Optional<BlockPos> getPositionToOpen() {
-							if (player.level().getBlockEntity(pos) instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
-								return Optional.of(pos);
-							}
-							return Optional.empty();
-						}
-
-						@Override
-						public Vec3 getPosition() {
-							return center;
-						}
-
-						@Override
-						public ItemMatchResult getItemMatch(ItemStackKey stackKey) {
-							return StandardStorageActionHandler.getItemMatch(stackKey, cap);
-						}
-
-						@Override
-						public ItemStack insertItem(ItemStack stack) {
-							return InventoryHelper.insertIntoInventoryMatchingFirst(stack, cap, false);
-						}
-					};
+		return WorldHelper.getBlockEntity(player.level(), pos).flatMap(blockEntity -> {
+			List<IItemHandler> itemHandlers = getDepositItemHandlers(blockEntity);
+			if (itemHandlers.isEmpty()) {
+				return Optional.empty();
+			}
+			Vec3 center = Vec3.atCenterOf(blockEntity.getBlockPos());
+			return Optional.of(new IDepositHandler() {
+				@Override
+				public Optional<BlockPos> getPositionToOpen() {
+					if (player.level().getBlockEntity(pos) instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
+						return Optional.of(pos);
+					}
+					return Optional.empty();
 				}
-		));
+
+				@Override
+				public Vec3 getPosition() {
+					return center;
+				}
+
+				@Override
+				public ItemMatchResult getItemMatch(ItemStackKey stackKey) {
+					return StandardStorageActionHandler.getDepositItemMatch(stackKey, blockEntity);
+				}
+
+				@Override
+				public ItemStack insertItem(ItemStack stack) {
+					return insertIntoDepositItemHandlers(stack, itemHandlers);
+				}
+			});
+		});
 	}
 
 	@Override
