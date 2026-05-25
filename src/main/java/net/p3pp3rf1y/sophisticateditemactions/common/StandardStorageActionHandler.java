@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticateditemactions.common;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -17,12 +18,14 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 
 import javax.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -30,6 +33,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class StandardStorageActionHandler implements IBlockItemActionHandler, IEntityItemActionHandler {
 	public static final StandardStorageActionHandler INSTANCE = new StandardStorageActionHandler();
 	public static final Identifier ID = SophisticatedItemActions.getIdentifier("item_handler");
+	private static final Direction[] DEPOSIT_DIRECTIONS = {Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST};
 
 	@Override
 	public Identifier id() {
@@ -159,14 +163,104 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 		if (state.getBlock() == Blocks.CHEST && state.getValue(ChestBlock.TYPE) == ChestType.RIGHT) {
 			return ItemMatchResult.NO_MATCH;
 		}
-		return getItemMatch(stackKey, player.level().getCapability(Capabilities.Item.BLOCK, pos, null));
+		return action == Action.DEPOSIT ? getDepositItemMatch(stackKey, player.level(), pos) : getItemMatch(stackKey, player.level().getCapability(Capabilities.Item.BLOCK, pos, null));
+	}
+
+	private static ItemMatchResult getDepositItemMatch(ItemStackKey stackKey, Level level, BlockPos pos) {
+		ItemMatchResult matchResult = ItemMatchResult.NO_MATCH;
+		for (ResourceHandler<ItemResource> itemHandler : getDepositItemHandlers(level, pos)) {
+			ItemMatchResult itemHandlerMatch = getItemMatch(stackKey, itemHandler);
+			if (itemHandlerMatch == ItemMatchResult.MATCHING_STACK) {
+				return ItemMatchResult.MATCHING_STACK;
+			}
+			if (itemHandlerMatch == ItemMatchResult.MATCHING_ITEM) {
+				matchResult = ItemMatchResult.MATCHING_ITEM;
+			}
+		}
+		return matchResult;
+	}
+
+	private static List<ResourceHandler<ItemResource>> getDepositItemHandlers(Level level, BlockPos pos) {
+		List<ResourceHandler<ItemResource>> itemHandlers = new ArrayList<>();
+		for (Direction direction : DEPOSIT_DIRECTIONS) {
+			ResourceHandler<ItemResource> itemHandler = level.getCapability(Capabilities.Item.BLOCK, pos, direction);
+			if (itemHandler != null) {
+				itemHandlers.add(itemHandler);
+			}
+		}
+		if (itemHandlers.isEmpty()) {
+			ResourceHandler<ItemResource> itemHandler = level.getCapability(Capabilities.Item.BLOCK, pos, null);
+			if (itemHandler != null) {
+				itemHandlers.add(itemHandler);
+			}
+		}
+		return itemHandlers;
+	}
+
+	private static int insertIntoDepositItemHandlers(ItemStack stack, List<ResourceHandler<ItemResource>> itemHandlers) {
+		ItemResource resource = ItemResource.of(stack);
+		List<ResourceHandler<ItemResource>> matchingItemHandlers = itemHandlers.stream().filter(itemHandler -> hasMatchingSlot(resource, itemHandler)).toList();
+		List<ResourceHandler<ItemResource>> handlersToInsertInto = matchingItemHandlers.isEmpty() ? itemHandlers : matchingItemHandlers;
+		int amount = stack.getCount();
+		int inserted = 0;
+		try (Transaction tx = Transaction.openRoot()) {
+			for (ResourceHandler<ItemResource> itemHandler : handlersToInsertInto) {
+				inserted += insertIntoMatchingSlots(resource, amount - inserted, itemHandler, tx);
+				if (inserted == amount) {
+					tx.commit();
+					return inserted;
+				}
+			}
+			for (ResourceHandler<ItemResource> itemHandler : handlersToInsertInto) {
+				inserted += insertIntoEmptySlots(resource, amount - inserted, itemHandler, tx);
+				if (inserted == amount) {
+					tx.commit();
+					return inserted;
+				}
+			}
+			if (inserted > 0) {
+				tx.commit();
+			}
+		}
+		return inserted;
+	}
+
+	private static boolean hasMatchingSlot(ItemResource resource, ResourceHandler<ItemResource> itemHandler) {
+		for (int slot = 0; slot < itemHandler.size(); slot++) {
+			ItemResource slotResource = itemHandler.getResource(slot);
+			if (!slotResource.isEmpty() && slotResource.equals(resource)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static int insertIntoMatchingSlots(ItemResource resource, int amount, ResourceHandler<ItemResource> itemHandler, Transaction tx) {
+		int inserted = 0;
+		for (int slot = 0; slot < itemHandler.size() && inserted < amount; slot++) {
+			ItemResource slotResource = itemHandler.getResource(slot);
+			if (!slotResource.isEmpty() && slotResource.equals(resource)) {
+				inserted += itemHandler.insert(slot, resource, amount - inserted, tx);
+			}
+		}
+		return inserted;
+	}
+
+	private static int insertIntoEmptySlots(ItemResource resource, int amount, ResourceHandler<ItemResource> itemHandler, Transaction tx) {
+		int inserted = 0;
+		for (int slot = 0; slot < itemHandler.size() && inserted < amount; slot++) {
+			if (itemHandler.getResource(slot).isEmpty()) {
+				inserted += itemHandler.insert(slot, resource, amount - inserted, tx);
+			}
+		}
+		return inserted;
 	}
 
 	@Override
 	public Optional<IDepositHandler> getDepositHandler(ServerPlayer player, BlockPos pos) {
 		Level level = player.level();
-		ResourceHandler<ItemResource> cap = level.getCapability(Capabilities.Item.BLOCK, pos, null);
-		if (cap == null) {
+		List<ResourceHandler<ItemResource>> itemHandlers = getDepositItemHandlers(level, pos);
+		if (itemHandlers.isEmpty()) {
 			return Optional.empty();
 		}
 		Vec3 center = Vec3.atCenterOf(pos);
@@ -186,12 +280,12 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 
 			@Override
 			public ItemMatchResult getItemMatch(ItemStackKey stackKey) {
-				return StandardStorageActionHandler.getItemMatch(stackKey, cap);
+				return StandardStorageActionHandler.getDepositItemMatch(stackKey, level, pos);
 			}
 
 			@Override
 			public int insertItem(ItemStack stack) {
-				return InventoryHelper.insertMatchingFirst(cap, stack);
+				return insertIntoDepositItemHandlers(stack, itemHandlers);
 			}
 		});
 	}
