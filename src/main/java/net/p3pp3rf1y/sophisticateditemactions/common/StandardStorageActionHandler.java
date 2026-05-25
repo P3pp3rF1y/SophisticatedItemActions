@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticateditemactions.common;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -21,12 +22,15 @@ import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class StandardStorageActionHandler implements IBlockItemActionHandler, IEntityItemActionHandler {
 	public static final StandardStorageActionHandler INSTANCE = new StandardStorageActionHandler();
 	public static final ResourceLocation ID = SophisticatedItemActions.getRL("item_handler");
+	private static final Direction[] DEPOSIT_DIRECTIONS = {Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST};
 
 	@Override
 	public ResourceLocation id() {
@@ -146,14 +150,96 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 		if (state.getBlock() == Blocks.CHEST && state.getValue(ChestBlock.TYPE) == ChestType.RIGHT) {
 			return ItemMatchResult.NO_MATCH;
 		}
-		return getItemMatch(stackKey, player.level().getCapability(Capabilities.ItemHandler.BLOCK, pos, null));
+		return action == Action.DEPOSIT ? getDepositItemMatch(stackKey, player.level(), pos) : getItemMatch(stackKey, player.level().getCapability(Capabilities.ItemHandler.BLOCK, pos, null));
+	}
+
+	private static ItemMatchResult getDepositItemMatch(ItemStackKey stackKey, Level level, BlockPos pos) {
+		ItemMatchResult matchResult = ItemMatchResult.NO_MATCH;
+		for (IItemHandler itemHandler : getDepositItemHandlers(level, pos)) {
+			ItemMatchResult itemHandlerMatch = getItemMatch(stackKey, itemHandler);
+			if (itemHandlerMatch == ItemMatchResult.MATCHING_STACK) {
+				return ItemMatchResult.MATCHING_STACK;
+			}
+			if (itemHandlerMatch == ItemMatchResult.MATCHING_ITEM) {
+				matchResult = ItemMatchResult.MATCHING_ITEM;
+			}
+		}
+		return matchResult;
+	}
+
+	private static List<IItemHandler> getDepositItemHandlers(Level level, BlockPos pos) {
+		List<IItemHandler> itemHandlers = new ArrayList<>();
+		for (Direction direction : DEPOSIT_DIRECTIONS) {
+			IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, direction);
+			if (itemHandler != null) {
+				itemHandlers.add(itemHandler);
+			}
+		}
+		if (itemHandlers.isEmpty()) {
+			IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, null);
+			if (itemHandler != null) {
+				itemHandlers.add(itemHandler);
+			}
+		}
+		return itemHandlers;
+	}
+
+	private static ItemStack insertIntoDepositItemHandlers(ItemStack stack, List<IItemHandler> itemHandlers) {
+		ItemStack remainingStack = stack.copy();
+		ItemStack stackToInsert = remainingStack;
+		List<IItemHandler> matchingItemHandlers = itemHandlers.stream().filter(itemHandler -> hasMatchingSlot(stackToInsert, itemHandler)).toList();
+		List<IItemHandler> handlersToInsertInto = matchingItemHandlers.isEmpty() ? itemHandlers : matchingItemHandlers;
+		for (IItemHandler itemHandler : handlersToInsertInto) {
+			remainingStack = insertIntoMatchingSlots(remainingStack, itemHandler);
+			if (remainingStack.isEmpty()) {
+				return ItemStack.EMPTY;
+			}
+		}
+		for (IItemHandler itemHandler : handlersToInsertInto) {
+			remainingStack = insertIntoEmptySlots(remainingStack, itemHandler);
+			if (remainingStack.isEmpty()) {
+				return ItemStack.EMPTY;
+			}
+		}
+		return remainingStack;
+	}
+
+	private static boolean hasMatchingSlot(ItemStack stack, IItemHandler itemHandler) {
+		for (int slot = 0; slot < itemHandler.getSlots(); slot++) {
+			ItemStack slotStack = itemHandler.getStackInSlot(slot);
+			if (!slotStack.isEmpty() && ItemStack.isSameItemSameComponents(slotStack, stack)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static ItemStack insertIntoMatchingSlots(ItemStack stack, IItemHandler itemHandler) {
+		ItemStack remainingStack = stack;
+		for (int slot = 0; slot < itemHandler.getSlots() && !remainingStack.isEmpty(); slot++) {
+			ItemStack slotStack = itemHandler.getStackInSlot(slot);
+			if (!slotStack.isEmpty() && ItemStack.isSameItemSameComponents(slotStack, remainingStack)) {
+				remainingStack = itemHandler.insertItem(slot, remainingStack, false);
+			}
+		}
+		return remainingStack;
+	}
+
+	private static ItemStack insertIntoEmptySlots(ItemStack stack, IItemHandler itemHandler) {
+		ItemStack remainingStack = stack;
+		for (int slot = 0; slot < itemHandler.getSlots() && !remainingStack.isEmpty(); slot++) {
+			if (itemHandler.getStackInSlot(slot).isEmpty()) {
+				remainingStack = itemHandler.insertItem(slot, remainingStack, false);
+			}
+		}
+		return remainingStack;
 	}
 
 	@Override
 	public Optional<IDepositHandler> getDepositHandler(ServerPlayer player, BlockPos pos) {
 		Level level = player.level();
-		IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, null);
-		if (itemHandler == null) {
+		List<IItemHandler> itemHandlers = getDepositItemHandlers(level, pos);
+		if (itemHandlers.isEmpty()) {
 			return Optional.empty();
 		}
 		Vec3 center = Vec3.atCenterOf(pos);
@@ -173,12 +259,12 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 
 			@Override
 			public ItemMatchResult getItemMatch(ItemStackKey stackKey) {
-				return StandardStorageActionHandler.getItemMatch(stackKey, itemHandler);
+				return StandardStorageActionHandler.getDepositItemMatch(stackKey, level, pos);
 			}
 
 			@Override
 			public ItemStack insertItem(ItemStack stack) {
-				return InventoryHelper.insertIntoInventoryMatchingFirst(stack, itemHandler, false);
+				return insertIntoDepositItemHandlers(stack, itemHandlers);
 			}
 		});
 	}
