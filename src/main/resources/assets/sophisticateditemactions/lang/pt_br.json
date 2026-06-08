@@ -16,5 +16,11 @@
   "gui.sophisticateditemactions.status.cannot_restock_item": "Não foi possível repor %s de nenhum armazenamento",
   "gui.sophisticateditemactions.status.cannot_restock_items": "Não foi possível repor nenhum item do armazenamento",
   "gui.sophisticateditemactions.status.cannot_restock_full_stack": "A pilha %s já está cheia",
-  "gui.sophisticateditemactions.status.cannot_restock_full_stacks": "Todas as pilhas já estão cheias"
+  "gui.sophisticateditemactions.status.cannot_restock_full_stacks": "Todas as pilhas já estão cheias",
+  "gui.sophisticateditemactions.discovery.nudge.highlight.title": "Dica de Pesquisa de Armazenamento",
+  "gui.sophisticateditemactions.discovery.nudge.highlight.description": "Pressione %s para encontrar itens em armazenamentos próximos",
+  "gui.sophisticateditemactions.discovery.nudge.restock.title": "Dica de Reabastecimento",
+  "gui.sophisticateditemactions.discovery.nudge.restock.description": "Pressione %s para reabastecer de armazenamentos próximos",
+  "gui.sophisticateditemactions.discovery.nudge.deposit.title": "Dica de Depósito",
+  "gui.sophisticateditemactions.discovery.nudge.deposit.description": "Pressione %s para depositar em armazenamentos próximos"
 }
