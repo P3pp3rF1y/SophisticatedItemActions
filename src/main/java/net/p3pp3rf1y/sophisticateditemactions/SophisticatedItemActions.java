@@ -19,8 +19,10 @@ import org.apache.logging.log4j.Logger;
 public class SophisticatedItemActions {
 	public static final String MOD_ID = "sophisticateditemactions";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+	private static String networkProtocolVersion;
 
 	public SophisticatedItemActions() {
+		networkProtocolVersion = ModLoadingContext.get().getActiveContainer().getModInfo().getVersion().toString();
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC);
 		ModCompat.register();
@@ -42,5 +44,9 @@ public class SophisticatedItemActions {
 
 	public static String getRegistryName(String regName) {
 		return MOD_ID + ":" + regName;
+	}
+
+	public static String getNetworkProtocolVersion() {
+		return networkProtocolVersion;
 	}
 }

@@ -7,7 +7,7 @@ public class ItemActionsPacketHandler extends PacketHandler {
 	public static final ItemActionsPacketHandler INSTANCE = new ItemActionsPacketHandler();
 
 	protected ItemActionsPacketHandler() {
-		super(SophisticatedItemActions.MOD_ID);
+		super(SophisticatedItemActions.MOD_ID, SophisticatedItemActions.getNetworkProtocolVersion());
 	}
 
 	@Override
