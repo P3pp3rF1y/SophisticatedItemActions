@@ -69,7 +69,7 @@ public class ControllerItemActionHandler implements IBlockEntityItemActionHandle
 	private ItemMatchResult getItemMatch(ItemStackKey stackKey, ControllerBlockEntityBase controller) {
 		if (controller.hasMatchingStack(stackKey)) {
 			return ItemMatchResult.MATCHING_STACK;
-		} else if (controller.hasMatchingItem(stackKey.stack().getItem())) {
+		} else if (controller.hasMatchingItem(stackKey.stack().getItem()) || controller.hasMatchingFilter(stackKey.stack())) {
 			return ItemMatchResult.MATCHING_ITEM;
 		}
 		return ItemMatchResult.NO_MATCH;
