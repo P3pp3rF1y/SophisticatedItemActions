@@ -61,7 +61,7 @@ public class JeiClientCompat {
 		}
 		InputConstants.Key key = InputConstants.getKey(event.getKeyEvent());
 		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key) && getStack().map(JeiClientCompat::tryHighlightItem).orElse(false)) {
-			event.getScreen().getMinecraft().setScreen(null);
+			event.getScreen().getMinecraft().gui.setScreen(null);
 			event.setCanceled(true);
 		}
 	}
@@ -72,7 +72,7 @@ public class JeiClientCompat {
 		}
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
 		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input) && getStack().map(JeiClientCompat::tryHighlightItem).orElse(false)) {
-			event.getScreen().getMinecraft().setScreen(null);
+			event.getScreen().getMinecraft().gui.setScreen(null);
 			event.setCanceled(true);
 		}
 	}

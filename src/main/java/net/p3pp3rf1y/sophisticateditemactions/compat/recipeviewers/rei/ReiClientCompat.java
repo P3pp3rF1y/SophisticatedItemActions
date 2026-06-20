@@ -32,7 +32,7 @@ public class ReiClientCompat {
 
 			@Override
 			public boolean restockSingle(Screen screen) {
-				return Minecraft.getInstance().screen instanceof AbstractDisplayViewingScreen;
+				return Minecraft.getInstance().gui.screen() instanceof AbstractDisplayViewingScreen;
 			}
 
 			@Override
@@ -62,7 +62,7 @@ public class ReiClientCompat {
 	}
 
 	private static ItemStack getRecipeViewStack() {
-		if (!(Minecraft.getInstance().screen instanceof AbstractDisplayViewingScreen displayScreen)) {
+		if (!(Minecraft.getInstance().gui.screen() instanceof AbstractDisplayViewingScreen displayScreen)) {
 			return ItemStack.EMPTY;
 		}
 
@@ -80,7 +80,7 @@ public class ReiClientCompat {
 		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key)) {
 			ItemStack stack = getStack();
 			if (!stack.isEmpty() && tryHighlightItem(stack)) {
-				event.getScreen().getMinecraft().setScreen(null);
+				event.getScreen().getMinecraft().gui.setScreen(null);
 				event.setCanceled(true);
 			}
 		}
@@ -91,7 +91,7 @@ public class ReiClientCompat {
 		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input)) {
 			ItemStack stack = getStack();
 			if (!stack.isEmpty() && tryHighlightItem(stack)) {
-				event.getScreen().getMinecraft().setScreen(null);
+				event.getScreen().getMinecraft().gui.setScreen(null);
 				event.setCanceled(true);
 			}
 		}

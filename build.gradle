@@ -259,7 +259,7 @@ dependencies {
     compileOnly("dev.eriksonn.aeronautics:aeronautics-neoforge-1.21.1:1.1.0") {
         transitive = false
     }
-    compileOnly("org.appliedenergistics:appliedenergistics2:26.1.5-alpha") {
+    compileOnly("org.appliedenergistics:appliedenergistics2:26.1.10-beta") {
         transitive = false
     }
     compileOnly("com.refinedmods.refinedstorage:refinedstorage-neoforge:${rs_version}") {

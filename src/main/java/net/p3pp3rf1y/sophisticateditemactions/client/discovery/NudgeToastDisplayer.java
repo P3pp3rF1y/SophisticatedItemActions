@@ -20,7 +20,7 @@ public class NudgeToastDisplayer {
 			return true;
 		}
 
-		minecraft.gui.setOverlayMessage(description, false);
+		minecraft.gui.hud.setOverlayMessage(description, false);
 		return true;
 	}
 
@@ -42,7 +42,7 @@ public class NudgeToastDisplayer {
 	}
 
 	private boolean tryShowSystemToast(Minecraft minecraft, Component title, Component description) {
-		ToastManager toastManager = minecraft.getToastManager();
+		ToastManager toastManager = minecraft.gui.toastManager();
 		SystemToast.add(toastManager, SystemToast.SystemToastId.PERIODIC_NOTIFICATION, title, description);
 		return true;
 	}

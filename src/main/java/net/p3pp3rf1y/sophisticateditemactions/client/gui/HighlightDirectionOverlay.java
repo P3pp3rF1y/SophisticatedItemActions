@@ -77,7 +77,7 @@ public class HighlightDirectionOverlay {
 	private static void render(GuiGraphicsExtractor guiGraphics, net.minecraft.client.DeltaTracker deltaTracker) {
 		Minecraft mc = Minecraft.getInstance();
 		LocalPlayer player = mc.player;
-		if (player == null || mc.level == null || mc.options.hideGui || mc.screen != null) {
+		if (player == null || mc.level == null || mc.gui.hud.isHidden() || mc.gui.screen() != null) {
 			return;
 		}
 

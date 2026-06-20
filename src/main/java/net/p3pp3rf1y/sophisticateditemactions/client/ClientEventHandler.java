@@ -123,7 +123,7 @@ public class ClientEventHandler {
 		InputConstants.Key key = InputConstants.getKey(event.getKeyEvent());
 		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key) && event.getScreen() instanceof AbstractContainerScreen<?> screen && tryHighlightItem(screen.getSlotUnderMouse())) {
 			NudgeActionUsageTracker.markUsed(NudgeHintType.HIGHLIGHT);
-			event.getScreen().getMinecraft().setScreen(null);
+			event.getScreen().getMinecraft().gui.setScreen(null);
 			event.setCanceled(true);
 		}
 	}
@@ -132,7 +132,7 @@ public class ClientEventHandler {
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
 		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input) && event.getScreen() instanceof AbstractContainerScreen<?> screen && tryHighlightItem(screen.getSlotUnderMouse())) {
 			NudgeActionUsageTracker.markUsed(NudgeHintType.HIGHLIGHT);
-			event.getScreen().getMinecraft().setScreen(null);
+			event.getScreen().getMinecraft().gui.setScreen(null);
 			event.setCanceled(true);
 		}
 	}
@@ -174,7 +174,7 @@ public class ClientEventHandler {
 	}
 
 	public static void handleKeyInput(InputEvent.Key event) {
-		Screen screen = Minecraft.getInstance().screen;
+		Screen screen = Minecraft.getInstance().gui.screen();
 		if (screen != null && screen.isFocused()) {
 			return;
 		}
@@ -201,7 +201,7 @@ public class ClientEventHandler {
 		boolean hotbar = (mods & GLFW.GLFW_MOD_ALT) != 0;
 		boolean fillEmpty = (mods & GLFW.GLFW_MOD_CONTROL) != 0;
 
-		Screen screen = Minecraft.getInstance().screen;
+		Screen screen = Minecraft.getInstance().gui.screen();
 		ItemStack filter = ItemStack.EMPTY;
 		int slot = -1;
 		boolean refillSingle = false;
@@ -267,7 +267,7 @@ public class ClientEventHandler {
 			return tryDepositMultipleItems(player, mainInventory, hotbar, onlyMatching);
 		}
 
-		Screen screen = Minecraft.getInstance().screen;
+		Screen screen = Minecraft.getInstance().gui.screen();
 		if (screen != null) {
 			if (screen instanceof AbstractContainerScreen<?> containerScreen) {
 				return tryDepositItem(player, containerScreen.getSlotUnderMouse(), onlyMatching);

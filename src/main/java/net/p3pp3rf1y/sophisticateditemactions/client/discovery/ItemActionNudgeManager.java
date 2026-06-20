@@ -135,7 +135,7 @@ public class ItemActionNudgeManager {
 	}
 
 	private void trackStorageSession(Minecraft minecraft) {
-		Screen screen = minecraft.screen;
+		Screen screen = minecraft.gui.screen();
 		if (screen == null) {
 			eligibilityDetector.clearCache();
 		}

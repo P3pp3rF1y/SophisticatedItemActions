@@ -30,7 +30,7 @@ public class EmiClientCompat {
 			@Override
 			public boolean restockSingle(Screen screen) {
 				//in case of crafting grid return single
-				return Minecraft.getInstance().screen instanceof RecipeScreen;
+				return Minecraft.getInstance().gui.screen() instanceof RecipeScreen;
 			}
 
 			@Override
@@ -42,7 +42,7 @@ public class EmiClientCompat {
 
 	private static ItemStack getStack() {
 		List<EmiStack> emiStacks;
-		if (Minecraft.getInstance().screen instanceof RecipeScreen recipeScreen) {
+		if (Minecraft.getInstance().gui.screen() instanceof RecipeScreen recipeScreen) {
 			emiStacks = recipeScreen.getHoveredStack().getEmiStacks();
 		} else {
 			emiStacks = EmiApi.getHoveredStack(true).getStack().getEmiStacks();
@@ -55,7 +55,7 @@ public class EmiClientCompat {
 		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key)) {
 			ItemStack stack = getStack();
 			if (!stack.isEmpty() && tryHighlightItem(stack)) {
-				event.getScreen().getMinecraft().setScreen(null);
+				event.getScreen().getMinecraft().gui.setScreen(null);
 				event.setCanceled(true);
 			}
 		}
@@ -66,7 +66,7 @@ public class EmiClientCompat {
 		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input)) {
 			ItemStack stack = getStack();
 			if (!stack.isEmpty() && tryHighlightItem(stack)) {
-				event.getScreen().getMinecraft().setScreen(null);
+				event.getScreen().getMinecraft().gui.setScreen(null);
 				event.setCanceled(true);
 			}
 		}

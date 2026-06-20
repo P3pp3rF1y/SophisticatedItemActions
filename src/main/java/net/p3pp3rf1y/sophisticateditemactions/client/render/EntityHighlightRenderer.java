@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticateditemactions.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -39,14 +38,12 @@ public class EntityHighlightRenderer {
 			}
 			return;
 		}
-		MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
-
 		highlightedStackEntityIds.forEach((color, highlightedEntities) -> {
-			highlightedEntities.forEach(he -> submitHighlightedEntity(submitNodeCollector, poseStack, partialTick, cameraPos, he, mc, buffer, color));
+			highlightedEntities.forEach(he -> submitHighlightedEntity(submitNodeCollector, poseStack, partialTick, cameraPos, he, mc, color));
 		});
 	}
 
-	private static void submitHighlightedEntity(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos, int entityId, Minecraft mc, MultiBufferSource.BufferSource buffer, int color) {
+	private static void submitHighlightedEntity(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos, int entityId, Minecraft mc, int color) {
 		Entity entity = mc.level.getEntity(entityId);
 		if (entity == null) {
 			return;
