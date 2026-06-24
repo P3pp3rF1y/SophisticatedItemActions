@@ -5,7 +5,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticateditemactions.client.NudgeScreenSuppressorRegistry;
 
 public class SophisticatedBackpacksClientCompat {
-	private SophisticatedBackpacksClientCompat() {}
+	private SophisticatedBackpacksClientCompat() {
+	}
 
 	public static void init() {
 		NudgeScreenSuppressorRegistry.register(screen -> screen instanceof BackpackScreen backpackScreen

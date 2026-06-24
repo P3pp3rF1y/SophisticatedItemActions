@@ -73,7 +73,8 @@ public class ItemActionNudgeManager {
 
 		long playTime = getCurrentPlayTime(minecraft);
 
-		if (shouldShow(config, config.highlightEnabled.get(), config.highlightActionThreshold.get(), opensWithoutTransfers, NudgeHintType.HIGHLIGHT, playTime)) {
+		if (shouldShow(config, config.highlightEnabled.get(), config.highlightActionThreshold.get(), opensWithoutTransfers, NudgeHintType.HIGHLIGHT,
+				playTime)) {
 			show(minecraft, NudgeHintType.HIGHLIGHT, gameTime, playTime);
 			return;
 		}
@@ -87,11 +88,7 @@ public class ItemActionNudgeManager {
 	}
 
 	private boolean shouldShow(Config.DiscoveryNudges config, boolean hintEnabled, int threshold, int value, NudgeHintType hintType, long playTime) {
-		if (!(hintEnabled
-				&& threshold >= 0
-				&& value >= threshold
-				&& !sessionState.wasShown(hintType)
-				&& !sessionState.isSuppressed(hintType))) {
+		if (!(hintEnabled && threshold >= 0 && value >= threshold && !sessionState.wasShown(hintType) && !sessionState.isSuppressed(hintType))) {
 			return false;
 		}
 
@@ -193,7 +190,8 @@ public class ItemActionNudgeManager {
 		}
 
 		if (Config.CLIENT.discoveryNudges.debugLogging.get()) {
-			SophisticatedItemActions.LOGGER.debug("Discovery storage session finished: transfersObservedInSession={}, opensWithoutTransfers={}, restockActionUnits={}, depositActionUnits={}",
+			SophisticatedItemActions.LOGGER.debug(
+					"Discovery storage session finished: transfersObservedInSession={}, opensWithoutTransfers={}, restockActionUnits={}, depositActionUnits={}",
 					transfersObservedInSession, opensWithoutTransfers, restockActionUnits, depositActionUnits);
 		}
 

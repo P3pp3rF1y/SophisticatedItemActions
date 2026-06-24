@@ -6,7 +6,8 @@ import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 import net.p3pp3rf1y.sophisticateditemactions.network.*;
 
 public class ModPayloads {
-	private ModPayloads() {}
+	private ModPayloads() {
+	}
 
 	public static void registerPayloads(final RegisterPayloadHandlersEvent event) {
 		final PayloadRegistrar registrar = event.registrar(SophisticatedItemActions.MOD_ID).versioned(SophisticatedItemActions.getNetworkProtocolVersion());

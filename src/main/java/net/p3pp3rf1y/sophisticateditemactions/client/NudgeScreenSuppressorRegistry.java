@@ -9,7 +9,8 @@ import java.util.function.Predicate;
 public class NudgeScreenSuppressorRegistry {
 	private static final List<Predicate<Screen>> SUPPRESSORS = new ArrayList<>();
 
-	private NudgeScreenSuppressorRegistry() {}
+	private NudgeScreenSuppressorRegistry() {
+	}
 
 	public static void register(Predicate<Screen> suppressor) {
 		SUPPRESSORS.add(suppressor);
