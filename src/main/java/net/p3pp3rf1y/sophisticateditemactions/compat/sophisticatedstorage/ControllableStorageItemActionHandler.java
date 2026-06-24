@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticateditemactions.common;
+package net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorage;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -8,6 +8,12 @@ import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
 import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ISlotTracker;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
+import net.p3pp3rf1y.sophisticateditemactions.common.IBlockEntityItemActionHandler;
+import net.p3pp3rf1y.sophisticateditemactions.common.IDepositHandler;
+import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
+import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
+import net.p3pp3rf1y.sophisticateditemactions.common.StorageItemHandlerTarget;
+import net.p3pp3rf1y.sophisticateditemactions.common.SubLevelCompatHelper;
 import net.p3pp3rf1y.sophisticatedstorage.block.ChestBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.StoragePositionGroups;
 
