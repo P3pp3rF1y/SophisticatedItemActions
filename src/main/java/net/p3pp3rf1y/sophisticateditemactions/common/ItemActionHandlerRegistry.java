@@ -19,7 +19,6 @@ public class ItemActionHandlerRegistry {
 
 	static {
 		register(ControllerItemActionHandler.INSTANCE);
-		register(ControllableStorageItemActionHandler.INSTANCE);
 	}
 
 	public static void register(IBlockItemActionHandler handler) {
