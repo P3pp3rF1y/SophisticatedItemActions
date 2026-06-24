@@ -7,6 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,10 +36,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 public class ContraptionStorageItemActionHandler implements IEntityItemActionHandler {
 	public static final ContraptionStorageItemActionHandler INSTANCE = new ContraptionStorageItemActionHandler();
 	public static final Identifier ID = SophisticatedItemActions.getIdentifier("create_contraption");
+	private static final List<Predicate<Block>> SUPPORTED_CHEST_BLOCKS = new ArrayList<>(List.of(block -> block instanceof ChestBlock));
+
+	public static void registerSupportedChestBlock(Predicate<Block> supportedChestBlock) {
+		SUPPORTED_CHEST_BLOCKS.add(supportedChestBlock);
+	}
 
 	@Override
 	public Identifier id() {
@@ -403,7 +410,7 @@ public class ContraptionStorageItemActionHandler implements IEntityItemActionHan
 	}
 
 	private static boolean isSupportedChestBlock(BlockState state) {
-		return state.getBlock() instanceof ChestBlock || state.getBlock() instanceof net.p3pp3rf1y.sophisticatedstorage.block.ChestBlock;
+		return SUPPORTED_CHEST_BLOCKS.stream().anyMatch(supportedChestBlock -> supportedChestBlock.test(state.getBlock()));
 	}
 
 	private static Direction getConnectedDirection(BlockState state) {
