@@ -10,26 +10,25 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticateditemactions.common.HighlightHandler;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public record RequestItemHighlightsMessage(ItemStack stack,
-										   Map<ResourceLocation, List<BlockPos>> inventoryPositions,
-										   Map<ResourceLocation, List<Integer>> entities) {
+public record RequestItemHighlightsMessage(ItemStack stack, Map<ResourceLocation, List<BlockPos>> inventoryPositions,
+		Map<ResourceLocation, List<Integer>> entities) {
 
 	public static void encode(RequestItemHighlightsMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeItemStack(msg.stack(), false);
-		packetBuffer.writeMap(msg.inventoryPositions(), FriendlyByteBuf::writeResourceLocation, (buf, list) -> buf.writeCollection(list, FriendlyByteBuf::writeBlockPos));
+		packetBuffer.writeMap(msg.inventoryPositions(), FriendlyByteBuf::writeResourceLocation,
+				(buf, list) -> buf.writeCollection(list, FriendlyByteBuf::writeBlockPos));
 		packetBuffer.writeMap(msg.entities(), FriendlyByteBuf::writeResourceLocation, (buf, list) -> buf.writeCollection(list, FriendlyByteBuf::writeInt));
 	}
 
 	public static RequestItemHighlightsMessage decode(FriendlyByteBuf packetBuffer) {
-		return new RequestItemHighlightsMessage(
-				packetBuffer.readItem(),
+		return new RequestItemHighlightsMessage(packetBuffer.readItem(),
 				packetBuffer.readMap(FriendlyByteBuf::readResourceLocation, buf -> buf.readList(FriendlyByteBuf::readBlockPos)),
-				packetBuffer.readMap(FriendlyByteBuf::readResourceLocation, buf -> buf.readList(FriendlyByteBuf::readInt))
-		);
+				packetBuffer.readMap(FriendlyByteBuf::readResourceLocation, buf -> buf.readList(FriendlyByteBuf::readInt)));
 	}
 
 	static void onMessage(RequestItemHighlightsMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {

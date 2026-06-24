@@ -9,11 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public record SyncHighlightDirectionsMessage(Map<Integer, List<List<BlockPos>>> blockTargets,
-											 Map<Integer, List<Integer>> entityTargets,
-											 int durationTicks) {
+public record SyncHighlightDirectionsMessage(Map<Integer, List<List<BlockPos>>> blockTargets, Map<Integer, List<Integer>> entityTargets, int durationTicks) {
 	public static void encode(SyncHighlightDirectionsMessage message, FriendlyByteBuf buffer) {
-		buffer.writeMap(message.blockTargets, FriendlyByteBuf::writeInt, (buf, groups) -> buf.writeCollection(groups, (groupBuf, group) -> groupBuf.writeCollection(group, FriendlyByteBuf::writeBlockPos)));
+		buffer.writeMap(message.blockTargets, FriendlyByteBuf::writeInt,
+				(buf, groups) -> buf.writeCollection(groups, (groupBuf, group) -> groupBuf.writeCollection(group, FriendlyByteBuf::writeBlockPos)));
 		buffer.writeMap(message.entityTargets, FriendlyByteBuf::writeInt, (buf, list) -> buf.writeCollection(list, FriendlyByteBuf::writeInt));
 		buffer.writeInt(message.durationTicks);
 	}
@@ -21,8 +20,7 @@ public record SyncHighlightDirectionsMessage(Map<Integer, List<List<BlockPos>>> 
 	public static SyncHighlightDirectionsMessage decode(FriendlyByteBuf buffer) {
 		return new SyncHighlightDirectionsMessage(
 				buffer.readMap(FriendlyByteBuf::readInt, buf -> buf.readList(groupBuf -> groupBuf.readList(FriendlyByteBuf::readBlockPos))),
-				buffer.readMap(FriendlyByteBuf::readInt, buf -> buf.readList(FriendlyByteBuf::readInt)),
-				buffer.readInt());
+				buffer.readMap(FriendlyByteBuf::readInt, buf -> buf.readList(FriendlyByteBuf::readInt)), buffer.readInt());
 	}
 
 	static void onMessage(SyncHighlightDirectionsMessage message, Supplier<NetworkEvent.Context> contextSupplier) {

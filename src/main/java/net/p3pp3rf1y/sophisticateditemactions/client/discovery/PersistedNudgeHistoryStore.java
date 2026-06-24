@@ -8,6 +8,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 
 import javax.annotation.Nullable;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -72,11 +73,7 @@ public class PersistedNudgeHistoryStore {
 	}
 
 	private static Path getDataFilePath(Minecraft minecraft, String connectionKey) {
-		return minecraft.gameDirectory.toPath()
-				.resolve("local")
-				.resolve(SophisticatedItemActions.MOD_ID)
-				.resolve("data")
-				.resolve(connectionKey)
+		return minecraft.gameDirectory.toPath().resolve("local").resolve(SophisticatedItemActions.MOD_ID).resolve("data").resolve(connectionKey)
 				.resolve(DATA_FILE_NAME);
 	}
 

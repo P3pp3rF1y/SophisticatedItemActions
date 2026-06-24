@@ -1,6 +1,4 @@
 package net.p3pp3rf1y.sophisticateditemactions.compat.refinedstorage;
-
-import com.refinedmods.refinedstorage.api.storage.disk.IStorageDisk;
 import com.refinedmods.refinedstorage.blockentity.grid.portable.IPortableGrid;
 import com.refinedmods.refinedstorage.blockentity.grid.portable.PortableGridBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -34,10 +32,8 @@ public class RefinedStoragePortableGridItemActionHandler implements IBlockEntity
 
 	@Override
 	public ItemMatchResult getItemMatch(ItemStackKey stackKey, PortableGridBlockEntity portableGrid, IBlockItemActionHandler.Action action) {
-		return getPortableGrid(portableGrid)
-				.filter(IPortableGrid::isGridActive)
-				.map(portable -> RefinedStorageItemActionHelper.getItemMatch(stackKey, portable.getItemCache()))
-				.orElse(ItemMatchResult.NO_MATCH);
+		return getPortableGrid(portableGrid).filter(IPortableGrid::isGridActive)
+				.map(portable -> RefinedStorageItemActionHelper.getItemMatch(stackKey, portable.getItemCache())).orElse(ItemMatchResult.NO_MATCH);
 	}
 
 	@Override
@@ -47,9 +43,8 @@ public class RefinedStoragePortableGridItemActionHandler implements IBlockEntity
 
 	@Override
 	public Optional<IDepositHandler> getDepositHandler(ServerPlayer player, BlockPos pos) {
-		return getFromBlockEntity(player, pos, portableGrid -> getPortableGrid(portableGrid)
-				.filter(IPortableGrid::isGridActive)
-				.map(portable -> new IDepositHandler() {
+		return getFromBlockEntity(player, pos,
+				portableGrid -> getPortableGrid(portableGrid).filter(IPortableGrid::isGridActive).map(portable -> new IDepositHandler() {
 					@Override
 					public Optional<BlockPos> getPositionToOpen() {
 						return Optional.of(portableGrid.getBlockPos());
@@ -79,9 +74,8 @@ public class RefinedStoragePortableGridItemActionHandler implements IBlockEntity
 
 	@Override
 	public Optional<IRestockHandler> getRestockHandler(ServerPlayer player, BlockPos pos) {
-		return getFromBlockEntity(player, pos, portableGrid -> getPortableGrid(portableGrid)
-				.filter(IPortableGrid::isGridActive)
-				.map(portable -> new IRestockHandler() {
+		return getFromBlockEntity(player, pos,
+				portableGrid -> getPortableGrid(portableGrid).filter(IPortableGrid::isGridActive).map(portable -> new IRestockHandler() {
 					@Override
 					public Optional<BlockPos> getPositionToOpen() {
 						return Optional.of(portableGrid.getBlockPos());

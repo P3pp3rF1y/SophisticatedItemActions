@@ -57,10 +57,10 @@ public class ItemTransferHandler {
 		Map<ResourceLocation, Set<BlockPos>> tempStorages = new HashMap<>();
 		Level level = player.level();
 		WorldHelper.getBlockEntitiesInRange(level, player.blockPosition(), INTERACTION_RANGE).forEach(be -> {
-			ItemActionHandlerRegistry.getBlockHandlerFor(level, be.getBlockPos(), be, IBlockItemActionHandler.Action.DEPOSIT)
-					.ifPresent(handler -> {
-						tempStorages.computeIfAbsent(handler.id(), k -> new HashSet<>()).add(handler.getInteractionPosToActOn(level, be.getBlockPos(), be, IBlockItemActionHandler.Action.DEPOSIT));
-					});
+			ItemActionHandlerRegistry.getBlockHandlerFor(level, be.getBlockPos(), be, IBlockItemActionHandler.Action.DEPOSIT).ifPresent(handler -> {
+				tempStorages.computeIfAbsent(handler.id(), k -> new HashSet<>())
+						.add(handler.getInteractionPosToActOn(level, be.getBlockPos(), be, IBlockItemActionHandler.Action.DEPOSIT));
+			});
 		});
 
 		Map<ResourceLocation, List<BlockPos>> storages = new HashMap<>();
@@ -70,16 +70,13 @@ public class ItemTransferHandler {
 
 	private static Map<ResourceLocation, List<Integer>> getStorageEntitiesAround(Player player) {
 		Map<ResourceLocation, List<Integer>> entities = new HashMap<>();
-		player.level().getEntities(player, player.getBoundingBox().inflate(INTERACTION_RANGE),
-						e -> e.distanceTo(player) <= INTERACTION_RANGE)
-				.forEach(e ->
-						ItemActionHandlerRegistry.getEntityHandlerIdFor(e)
-								.ifPresent(id -> entities.computeIfAbsent(id, k -> new ArrayList<>()).add(e.getId()))
-				);
+		player.level().getEntities(player, player.getBoundingBox().inflate(INTERACTION_RANGE), e -> e.distanceTo(player) <= INTERACTION_RANGE).forEach(
+				e -> ItemActionHandlerRegistry.getEntityHandlerIdFor(e).ifPresent(id -> entities.computeIfAbsent(id, k -> new ArrayList<>()).add(e.getId())));
 		return entities;
 	}
 
-	public static void handleDeposit(Player player, int minSlot, int maxSlot, Map<ResourceLocation, List<BlockPos>> storagePositions, Map<ResourceLocation, List<Integer>> entities, boolean onlyMatching) {
+	public static void handleDeposit(Player player, int minSlot, int maxSlot, Map<ResourceLocation, List<BlockPos>> storagePositions,
+			Map<ResourceLocation, List<Integer>> entities, boolean onlyMatching) {
 		if (!(player instanceof ServerPlayer serverPlayer)) {
 			return;
 		}
@@ -126,19 +123,20 @@ public class ItemTransferHandler {
 				}
 			}
 		}
-		int extensionDepositedStacks = ItemTransferExtensionRegistry.getExtension()
-				.map(extension -> extension.depositFromInventorySources(player, minSlot, maxSlot, onlyMatching, collectStorageItemHandlerTargets(player, storagePositions, entities, serverPlayer), inserted))
-				.orElse(0);
+		int extensionDepositedStacks = ItemTransferExtensionRegistry.getExtension().map(extension -> extension.depositFromInventorySources(player, minSlot,
+				maxSlot, onlyMatching, collectStorageItemHandlerTargets(player, storagePositions, entities, serverPlayer), inserted)).orElse(0);
 
 		Vec3 playerPos = player.getEyePosition().add(0, -0.1, 0);
 		List<ItemTransferData> itemTransferData = inserted.values().stream().toList();
 		ItemActionsPacketHandler.INSTANCE.sendToClient(serverPlayer, new SyncItemTransfersMessage(itemTransferData, playerPos, true));
 		ItemActionsPacketHandler.INSTANCE.sendToAllTracking(new SyncItemTransfersMessage(itemTransferData, playerPos, true), serverPlayer);
 
-		showDepositMessage(player, minSlot, maxSlot, depositedFromSlots, depositedStacks, extensionDepositedStacks, hasDepositExtensionSourceInScope(player, minSlot, maxSlot));
+		showDepositMessage(player, minSlot, maxSlot, depositedFromSlots, depositedStacks, extensionDepositedStacks,
+				hasDepositExtensionSourceInScope(player, minSlot, maxSlot));
 	}
 
-	private static void showDepositMessage(Player player, int minSlot, int maxSlot, Set<Integer> depositedFromSlots, List<ItemStack> depositedStacks, int extensionDepositedStacks, boolean hasDepositExtensionSourceInScope) {
+	private static void showDepositMessage(Player player, int minSlot, int maxSlot, Set<Integer> depositedFromSlots, List<ItemStack> depositedStacks,
+			int extensionDepositedStacks, boolean hasDepositExtensionSourceInScope) {
 		Component message;
 		Level level = player.level();
 		if (depositedFromSlots.isEmpty() && extensionDepositedStacks == 0) {
@@ -153,14 +151,14 @@ public class ItemTransferHandler {
 			message = Component.empty();
 			if (extensionDepositedStacks > 0) {
 				message = ItemTransferExtensionRegistry.getExtension()
-						.map(extension -> extension.getDepositMessage(depositedFromSlots.size(), extensionDepositedStacks))
-						.orElse(message);
+						.map(extension -> extension.getDepositMessage(depositedFromSlots.size(), extensionDepositedStacks)).orElse(message);
 			} else if (!depositedFromSlots.isEmpty()) {
 				if (maxSlot - minSlot == 1) {
 					message = message.copy().append(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("deposited_item",
 							Component.literal(depositedStacks.get(0).getHoverName().getString()).withStyle(ChatFormatting.DARK_GREEN)));
 				} else {
-					message = message.copy().append(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("deposited_items", Component.literal(String.valueOf(depositedFromSlots.size())).withStyle(ChatFormatting.DARK_GREEN)));
+					message = message.copy().append(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("deposited_items",
+							Component.literal(String.valueOf(depositedFromSlots.size())).withStyle(ChatFormatting.DARK_GREEN)));
 				}
 			}
 		}
@@ -180,72 +178,61 @@ public class ItemTransferHandler {
 		return false;
 	}
 
-	private static List<StorageItemHandlerTarget> collectStorageItemHandlerTargets(Player player, Map<ResourceLocation, List<BlockPos>> storagePositions, Map<ResourceLocation, List<Integer>> entities, ServerPlayer serverPlayer) {
+	private static List<StorageItemHandlerTarget> collectStorageItemHandlerTargets(Player player, Map<ResourceLocation, List<BlockPos>> storagePositions,
+			Map<ResourceLocation, List<Integer>> entities, ServerPlayer serverPlayer) {
 		List<StorageItemHandlerTarget> targets = new ArrayList<>();
 
-		storagePositions.forEach((handlerId, positions) ->
-				ItemActionHandlerRegistry.getBlockHandler(handlerId).ifPresent(handler ->
-						positions.forEach(pos -> {
-							if (WorldHelper.playerMayInteract(player, pos)) {
-								targets.addAll(handler.getStorageItemHandlerTargets(serverPlayer, pos));
-							}
-						})
-				)
-		);
+		storagePositions.forEach((handlerId, positions) -> ItemActionHandlerRegistry.getBlockHandler(handlerId).ifPresent(handler -> positions.forEach(pos -> {
+			if (WorldHelper.playerMayInteract(player, pos)) {
+				targets.addAll(handler.getStorageItemHandlerTargets(serverPlayer, pos));
+			}
+		})));
 
-		entities.forEach((handlerId, entityIds) ->
-				ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler ->
-						entityIds.forEach(entityId -> {
-							Entity entity = player.level().getEntity(entityId);
-							if (entity == null) {
-								return;
-							}
+		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
+			Entity entity = player.level().getEntity(entityId);
+			if (entity == null) {
+				return;
+			}
 
-							targets.addAll(handler.getStorageItemHandlerTargets(entity));
-						})
-				)
-		);
+			targets.addAll(handler.getStorageItemHandlerTargets(entity));
+		})));
 
 		targets.sort(Comparator.comparingDouble(target -> player.distanceToSqr(target.position())));
 		return targets;
 	}
 
-	private static List<IDepositHandler> collectAndSortDepositHandlers(Player player, Map<ResourceLocation, List<BlockPos>> storagePositions, Map<ResourceLocation, List<Integer>> entities, ServerPlayer serverPlayer) {
+	private static List<IDepositHandler> collectAndSortDepositHandlers(Player player, Map<ResourceLocation, List<BlockPos>> storagePositions,
+			Map<ResourceLocation, List<Integer>> entities, ServerPlayer serverPlayer) {
 		List<IDepositHandler> handlers = new ArrayList<>();
 
-		storagePositions.forEach((handlerId, positions) ->
-				ItemActionHandlerRegistry.getBlockHandler(handlerId).ifPresent(handler ->
-						positions.forEach(pos -> {
-							if (WorldHelper.playerMayInteract(player, pos)) {
-								handler.getDepositHandler(serverPlayer, pos).ifPresent(handlers::add);
-							}
+		storagePositions.forEach((handlerId, positions) -> ItemActionHandlerRegistry.getBlockHandler(handlerId).ifPresent(handler -> positions.forEach(pos -> {
+			if (WorldHelper.playerMayInteract(player, pos)) {
+				handler.getDepositHandler(serverPlayer, pos).ifPresent(handlers::add);
+			}
 
-						})
-				)
-		);
+		})));
 
-		entities.forEach((handlerId, entityIds) ->
-				ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler ->
-						entityIds.forEach(entityId -> {
-							Entity entity = player.level().getEntity(entityId);
-							if (entity == null) {
-								return;
-							}
+		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
+			Entity entity = player.level().getEntity(entityId);
+			if (entity == null) {
+				return;
+			}
 
-							handler.getDepositHandler(entity).ifPresent(handlers::add);
-						})
-				)
-		);
+			handler.getDepositHandler(entity).ifPresent(handlers::add);
+		})));
 
 		handlers.sort(Comparator.comparingDouble(h -> player.distanceToSqr(h.getPosition())));
 		return handlers;
 	}
 
-	private static ItemStack depositToHandlerAndLog(IDepositHandler depositHandler, ItemStack stack, Player player, int slot, Map<Vec3, ItemTransferData> inserted, Set<Integer> depositedFromSlots, List<ItemStack> depositedStacks) {
+	private static ItemStack depositToHandlerAndLog(IDepositHandler depositHandler, ItemStack stack, Player player, int slot,
+			Map<Vec3, ItemTransferData> inserted, Set<Integer> depositedFromSlots, List<ItemStack> depositedStacks) {
 		ItemStack remaining = depositHandler.insertItem(stack);
 		if (remaining.getCount() < stack.getCount()) {
 			ItemStack transferredStack = stack.copyWithCount(stack.getCount() - remaining.getCount());
-			inserted.computeIfAbsent(depositHandler.getPosition(), k -> new ItemTransferData(depositHandler.getPositionToOpen().orElse(null), depositHandler.getPosition(), new ArrayList<>())).itemsTransferred().add(transferredStack);
+			inserted.computeIfAbsent(depositHandler.getPosition(),
+					k -> new ItemTransferData(depositHandler.getPositionToOpen().orElse(null), depositHandler.getPosition(), new ArrayList<>()))
+					.itemsTransferred().add(transferredStack);
 			depositedStacks.add(transferredStack);
 			player.getInventory().setItem(slot, remaining);
 			depositedFromSlots.add(slot);
@@ -270,7 +257,8 @@ public class ItemTransferHandler {
 			return;
 		}
 		if (!fillEmpty && item.getCount() == item.getMaxStackSize() && !hasInventorySourceInScope(player, itemSlot, itemSlot + 1)) {
-			playError(player, ItemActionsTranslationHelper.INSTANCE.translStatusMessage("cannot_restock_full_stack", item.getHoverName().copy().setStyle(Style.EMPTY.withColor(0xFF5555))));
+			playError(player, ItemActionsTranslationHelper.INSTANCE.translStatusMessage("cannot_restock_full_stack",
+					item.getHoverName().copy().setStyle(Style.EMPTY.withColor(0xFF5555))));
 			return;
 		}
 
@@ -278,8 +266,10 @@ public class ItemTransferHandler {
 	}
 
 	private static void restockItem(Player player, ItemStack filter, int minSlot, int maxSlot, boolean fillEmpty, boolean refillSingle) {
-		if (maxSlot - minSlot > 1 && checkStacksDoNotAllowRestock(player, minSlot, maxSlot, fillEmpty) && !hasInventorySourceInScope(player, minSlot, maxSlot)) {
-			playError(player, ItemActionsTranslationHelper.INSTANCE.translStatusMessage("cannot_restock_full_stacks").setStyle(Style.EMPTY.withColor(0xFF5555)));
+		if (maxSlot - minSlot > 1 && checkStacksDoNotAllowRestock(player, minSlot, maxSlot, fillEmpty)
+				&& !hasInventorySourceInScope(player, minSlot, maxSlot)) {
+			playError(player,
+					ItemActionsTranslationHelper.INSTANCE.translStatusMessage("cannot_restock_full_stacks").setStyle(Style.EMPTY.withColor(0xFF5555)));
 			return;
 		}
 		Map<ResourceLocation, List<BlockPos>> storages = getInteractionStoragePositionsAround(player);
@@ -311,7 +301,8 @@ public class ItemTransferHandler {
 		player.playSound(SoundEvents.NOTE_BLOCK_BASS.value(), 1, 0.45f + RandHelper.getRandomMinusOneToOne(player.level().random) * 0.1F);
 	}
 
-	public static void handleRestock(Player player, Map<ResourceLocation, List<BlockPos>> storagePositions, Map<ResourceLocation, List<Integer>> entities, int minSlot, int maxSlot, ItemStack filter, boolean fillEmpty, boolean refillSingle) {
+	public static void handleRestock(Player player, Map<ResourceLocation, List<BlockPos>> storagePositions, Map<ResourceLocation, List<Integer>> entities,
+			int minSlot, int maxSlot, ItemStack filter, boolean fillEmpty, boolean refillSingle) {
 		if (!(player instanceof ServerPlayer serverPlayer)) {
 			return;
 		}
@@ -326,18 +317,19 @@ public class ItemTransferHandler {
 			if (fillEmpty && !filter.isEmpty()) {
 				if (playerInventoryStack.isEmpty() || ItemStack.isSameItemSameTags(playerInventoryStack, filter)) {
 					int countToRestock = refillSingle ? 1 : filter.getMaxStackSize() - playerInventoryStack.getCount();
-					restockSlot(restockHandlers, filter, playerInventoryStack, restocked, restockedPlayerSlots, restockedStacks, player, playerInventorySlot, countToRestock);
+					restockSlot(restockHandlers, filter, playerInventoryStack, restocked, restockedPlayerSlots, restockedStacks, player, playerInventorySlot,
+							countToRestock);
 				}
 			} else {
 				if (!playerInventoryStack.isEmpty()) {
 					int countToRestock = refillSingle ? 1 : playerInventoryStack.getMaxStackSize() - playerInventoryStack.getCount();
-					restockSlot(restockHandlers, playerInventoryStack, playerInventoryStack, restocked, restockedPlayerSlots, restockedStacks, player, playerInventorySlot, countToRestock);
+					restockSlot(restockHandlers, playerInventoryStack, playerInventoryStack, restocked, restockedPlayerSlots, restockedStacks, player,
+							playerInventorySlot, countToRestock);
 				}
 			}
 		}
-		int extensionRestockedStacks = ItemTransferExtensionRegistry.getExtension()
-				.map(extension -> extension.restockToInventorySources(player, minSlot, maxSlot, filter, fillEmpty, collectStorageItemHandlerTargets(player, storagePositions, entities, serverPlayer), restocked))
-				.orElse(0);
+		int extensionRestockedStacks = ItemTransferExtensionRegistry.getExtension().map(extension -> extension.restockToInventorySources(player, minSlot,
+				maxSlot, filter, fillEmpty, collectStorageItemHandlerTargets(player, storagePositions, entities, serverPlayer), restocked)).orElse(0);
 
 		Vec3 playerPos = player.getEyePosition().add(0, -0.3, 0);
 		List<ItemTransferData> itemTransferData = restocked.values().stream().toList();
@@ -359,21 +351,23 @@ public class ItemTransferHandler {
 			message = Component.empty();
 			if (extensionRestockedStacks > 0) {
 				message = ItemTransferExtensionRegistry.getExtension()
-						.map(extension -> extension.getRestockMessage(restockedPlayerSlots.size(), extensionRestockedStacks))
-						.orElse(message);
+						.map(extension -> extension.getRestockMessage(restockedPlayerSlots.size(), extensionRestockedStacks)).orElse(message);
 			} else if (!restockedPlayerSlots.isEmpty()) {
 				if (maxSlot - minSlot == 1) {
 					message = message.copy().append(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_item",
 							Component.literal(restockedStacks.get(0).getHoverName().getString()).withStyle(ChatFormatting.DARK_GREEN)));
 				} else {
-					message = message.copy().append(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_items", Component.literal(String.valueOf(restockedPlayerSlots.size())).withStyle(ChatFormatting.DARK_GREEN)));
+					message = message.copy().append(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_items",
+							Component.literal(String.valueOf(restockedPlayerSlots.size())).withStyle(ChatFormatting.DARK_GREEN)));
 				}
 			}
 		}
 		player.displayClientMessage(message, true);
 	}
 
-	private static void restockSlot(List<IRestockHandler> restockHandlers, ItemStack filter, ItemStack playerInventoryStack, Map<Vec3, ItemTransferData> restocked, Set<Integer> restockedPlayerSlots, List<ItemStack> restockedStacks, Player player, int playerInventorySlot, int countToRestock) {
+	private static void restockSlot(List<IRestockHandler> restockHandlers, ItemStack filter, ItemStack playerInventoryStack,
+			Map<Vec3, ItemTransferData> restocked, Set<Integer> restockedPlayerSlots, List<ItemStack> restockedStacks, Player player, int playerInventorySlot,
+			int countToRestock) {
 		if (playerInventoryStack.getCount() >= filter.getMaxStackSize()) {
 			return;
 		}
@@ -387,7 +381,8 @@ public class ItemTransferHandler {
 			if (!transfers.isEmpty()) {
 				for (IRestockHandler.RestockTransfer transfer : transfers) {
 					ItemStack transferredStack = transfer.stack().copy();
-					restocked.computeIfAbsent(transfer.position(), k -> new ItemTransferData(transfer.positionToOpen(), transfer.position(), new ArrayList<>())).itemsTransferred().add(transferredStack);
+					restocked.computeIfAbsent(transfer.position(), k -> new ItemTransferData(transfer.positionToOpen(), transfer.position(), new ArrayList<>()))
+							.itemsTransferred().add(transferredStack);
 					restockedStacks.add(transferredStack);
 					if (playerInventoryStack.isEmpty()) {
 						playerInventoryStack = transferredStack.copy();
@@ -398,7 +393,8 @@ public class ItemTransferHandler {
 					restockedPlayerSlots.add(playerInventorySlot);
 					totalExtracted += transfer.stack().getCount();
 				}
-				stackToExtract = stackToExtract.copyWithCount(Math.max(0, stackToExtract.getCount() - transfers.stream().mapToInt(transfer -> transfer.stack().getCount()).sum()));
+				stackToExtract = stackToExtract
+						.copyWithCount(Math.max(0, stackToExtract.getCount() - transfers.stream().mapToInt(transfer -> transfer.stack().getCount()).sum()));
 			}
 			if (totalExtracted >= originalCount) {
 				break;
@@ -406,31 +402,24 @@ public class ItemTransferHandler {
 		}
 	}
 
-	private static List<IRestockHandler> collectAndSortRestockHandlers(Player player, Map<ResourceLocation, List<BlockPos>> storagePositions, Map<ResourceLocation, List<Integer>> entities, ServerPlayer serverPlayer) {
+	private static List<IRestockHandler> collectAndSortRestockHandlers(Player player, Map<ResourceLocation, List<BlockPos>> storagePositions,
+			Map<ResourceLocation, List<Integer>> entities, ServerPlayer serverPlayer) {
 		List<IRestockHandler> handlers = new ArrayList<>();
 
-		storagePositions.forEach((handlerId, positions) ->
-				ItemActionHandlerRegistry.getBlockHandler(handlerId).ifPresent(handler ->
-						positions.forEach(pos -> {
-							if (WorldHelper.playerMayInteract(player, pos)) {
-								handler.getRestockHandler(serverPlayer, pos).ifPresent(handlers::add);
-							}
-						})
-				)
-		);
+		storagePositions.forEach((handlerId, positions) -> ItemActionHandlerRegistry.getBlockHandler(handlerId).ifPresent(handler -> positions.forEach(pos -> {
+			if (WorldHelper.playerMayInteract(player, pos)) {
+				handler.getRestockHandler(serverPlayer, pos).ifPresent(handlers::add);
+			}
+		})));
 
-		entities.forEach((handlerId, entityIds) ->
-				ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler ->
-						entityIds.forEach(entityId -> {
-							Entity entity = player.level().getEntity(entityId);
-							if (entity == null) {
-								return;
-							}
+		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
+			Entity entity = player.level().getEntity(entityId);
+			if (entity == null) {
+				return;
+			}
 
-							handler.getRestockHandler(entity).ifPresent(handlers::add);
-						})
-				)
-		);
+			handler.getRestockHandler(entity).ifPresent(handlers::add);
+		})));
 
 		handlers.sort(Comparator.comparingDouble(h -> player.distanceToSqr(h.getPosition())));
 		return handlers;

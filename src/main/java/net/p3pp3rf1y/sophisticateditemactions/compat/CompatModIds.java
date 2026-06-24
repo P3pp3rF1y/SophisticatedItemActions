@@ -1,7 +1,8 @@
 package net.p3pp3rf1y.sophisticateditemactions.compat;
 
 public class CompatModIds {
-	private CompatModIds() {}
+	private CompatModIds() {
+	}
 
 	public static final String AE2 = "ae2";
 	public static final String CREATE = "create";

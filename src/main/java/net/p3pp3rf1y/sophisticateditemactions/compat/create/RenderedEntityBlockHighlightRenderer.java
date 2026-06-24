@@ -22,6 +22,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.VoxelOutliner;
 import net.p3pp3rf1y.sophisticateditemactions.common.EntityBlockHighlightData;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -135,7 +136,8 @@ public class RenderedEntityBlockHighlightRenderer {
 		return new RenderedHighlight(edges, pivotSum.scale(1D / count));
 	}
 
-	private static void renderHighlightedBlock(PoseStack poseStack, float partialTick, Vec3 cameraPos, CachedEntityHighlight cachedHighlight, Minecraft mc, MultiBufferSource.BufferSource buffer, int color) {
+	private static void renderHighlightedBlock(PoseStack poseStack, float partialTick, Vec3 cameraPos, CachedEntityHighlight cachedHighlight, Minecraft mc,
+			MultiBufferSource.BufferSource buffer, int color) {
 		Entity entity = mc.level.getEntity(cachedHighlight.entityId());
 		if (!(entity instanceof AbstractContraptionEntity contraptionEntity) || contraptionEntity.getContraption() == null) {
 			return;
@@ -143,7 +145,8 @@ public class RenderedEntityBlockHighlightRenderer {
 
 		poseStack.pushPose();
 		poseStack.translate(-cameraPos.x(), -cameraPos.y(), -cameraPos.z());
-		poseStack.translate(Mth.lerp(partialTick, entity.xOld, entity.getX()), Mth.lerp(partialTick, entity.yOld, entity.getY()), Mth.lerp(partialTick, entity.zOld, entity.getZ()));
+		poseStack.translate(Mth.lerp(partialTick, entity.xOld, entity.getX()), Mth.lerp(partialTick, entity.yOld, entity.getY()),
+				Mth.lerp(partialTick, entity.zOld, entity.getZ()));
 		contraptionEntity.applyLocalTransforms(poseStack, partialTick);
 		for (RenderedHighlight highlight : cachedHighlight.highlights()) {
 			poseStack.pushPose();

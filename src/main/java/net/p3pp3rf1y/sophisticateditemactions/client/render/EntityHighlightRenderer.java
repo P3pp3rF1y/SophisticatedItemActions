@@ -28,9 +28,7 @@ public class EntityHighlightRenderer {
 	}
 
 	public static void addHighlightedEntities(Map<Integer, List<Integer>> highlightEntities, int durationTicks) {
-		highlightEntities.forEach((color, entityIds) ->
-				highlightedStackEntityIds.computeIfAbsent(color, k -> new ArrayList<>()).addAll(entityIds)
-		);
+		highlightEntities.forEach((color, entityIds) -> highlightedStackEntityIds.computeIfAbsent(color, k -> new ArrayList<>()).addAll(entityIds));
 		highlightExpireTime = Minecraft.getInstance().level.getGameTime() + durationTicks;
 	}
 
@@ -49,7 +47,8 @@ public class EntityHighlightRenderer {
 		});
 	}
 
-	private static void renderHighlightedEntity(PoseStack poseStack, float partialTick, Vec3 cameraPos, int entityId, Minecraft mc, MultiBufferSource.BufferSource buffer, int color) {
+	private static void renderHighlightedEntity(PoseStack poseStack, float partialTick, Vec3 cameraPos, int entityId, Minecraft mc,
+			MultiBufferSource.BufferSource buffer, int color) {
 		Entity entity = mc.level.getEntity(entityId);
 		if (entity == null) {
 			return;
@@ -66,7 +65,8 @@ public class EntityHighlightRenderer {
 		float scale = 1 + Easing.EASE_IN_OUT_CUBIC.ease((float) BlockHighlightRenderer.tri01(mc.level.getGameTime(), 15, partialTick)) * 0.05f;
 		poseStack.scale(scale, scale, scale);
 		poseStack.translate(0, -halfH, 0);
-		BlockHighlightRenderHelper.renderThickEdges(poseStack, buffer, color, VoxelOutliner.edgesFromAABB(boundingBox), entity.getX(), entity.getY(), entity.getZ());
+		BlockHighlightRenderHelper.renderThickEdges(poseStack, buffer, color, VoxelOutliner.edgesFromAABB(boundingBox), entity.getX(), entity.getY(),
+				entity.getZ());
 		poseStack.popPose();
 	}
 }

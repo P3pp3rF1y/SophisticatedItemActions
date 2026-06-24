@@ -24,6 +24,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
 import net.p3pp3rf1y.sophisticateditemactions.common.StorageItemHandlerTarget;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -48,7 +49,9 @@ public class ContraptionStorageItemActionHandler implements IEntityItemActionHan
 
 	@Override
 	public ItemMatchResult getItemMatch(ItemStackKey stackKey, Entity entity) {
-		return entity instanceof AbstractContraptionEntity contraptionEntity ? getItemMatch(stackKey, getMountedStorageHandlers(getMountedStoragesSnapshot(contraptionEntity))) : ItemMatchResult.NO_MATCH;
+		return entity instanceof AbstractContraptionEntity contraptionEntity
+				? getItemMatch(stackKey, getMountedStorageHandlers(getMountedStoragesSnapshot(contraptionEntity)))
+				: ItemMatchResult.NO_MATCH;
 	}
 
 	@Override
@@ -134,9 +137,8 @@ public class ContraptionStorageItemActionHandler implements IEntityItemActionHan
 			return List.of();
 		}
 
-		return storages.entrySet().stream()
-				.map(storageEntry -> new StorageItemHandlerTarget(null, getStoragePosition(contraptionEntity, storageEntry.getKey()), storageEntry.getValue().itemHandler()))
-				.toList();
+		return storages.entrySet().stream().map(storageEntry -> new StorageItemHandlerTarget(null, getStoragePosition(contraptionEntity, storageEntry.getKey()),
+				storageEntry.getValue().itemHandler())).toList();
 	}
 
 	@Override
@@ -186,9 +188,11 @@ public class ContraptionStorageItemActionHandler implements IEntityItemActionHan
 		getMountedStoragesSnapshot(contraptionEntity).forEach((pos, storage) -> {
 			ItemMatchResult matchResult = getItemMatch(stackKey, storage.itemHandler());
 			if (matchResult != ItemMatchResult.NO_MATCH) {
-				matchingPositions.putIfAbsent(storage.canonicalPos().asLong(), new HighlightGroup(storage.highlightPositions().stream()
-						.map(highlightPos -> BlockPos.containing(contraptionEntity.toGlobalVector(Vec3.atCenterOf(highlightPos), 0)))
-						.toList(), matchResult));
+				matchingPositions.putIfAbsent(storage.canonicalPos().asLong(),
+						new HighlightGroup(
+								storage.highlightPositions().stream()
+										.map(highlightPos -> BlockPos.containing(contraptionEntity.toGlobalVector(Vec3.atCenterOf(highlightPos), 0))).toList(),
+								matchResult));
 			}
 		});
 
@@ -226,7 +230,8 @@ public class ContraptionStorageItemActionHandler implements IEntityItemActionHan
 		return contraptionEntity.position();
 	}
 
-	private static ItemStack insertIntoMountedStorages(AbstractContraptionEntity contraptionEntity, Map<BlockPos, MountedStorageInfo> storages, ItemStack stack, AtomicReference<Vec3> lastTransferPosition) {
+	private static ItemStack insertIntoMountedStorages(AbstractContraptionEntity contraptionEntity, Map<BlockPos, MountedStorageInfo> storages, ItemStack stack,
+			AtomicReference<Vec3> lastTransferPosition) {
 		ItemStack remaining = stack;
 		remaining = insertIntoMatchingStorages(contraptionEntity, storages, remaining, lastTransferPosition, ItemMatchResult.MATCHING_STACK);
 		if (!remaining.isEmpty()) {
@@ -238,7 +243,8 @@ public class ContraptionStorageItemActionHandler implements IEntityItemActionHan
 		return remaining;
 	}
 
-	private static ItemStack insertIntoMatchingStorages(AbstractContraptionEntity contraptionEntity, Map<BlockPos, MountedStorageInfo> storages, ItemStack stack, AtomicReference<Vec3> lastTransferPosition, ItemMatchResult matchType) {
+	private static ItemStack insertIntoMatchingStorages(AbstractContraptionEntity contraptionEntity, Map<BlockPos, MountedStorageInfo> storages,
+			ItemStack stack, AtomicReference<Vec3> lastTransferPosition, ItemMatchResult matchType) {
 		ItemStack remaining = stack;
 		ItemStackKey stackKey = ItemStackKey.of(stack);
 		for (var storageEntry : storages.entrySet()) {
@@ -258,7 +264,8 @@ public class ContraptionStorageItemActionHandler implements IEntityItemActionHan
 		return remaining;
 	}
 
-	private static ItemStack extractFromMountedStorages(AbstractContraptionEntity contraptionEntity, Map<BlockPos, MountedStorageInfo> storages, ItemStack stack, AtomicReference<Vec3> lastTransferPosition) {
+	private static ItemStack extractFromMountedStorages(AbstractContraptionEntity contraptionEntity, Map<BlockPos, MountedStorageInfo> storages,
+			ItemStack stack, AtomicReference<Vec3> lastTransferPosition) {
 		ItemStack extracted = ItemStack.EMPTY;
 		ItemStack stackToExtract = stack.copy();
 		for (var storageEntry : storages.entrySet()) {
@@ -282,7 +289,8 @@ public class ContraptionStorageItemActionHandler implements IEntityItemActionHan
 		return extracted;
 	}
 
-	private static List<IRestockHandler.RestockTransfer> extractTransfersFromMountedStorages(AbstractContraptionEntity contraptionEntity, Map<BlockPos, MountedStorageInfo> storages, ItemStack stack, AtomicReference<Vec3> lastTransferPosition) {
+	private static List<IRestockHandler.RestockTransfer> extractTransfersFromMountedStorages(AbstractContraptionEntity contraptionEntity,
+			Map<BlockPos, MountedStorageInfo> storages, ItemStack stack, AtomicReference<Vec3> lastTransferPosition) {
 		List<IRestockHandler.RestockTransfer> transfers = new ArrayList<>();
 		ItemStack stackToExtract = stack.copy();
 		for (var storageEntry : storages.entrySet()) {
@@ -345,7 +353,8 @@ public class ContraptionStorageItemActionHandler implements IEntityItemActionHan
 
 		Map<BlockPos, MountedStorageInfo> storages = new LinkedHashMap<>();
 		ContraptionHelper.getMountedItemStorages(contraptionEntity).forEach((localPos, mountedStorage) -> {
-			storages.put(localPos, new MountedStorageInfo(mountedStorage, getCanonicalStoragePos(contraptionEntity, localPos), getHighlightPositions(contraptionEntity, localPos)));
+			storages.put(localPos, new MountedStorageInfo(mountedStorage, getCanonicalStoragePos(contraptionEntity, localPos),
+					getHighlightPositions(contraptionEntity, localPos)));
 		});
 		return storages;
 	}
@@ -388,7 +397,8 @@ public class ContraptionStorageItemActionHandler implements IEntityItemActionHan
 	}
 
 	private static boolean isDoubleChestState(BlockState state) {
-		return isSupportedChestBlock(state) && state.hasProperty(BlockStateProperties.CHEST_TYPE) && state.getValue(BlockStateProperties.CHEST_TYPE) != ChestType.SINGLE;
+		return isSupportedChestBlock(state) && state.hasProperty(BlockStateProperties.CHEST_TYPE)
+				&& state.getValue(BlockStateProperties.CHEST_TYPE) != ChestType.SINGLE;
 	}
 
 	private static boolean isSupportedChestBlock(BlockState state) {

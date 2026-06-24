@@ -9,16 +9,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public record SyncRenderedEntityBlockHighlightsMessage(Map<Integer, List<EntityBlockHighlightData>> highlightPositions,
-													   int durationTicks) {
+public record SyncRenderedEntityBlockHighlightsMessage(Map<Integer, List<EntityBlockHighlightData>> highlightPositions, int durationTicks) {
 	public static void encode(SyncRenderedEntityBlockHighlightsMessage message, FriendlyByteBuf buffer) {
-		buffer.writeMap(message.highlightPositions, FriendlyByteBuf::writeInt, (buf, list) -> buf.writeCollection(list, (listBuf, data) -> data.encode(listBuf)));
+		buffer.writeMap(message.highlightPositions, FriendlyByteBuf::writeInt,
+				(buf, list) -> buf.writeCollection(list, (listBuf, data) -> data.encode(listBuf)));
 		buffer.writeInt(message.durationTicks);
 	}
 
 	public static SyncRenderedEntityBlockHighlightsMessage decode(FriendlyByteBuf buffer) {
-		return new SyncRenderedEntityBlockHighlightsMessage(
-				buffer.readMap(FriendlyByteBuf::readInt, buf -> buf.readList(EntityBlockHighlightData::decode)),
+		return new SyncRenderedEntityBlockHighlightsMessage(buffer.readMap(FriendlyByteBuf::readInt, buf -> buf.readList(EntityBlockHighlightData::decode)),
 				buffer.readInt());
 	}
 

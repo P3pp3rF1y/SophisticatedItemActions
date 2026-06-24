@@ -11,8 +11,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferData;
 import java.util.List;
 import java.util.function.Supplier;
 
-public record SyncItemTransfersMessage(List<ItemTransferData> itemTransferData, Vec3 playerPos,
-									   boolean fromPlayer) implements ISplittableMessage {
+public record SyncItemTransfersMessage(List<ItemTransferData> itemTransferData, Vec3 playerPos, boolean fromPlayer) implements ISplittableMessage {
 	public static void encode(SyncItemTransfersMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeCollection(msg.itemTransferData, (friendlyByteBuf, itemTransferData) -> itemTransferData.encode(friendlyByteBuf));
 		packetBuffer.writeDouble(msg.playerPos.x());
@@ -23,9 +22,7 @@ public record SyncItemTransfersMessage(List<ItemTransferData> itemTransferData, 
 
 	public static SyncItemTransfersMessage decode(FriendlyByteBuf packetBuffer) {
 		return new SyncItemTransfersMessage(packetBuffer.readList(ItemTransferData::decode),
-				new Vec3(packetBuffer.readDouble(), packetBuffer.readDouble(), packetBuffer.readDouble()),
-				packetBuffer.readBoolean()
-		);
+				new Vec3(packetBuffer.readDouble(), packetBuffer.readDouble(), packetBuffer.readDouble()), packetBuffer.readBoolean());
 	}
 
 	static void onMessage(SyncItemTransfersMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {

@@ -5,10 +5,10 @@ import net.p3pp3rf1y.sophisticatedcore.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.ae2.AppliedEnergistics2Compat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.create.CreateCompat;
-import net.p3pp3rf1y.sophisticateditemactions.compat.refinedstorage.RefinedStorageCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.emi.EmiCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.jei.JeiCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.rei.ReiCompat;
+import net.p3pp3rf1y.sophisticateditemactions.compat.refinedstorage.RefinedStorageCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedbackpacks.SophisticatedBackpacksCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorage.SophisticatedStorageCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorageinmotion.StorageInMotionCompat;
@@ -25,7 +25,8 @@ import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHIST
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.STORAGE_IN_MOTION;
 
 public class ModCompat {
-	private ModCompat() {}
+	private ModCompat() {
+	}
 
 	private static final Map<String, Supplier<Callable<ICompat>>> compatFactories = new HashMap<>();
 	private static final Map<String, ICompat> loadedCompats = new HashMap<>();

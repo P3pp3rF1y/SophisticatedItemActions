@@ -46,8 +46,6 @@ public interface IBlockItemActionHandler {
 	}
 
 	enum Action {
-		DEPOSIT,
-		RESTOCK,
-		HIGHLIGHT
+		DEPOSIT, RESTOCK, HIGHLIGHT
 	}
 }

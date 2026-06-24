@@ -19,6 +19,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
 import net.p3pp3rf1y.sophisticateditemactions.common.StorageItemHandlerTarget;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -117,7 +118,8 @@ public class ItemVaultItemActionHandler implements IBlockEntityItemActionHandler
 		}
 
 		ItemVaultBlockEntity targetVault = controller != null ? controller : vault;
-		return Optional.of(new StorageItemHandlerTarget(targetVault.getBlockPos(), getVaultCenter(targetVault), itemHandler, stackKey -> getItemMatch(stackKey, itemHandler)));
+		return Optional.of(new StorageItemHandlerTarget(targetVault.getBlockPos(), getVaultCenter(targetVault), itemHandler,
+				stackKey -> getItemMatch(stackKey, itemHandler)));
 	}
 
 	private static ItemMatchResult getItemMatch(ItemStackKey stackKey, @Nullable IItemHandler itemHandler) {

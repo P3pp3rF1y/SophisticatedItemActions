@@ -17,6 +17,7 @@ import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -151,11 +152,13 @@ public class HighlightDirectionOverlay {
 	}
 
 	private static boolean isCloseCenteredAndVisible(LocalPlayer player, Vec3 playerPos, Vec3 eyePos, TrackedBlockTarget target) {
-		return playerPos.distanceToSqr(target.center()) <= HIDE_DISTANCE * HIDE_DISTANCE && isCentered(player, target.center()) && isBlockTargetVisible(player, eyePos, target.positions());
+		return playerPos.distanceToSqr(target.center()) <= HIDE_DISTANCE * HIDE_DISTANCE && isCentered(player, target.center())
+				&& isBlockTargetVisible(player, eyePos, target.positions());
 	}
 
 	private static boolean isCloseCenteredAndVisible(LocalPlayer player, Vec3 playerPos, Vec3 eyePos, Vec3 targetPos) {
-		return playerPos.distanceToSqr(targetPos) <= HIDE_DISTANCE * HIDE_DISTANCE && isCentered(player, targetPos) && isPointVisible(player, eyePos, targetPos, null);
+		return playerPos.distanceToSqr(targetPos) <= HIDE_DISTANCE * HIDE_DISTANCE && isCentered(player, targetPos)
+				&& isPointVisible(player, eyePos, targetPos, null);
 	}
 
 	private static boolean isCentered(LocalPlayer player, Vec3 targetPos) {
@@ -194,7 +197,8 @@ public class HighlightDirectionOverlay {
 		dots.stream().sorted(Comparator.comparingDouble(Dot::normalizedPosition)).forEach(dot -> {
 			for (int i = 0; i < groupedDots.size(); i++) {
 				Dot grouped = groupedDots.get(i);
-				if (grouped.color() == dot.color() && (Math.abs(grouped.relativeYaw() - dot.relativeYaw()) <= GROUP_YAW_DEGREES || grouped.normalizedPosition() == dot.normalizedPosition())) {
+				if (grouped.color() == dot.color() && (Math.abs(grouped.relativeYaw() - dot.relativeYaw()) <= GROUP_YAW_DEGREES
+						|| grouped.normalizedPosition() == dot.normalizedPosition())) {
 					if (dot.distance() < grouped.distance()) {
 						groupedDots.set(i, dot);
 					}

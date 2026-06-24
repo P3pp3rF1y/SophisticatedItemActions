@@ -30,7 +30,9 @@ public class ItemTransferClientHandler {
 			for (ItemStack stack : itemTransferData.itemsTransferred()) {
 				ItemFlightAnimator.startFlight(stack, from, to, level.getGameTime(), fromPlayer ? 15 : 10, level.getRandom());
 			}
-			float pitch = fromPlayer ? RandHelper.getRandomMinusOneToOne(level.random) * 0.1F + 0.2F : RandHelper.getRandomMinusOneToOne(level.random) * 1.4F + 2.0F;
+			float pitch = fromPlayer
+					? RandHelper.getRandomMinusOneToOne(level.random) * 0.1F + 0.2F
+					: RandHelper.getRandomMinusOneToOne(level.random) * 1.4F + 2.0F;
 			level.playSound(player, to.x(), to.y(), to.z(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.3F, pitch);
 		});
 	}

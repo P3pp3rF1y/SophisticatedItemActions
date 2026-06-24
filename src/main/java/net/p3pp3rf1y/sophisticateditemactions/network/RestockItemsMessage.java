@@ -13,8 +13,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public record RestockItemsMessage(ItemStack filter, int minSlot, int maxSlot, boolean fillEmpty, boolean refillSingle,
-								  Map<ResourceLocation, List<BlockPos>> storagePositions,
-								  Map<ResourceLocation, List<Integer>> entityIds) {
+		Map<ResourceLocation, List<BlockPos>> storagePositions, Map<ResourceLocation, List<Integer>> entityIds) {
 
 	public static void encode(RestockItemsMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeItem(msg.filter);
@@ -24,22 +23,13 @@ public record RestockItemsMessage(ItemStack filter, int minSlot, int maxSlot, bo
 		packetBuffer.writeBoolean(msg.refillSingle);
 		packetBuffer.writeMap(msg.storagePositions, FriendlyByteBuf::writeResourceLocation,
 				(buf, list) -> buf.writeCollection(list, FriendlyByteBuf::writeBlockPos));
-		packetBuffer.writeMap(msg.entityIds, FriendlyByteBuf::writeResourceLocation,
-				(buf, list) -> buf.writeCollection(list, FriendlyByteBuf::writeInt));
+		packetBuffer.writeMap(msg.entityIds, FriendlyByteBuf::writeResourceLocation, (buf, list) -> buf.writeCollection(list, FriendlyByteBuf::writeInt));
 	}
 
 	public static RestockItemsMessage decode(FriendlyByteBuf packetBuffer) {
-		return new RestockItemsMessage(
-				packetBuffer.readItem(),
-				packetBuffer.readInt(),
-				packetBuffer.readInt(),
-				packetBuffer.readBoolean(),
-				packetBuffer.readBoolean(),
-				packetBuffer.readMap(FriendlyByteBuf::readResourceLocation,
-						buf -> buf.readList(FriendlyByteBuf::readBlockPos)),
-				packetBuffer.readMap(FriendlyByteBuf::readResourceLocation,
-						buf -> buf.readList(FriendlyByteBuf::readInt))
-		);
+		return new RestockItemsMessage(packetBuffer.readItem(), packetBuffer.readInt(), packetBuffer.readInt(), packetBuffer.readBoolean(),
+				packetBuffer.readBoolean(), packetBuffer.readMap(FriendlyByteBuf::readResourceLocation, buf -> buf.readList(FriendlyByteBuf::readBlockPos)),
+				packetBuffer.readMap(FriendlyByteBuf::readResourceLocation, buf -> buf.readList(FriendlyByteBuf::readInt)));
 	}
 
 	static void onMessage(RestockItemsMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -53,7 +43,8 @@ public record RestockItemsMessage(ItemStack filter, int minSlot, int maxSlot, bo
 		if (sender == null) {
 			return;
 		}
-		ItemTransferHandler.handleRestock(sender, msg.storagePositions(), msg.entityIds, msg.minSlot(), msg.maxSlot(), msg.filter(), msg.fillEmpty(), msg.refillSingle());
+		ItemTransferHandler.handleRestock(sender, msg.storagePositions(), msg.entityIds, msg.minSlot(), msg.maxSlot(), msg.filter(), msg.fillEmpty(),
+				msg.refillSingle());
 	}
 
 }

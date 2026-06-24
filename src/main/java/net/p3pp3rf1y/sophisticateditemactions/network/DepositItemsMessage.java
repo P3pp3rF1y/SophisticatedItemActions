@@ -11,27 +11,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public record DepositItemsMessage(int minSlot, int maxSlot,
-								  Map<ResourceLocation, List<BlockPos>> storagePositions,
-								  Map<ResourceLocation, List<Integer>> entityIds,
-								  boolean onlyMatching) {
+public record DepositItemsMessage(int minSlot, int maxSlot, Map<ResourceLocation, List<BlockPos>> storagePositions,
+		Map<ResourceLocation, List<Integer>> entityIds, boolean onlyMatching) {
 
 	public static void encode(DepositItemsMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeInt(msg.minSlot);
 		packetBuffer.writeInt(msg.maxSlot);
-		packetBuffer.writeMap(msg.storagePositions, FriendlyByteBuf::writeResourceLocation, (buf, list) -> buf.writeCollection(list, FriendlyByteBuf::writeBlockPos));
+		packetBuffer.writeMap(msg.storagePositions, FriendlyByteBuf::writeResourceLocation,
+				(buf, list) -> buf.writeCollection(list, FriendlyByteBuf::writeBlockPos));
 		packetBuffer.writeMap(msg.entityIds, FriendlyByteBuf::writeResourceLocation, (buf, list) -> buf.writeCollection(list, FriendlyByteBuf::writeInt));
 		packetBuffer.writeBoolean(msg.onlyMatching);
 	}
 
 	public static DepositItemsMessage decode(FriendlyByteBuf packetBuffer) {
-		return new DepositItemsMessage(
-				packetBuffer.readInt(),
-				packetBuffer.readInt(),
+		return new DepositItemsMessage(packetBuffer.readInt(), packetBuffer.readInt(),
 				packetBuffer.readMap(FriendlyByteBuf::readResourceLocation, buf -> buf.readList(FriendlyByteBuf::readBlockPos)),
-				packetBuffer.readMap(FriendlyByteBuf::readResourceLocation, buf -> buf.readList(FriendlyByteBuf::readInt)),
-				packetBuffer.readBoolean()
-		);
+				packetBuffer.readMap(FriendlyByteBuf::readResourceLocation, buf -> buf.readList(FriendlyByteBuf::readInt)), packetBuffer.readBoolean());
 	}
 
 	static void onMessage(DepositItemsMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {

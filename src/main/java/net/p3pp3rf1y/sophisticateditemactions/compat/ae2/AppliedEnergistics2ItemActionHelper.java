@@ -45,8 +45,7 @@ public final class AppliedEnergistics2ItemActionHelper {
 		return ItemMatchResult.NO_MATCH;
 	}
 
-	public static ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, ChestBlockEntity chest,
-			IBlockItemActionHandler.Action action) {
+	public static ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, ChestBlockEntity chest, IBlockItemActionHandler.Action action) {
 		MEStorage storage = chest.getInventory();
 		if (storage == null || !isConnected(chest)) {
 			return ItemMatchResult.NO_MATCH;

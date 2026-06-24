@@ -36,9 +36,8 @@ public class RefinedStorageTerminalItemActionHandler implements IBlockEntityItem
 
 	@Override
 	public ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos, IBlockItemActionHandler.Action action) {
-		return getFromBlockEntity(player, pos, grid -> canPlayerUse(grid, player, action)
-				? getItemMatch(stackKey, grid, action)
-				: ItemMatchResult.NO_MATCH).orElse(ItemMatchResult.NO_MATCH);
+		return getFromBlockEntity(player, pos, grid -> canPlayerUse(grid, player, action) ? getItemMatch(stackKey, grid, action) : ItemMatchResult.NO_MATCH)
+				.orElse(ItemMatchResult.NO_MATCH);
 	}
 
 	@Override
@@ -67,50 +66,46 @@ public class RefinedStorageTerminalItemActionHandler implements IBlockEntityItem
 	}
 
 	private Optional<IDepositHandler> createDepositHandler(ServerPlayer player, GridBlockEntity grid) {
-		return getNetwork(grid)
-				.filter(network -> hasPermission(network, Permission.INSERT, player))
-				.map(network -> new IDepositHandler() {
-					@Override
-					public Optional<BlockPos> getPositionToOpen() {
-						return Optional.of(grid.getBlockPos());
-					}
+		return getNetwork(grid).filter(network -> hasPermission(network, Permission.INSERT, player)).map(network -> new IDepositHandler() {
+			@Override
+			public Optional<BlockPos> getPositionToOpen() {
+				return Optional.of(grid.getBlockPos());
+			}
 
-					@Override
-					public Vec3 getPosition() {
-						return Vec3.atCenterOf(grid.getBlockPos());
-					}
+			@Override
+			public Vec3 getPosition() {
+				return Vec3.atCenterOf(grid.getBlockPos());
+			}
 
-					@Override
-					public ItemMatchResult getItemMatch(ItemStackKey stackKey) {
-						return RefinedStorageTerminalItemActionHandler.this.getItemMatch(stackKey, grid, Action.DEPOSIT);
-					}
+			@Override
+			public ItemMatchResult getItemMatch(ItemStackKey stackKey) {
+				return RefinedStorageTerminalItemActionHandler.this.getItemMatch(stackKey, grid, Action.DEPOSIT);
+			}
 
-					@Override
-					public ItemStack insertItem(ItemStack stack) {
-						return network.insertItem(stack.copy(), stack.getCount(), com.refinedmods.refinedstorage.api.util.Action.PERFORM);
-					}
-				});
+			@Override
+			public ItemStack insertItem(ItemStack stack) {
+				return network.insertItem(stack.copy(), stack.getCount(), com.refinedmods.refinedstorage.api.util.Action.PERFORM);
+			}
+		});
 	}
 
 	private Optional<IRestockHandler> createRestockHandler(ServerPlayer player, GridBlockEntity grid) {
-		return getNetwork(grid)
-				.filter(network -> hasPermission(network, Permission.EXTRACT, player))
-				.map(network -> new IRestockHandler() {
-					@Override
-					public Optional<BlockPos> getPositionToOpen() {
-						return Optional.of(grid.getBlockPos());
-					}
+		return getNetwork(grid).filter(network -> hasPermission(network, Permission.EXTRACT, player)).map(network -> new IRestockHandler() {
+			@Override
+			public Optional<BlockPos> getPositionToOpen() {
+				return Optional.of(grid.getBlockPos());
+			}
 
-					@Override
-					public Vec3 getPosition() {
-						return Vec3.atCenterOf(grid.getBlockPos());
-					}
+			@Override
+			public Vec3 getPosition() {
+				return Vec3.atCenterOf(grid.getBlockPos());
+			}
 
-					@Override
-					public ItemStack extractItem(ItemStack stack) {
-						return network.extractItem(stack.copy(), stack.getCount(), com.refinedmods.refinedstorage.api.util.Action.PERFORM);
-					}
-				});
+			@Override
+			public ItemStack extractItem(ItemStack stack) {
+				return network.extractItem(stack.copy(), stack.getCount(), com.refinedmods.refinedstorage.api.util.Action.PERFORM);
+			}
+		});
 	}
 
 	private static Optional<IStorageCache<ItemStack>> getStorageCache(GridBlockEntity grid) {

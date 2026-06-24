@@ -6,10 +6,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 
-public record ItemTransferData(@Nullable BlockPos positionToOpen, Vec3 itemFlightPos,
-							   List<ItemStack> itemsTransferred) {
+public record ItemTransferData(@Nullable BlockPos positionToOpen, Vec3 itemFlightPos, List<ItemStack> itemsTransferred) {
 	public void encode(FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeBoolean(positionToOpen != null);
 		if (positionToOpen != null) {

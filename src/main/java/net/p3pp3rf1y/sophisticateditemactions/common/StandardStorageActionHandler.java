@@ -49,36 +49,32 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 
 	@Override
 	public Optional<IDepositHandler> getDepositHandler(Entity entity) {
-		return entity.getCapability(ForgeCapabilities.ITEM_HANDLER, null)
-				.map(cap ->
-						new IDepositHandler() {
-							@Override
-							public Optional<BlockPos> getPositionToOpen() {
-								return Optional.empty();
-							}
+		return entity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).map(cap -> new IDepositHandler() {
+			@Override
+			public Optional<BlockPos> getPositionToOpen() {
+				return Optional.empty();
+			}
 
-							@Override
-							public Vec3 getPosition() {
-								return entity.position();
-							}
+			@Override
+			public Vec3 getPosition() {
+				return entity.position();
+			}
 
-							@Override
-							public ItemMatchResult getItemMatch(ItemStackKey stackKey) {
-								return StandardStorageActionHandler.getItemMatch(stackKey, cap);
-							}
+			@Override
+			public ItemMatchResult getItemMatch(ItemStackKey stackKey) {
+				return StandardStorageActionHandler.getItemMatch(stackKey, cap);
+			}
 
-							@Override
-							public ItemStack insertItem(ItemStack stack) {
-								return InventoryHelper.insertIntoInventoryMatchingFirst(stack, cap, false);
-							}
-						}
-				);
+			@Override
+			public ItemStack insertItem(ItemStack stack) {
+				return InventoryHelper.insertIntoInventoryMatchingFirst(stack, cap, false);
+			}
+		});
 	}
 
 	@Override
 	public Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(Entity entity) {
-		return entity.getCapability(ForgeCapabilities.ITEM_HANDLER, null)
-				.map(cap -> new StorageItemHandlerTarget(null, entity.position(), cap));
+		return entity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).map(cap -> new StorageItemHandlerTarget(null, entity.position(), cap));
 	}
 
 	@Override
@@ -137,8 +133,9 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 			if (state.getBlock() == Blocks.CHEST && state.getValue(ChestBlock.TYPE) == ChestType.RIGHT) {
 				return ItemMatchResult.NO_MATCH;
 			}
-			return action == Action.DEPOSIT ? getDepositItemMatch(stackKey, blockEntity) : blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, null)
-					.map(cap -> getItemMatch(stackKey, cap)).orElse(ItemMatchResult.NO_MATCH);
+			return action == Action.DEPOSIT
+					? getDepositItemMatch(stackKey, blockEntity)
+					: blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).map(cap -> getItemMatch(stackKey, cap)).orElse(ItemMatchResult.NO_MATCH);
 		}).orElse(ItemMatchResult.NO_MATCH);
 	}
 
@@ -255,39 +252,37 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 
 	@Override
 	public Optional<StorageItemHandlerTarget> getStorageItemHandlerTarget(ServerPlayer player, BlockPos pos) {
-		return WorldHelper.getBlockEntity(player.level(), pos).flatMap(blockEntity -> blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).map(cap -> {
-			BlockPos positionToOpen = null;
-			if (player.level().getBlockEntity(pos) instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
-				positionToOpen = pos;
-			}
-			return new StorageItemHandlerTarget(positionToOpen, Vec3.atCenterOf(pos), cap);
-		}));
+		return WorldHelper.getBlockEntity(player.level(), pos)
+				.flatMap(blockEntity -> blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).map(cap -> {
+					BlockPos positionToOpen = null;
+					if (player.level().getBlockEntity(pos) instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
+						positionToOpen = pos;
+					}
+					return new StorageItemHandlerTarget(positionToOpen, Vec3.atCenterOf(pos), cap);
+				}));
 	}
 
 	@Override
 	public Optional<IRestockHandler> getRestockHandler(ServerPlayer player, BlockPos pos) {
-		return WorldHelper.getBlockEntity(player.level(), pos).flatMap(blockEntity -> blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, null)
-				.map(cap ->
-						new IRestockHandler() {
-							@Override
-							public Optional<BlockPos> getPositionToOpen() {
-								if (player.level().getBlockEntity(pos) instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
-									return Optional.of(pos);
-								}
-								return Optional.empty();
-							}
-
-							@Override
-							public Vec3 getPosition() {
-								return Vec3.atCenterOf(pos);
-							}
-
-							@Override
-							public ItemStack extractItem(ItemStack stack) {
-								return InventoryHelper.extractFromInventory(stack, cap, false);
-							}
+		return WorldHelper.getBlockEntity(player.level(), pos)
+				.flatMap(blockEntity -> blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).map(cap -> new IRestockHandler() {
+					@Override
+					public Optional<BlockPos> getPositionToOpen() {
+						if (player.level().getBlockEntity(pos) instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
+							return Optional.of(pos);
 						}
-				)
-		);
+						return Optional.empty();
+					}
+
+					@Override
+					public Vec3 getPosition() {
+						return Vec3.atCenterOf(pos);
+					}
+
+					@Override
+					public ItemStack extractItem(ItemStack stack) {
+						return InventoryHelper.extractFromInventory(stack, cap, false);
+					}
+				}));
 	}
 }
