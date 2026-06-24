@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticateditemactions.common;
+package net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorage;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -8,6 +8,11 @@ import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
 import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ISlotTracker;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
+import net.p3pp3rf1y.sophisticateditemactions.common.IBlockEntityItemActionHandler;
+import net.p3pp3rf1y.sophisticateditemactions.common.IDepositHandler;
+import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
+import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
+import net.p3pp3rf1y.sophisticateditemactions.common.StorageItemHandlerTarget;
 import net.p3pp3rf1y.sophisticatedstorage.block.ChestBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.StoragePositionGroups;
 
@@ -26,10 +31,10 @@ public class ControllableStorageItemActionHandler implements IBlockEntityItemAct
 
 	private static ItemMatchResult getItemMatchResult(ItemStackKey stackKey, ISlotTracker slotTracker, boolean includeMemorizedAndFiltered) {
 		if (slotTracker.getPartialStacks().contains(stackKey) || slotTracker.getFullStacks().contains(stackKey)
-				|| (includeMemorizedAndFiltered && slotTracker.hasExactStackMemorized(stackKey))) {
+				|| includeMemorizedAndFiltered && slotTracker.hasExactStackMemorized(stackKey)) {
 			return ItemMatchResult.MATCHING_STACK;
 		} else if (slotTracker.getItems().contains(stackKey.stack().getItem())
-				|| (includeMemorizedAndFiltered && slotTracker.hasItemMemorizedOrFiltered(stackKey.stack().getItem()))) {
+				|| includeMemorizedAndFiltered && slotTracker.hasItemMemorizedOrFiltered(stackKey.stack().getItem())) {
 			return ItemMatchResult.MATCHING_ITEM;
 		}
 		return ItemMatchResult.NO_MATCH;
