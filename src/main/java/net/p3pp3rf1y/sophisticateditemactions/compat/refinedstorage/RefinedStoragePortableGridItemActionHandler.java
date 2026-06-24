@@ -93,8 +93,8 @@ public class RefinedStoragePortableGridItemActionHandler implements IBlockEntity
 	}
 
 	private static Optional<Storage> getStorage(AbstractPortableGridBlockEntity portableGrid) {
-		com.refinedmods.refinedstorage.common.api.grid.Grid grid =
-				((AccessorAbstractPortableGridBlockEntity) portableGrid).sophisticatedItemActions$invokeGetGrid();
+		com.refinedmods.refinedstorage.common.api.grid.Grid grid = ((AccessorAbstractPortableGridBlockEntity) portableGrid)
+				.sophisticatedItemActions$invokeGetGrid();
 		return grid.isGridActive() ? Optional.of(grid.getItemStorage()) : Optional.empty();
 	}
 }

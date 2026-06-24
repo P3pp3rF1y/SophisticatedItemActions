@@ -14,7 +14,8 @@ public class ClientCompatRenderHelper {
 	private static CustomGeometryRenderer customGeometryRenderer = (submitNodeCollector, poseStack, partialTick, cameraPos) -> {
 	};
 
-	private ClientCompatRenderHelper() {}
+	private ClientCompatRenderHelper() {
+	}
 
 	public static void registerEntityBlockHighlightRenderer(EntityBlockHighlightRenderer renderer) {
 		entityBlockHighlightRenderer = renderer;

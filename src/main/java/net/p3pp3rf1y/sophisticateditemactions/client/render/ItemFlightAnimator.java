@@ -35,7 +35,8 @@ public class ItemFlightAnimator {
 
 	public static void submitItems(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos) {
 		Minecraft mc = Minecraft.getInstance();
-		if (flights.isEmpty() || mc.level == null) return;
+		if (flights.isEmpty() || mc.level == null)
+			return;
 
 		long gameTime = mc.level.getGameTime();
 
@@ -62,13 +63,8 @@ public class ItemFlightAnimator {
 
 			ItemStackRenderState itemStackRenderState = new ItemStackRenderState();
 			mc.getItemModelResolver().updateForTopItem(itemStackRenderState, flight.stack, ItemDisplayContext.GROUND, mc.level, null, 0);
-			itemStackRenderState.submit(
-					poseStack,
-					submitNodeCollector,
-					LevelRenderer.getLightCoords(mc.level, new BlockPos((int) pos.x, (int) pos.y, (int) pos.z)),
-					OverlayTexture.NO_OVERLAY,
-					0
-			);
+			itemStackRenderState.submit(poseStack, submitNodeCollector,
+					LevelRenderer.getLightCoords(mc.level, new BlockPos((int) pos.x, (int) pos.y, (int) pos.z)), OverlayTexture.NO_OVERLAY, 0);
 
 			poseStack.popPose();
 
@@ -117,4 +113,3 @@ public class ItemFlightAnimator {
 		return a.add(b.subtract(a).scale(t));
 	}
 }
-

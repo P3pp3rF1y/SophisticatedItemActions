@@ -13,11 +13,13 @@ public interface IItemTransferExtension {
 
 	boolean shouldSkipRegularDepositFromSlot(Player player, int slot);
 
-	int depositFromInventorySources(Player player, int minSlot, int maxSlot, boolean onlyMatching, List<StorageItemHandlerTarget> storageTargets, Map<Vec3, ItemTransferData> inserted);
+	int depositFromInventorySources(Player player, int minSlot, int maxSlot, boolean onlyMatching, List<StorageItemHandlerTarget> storageTargets,
+			Map<Vec3, ItemTransferData> inserted);
 
 	Component getDepositMessage(int inventoryTransferred, int extensionTransferred);
 
-	int restockToInventorySources(Player player, int minSlot, int maxSlot, ItemStack filter, boolean fillEmpty, List<StorageItemHandlerTarget> storageTargets, Map<Vec3, ItemTransferData> restocked);
+	int restockToInventorySources(Player player, int minSlot, int maxSlot, ItemStack filter, boolean fillEmpty, List<StorageItemHandlerTarget> storageTargets,
+			Map<Vec3, ItemTransferData> restocked);
 
 	Component getRestockMessage(int inventoryTransferred, int extensionTransferred);
 }

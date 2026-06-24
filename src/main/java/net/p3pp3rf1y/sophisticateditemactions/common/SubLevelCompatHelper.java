@@ -29,11 +29,12 @@ public class SubLevelCompatHelper {
 	};
 	private static ISubLevelCompat clientCompat = compat;
 
-	private SubLevelCompatHelper() {}
+	private SubLevelCompatHelper() {
+	}
 
 	public static void setCompat(ISubLevelCompat compat) {
 		SubLevelCompatHelper.compat = compat;
-		SubLevelCompatHelper.clientCompat = compat.getClientCompat();
+		clientCompat = compat.getClientCompat();
 	}
 
 	public static void setClientCompat(ISubLevelCompat compat) {

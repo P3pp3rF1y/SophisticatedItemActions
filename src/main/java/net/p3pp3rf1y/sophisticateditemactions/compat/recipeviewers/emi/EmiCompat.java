@@ -15,6 +15,6 @@ public class EmiCompat implements ICompat {
 
 	@Override
 	public void setup() {
-		//noop
+		// noop
 	}
 }

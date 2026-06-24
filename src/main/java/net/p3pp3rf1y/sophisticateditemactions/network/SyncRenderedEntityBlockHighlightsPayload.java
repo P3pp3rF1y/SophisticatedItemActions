@@ -17,15 +17,11 @@ import java.util.Map;
 public record SyncRenderedEntityBlockHighlightsPayload(Map<Integer, List<EntityBlockHighlightData>> highlightPositions,
 		int durationTicks) implements CustomPacketPayload {
 	public static final Type<SyncRenderedEntityBlockHighlightsPayload> TYPE = new Type<>(
-			SophisticatedItemActions.getIdentifier("sync_rendered_entity_block_highlights")
-	);
+			SophisticatedItemActions.getIdentifier("sync_rendered_entity_block_highlights"));
 	public static final StreamCodec<ByteBuf, SyncRenderedEntityBlockHighlightsPayload> STREAM_CODEC = StreamCodec.composite(
 			StreamCodecHelper.ofMap(ByteBufCodecs.INT, EntityBlockHighlightData.STREAM_CODEC.apply(ByteBufCodecs.list()), HashMap::new),
-			SyncRenderedEntityBlockHighlightsPayload::highlightPositions,
-			ByteBufCodecs.INT,
-			SyncRenderedEntityBlockHighlightsPayload::durationTicks,
-			SyncRenderedEntityBlockHighlightsPayload::new
-	);
+			SyncRenderedEntityBlockHighlightsPayload::highlightPositions, ByteBufCodecs.INT, SyncRenderedEntityBlockHighlightsPayload::durationTicks,
+			SyncRenderedEntityBlockHighlightsPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

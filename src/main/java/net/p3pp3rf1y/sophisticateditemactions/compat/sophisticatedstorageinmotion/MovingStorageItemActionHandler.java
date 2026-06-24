@@ -44,9 +44,11 @@ public class MovingStorageItemActionHandler implements IEntityItemActionHandler 
 		}
 
 		ISlotTracker slotTracker = movingStorage.getStorageHolder().getStorageWrapper().getInventoryHandler().getSlotTracker();
-		if (slotTracker.getPartialStacks().contains(stackKey) || slotTracker.getFullStacks().contains(stackKey) || (includeMemorizedAndFiltered && slotTracker.hasExactStackMemorized(stackKey))) {
+		if (slotTracker.getPartialStacks().contains(stackKey) || slotTracker.getFullStacks().contains(stackKey)
+				|| (includeMemorizedAndFiltered && slotTracker.hasExactStackMemorized(stackKey))) {
 			return ItemMatchResult.MATCHING_STACK;
-		} else if (slotTracker.getItems().contains(stackKey.stack().getItem()) || (includeMemorizedAndFiltered && slotTracker.hasItemMemorizedOrFiltered(stackKey.stack().getItem()))) {
+		} else if (slotTracker.getItems().contains(stackKey.stack().getItem())
+				|| (includeMemorizedAndFiltered && slotTracker.hasItemMemorizedOrFiltered(stackKey.stack().getItem()))) {
 			return ItemMatchResult.MATCHING_ITEM;
 		}
 		return ItemMatchResult.NO_MATCH;
@@ -109,6 +111,7 @@ public class MovingStorageItemActionHandler implements IEntityItemActionHandler 
 			return Optional.empty();
 		}
 
-		return Optional.of(new StorageItemHandlerTarget(null, entity.position(), movingStorage.getStorageHolder().getStorageWrapper().getInventoryForInputOutput(), stackKey -> getItemMatch(stackKey, entity, true)));
+		return Optional.of(new StorageItemHandlerTarget(null, entity.position(),
+				movingStorage.getStorageHolder().getStorageWrapper().getInventoryForInputOutput(), stackKey -> getItemMatch(stackKey, entity, true)));
 	}
 }

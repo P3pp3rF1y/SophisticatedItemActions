@@ -16,7 +16,8 @@ public class ChestOpeningAnimator {
 
 		if (be instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
 			chestBlockEntity.setShouldBeOpen(true);
-			chestClosingInfos.put(pos, new ChestClosingInfo(level.getGameTime() + 3 + level.getRandom().nextInt(3), () -> chestBlockEntity.setShouldBeOpen(false)));
+			chestClosingInfos.put(pos,
+					new ChestClosingInfo(level.getGameTime() + 3 + level.getRandom().nextInt(3), () -> chestBlockEntity.setShouldBeOpen(false)));
 		} else if (be instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
 			chestBlockEntity.triggerEvent(1, 1);
 			chestClosingInfos.put(pos, new ChestClosingInfo(level.getGameTime() + 3 + level.getRandom().nextInt(3), () -> chestBlockEntity.triggerEvent(1, 0)));
@@ -33,5 +34,6 @@ public class ChestOpeningAnimator {
 		});
 	}
 
-	private record ChestClosingInfo(long closeStartTime, Runnable startClose) {}
+	private record ChestClosingInfo(long closeStartTime, Runnable startClose) {
+	}
 }

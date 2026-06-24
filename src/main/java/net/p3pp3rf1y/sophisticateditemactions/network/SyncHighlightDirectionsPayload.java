@@ -14,17 +14,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public record SyncHighlightDirectionsPayload(Map<Integer, List<List<BlockPos>>> blockTargets,
-											 Map<Integer, List<Integer>> entityTargets,
-											 int durationTicks) implements CustomPacketPayload {
+public record SyncHighlightDirectionsPayload(Map<Integer, List<List<BlockPos>>> blockTargets, Map<Integer, List<Integer>> entityTargets,
+		int durationTicks) implements CustomPacketPayload {
 	public static final Type<SyncHighlightDirectionsPayload> TYPE = new Type<>(SophisticatedItemActions.getIdentifier("sync_highlight_directions"));
 	public static final StreamCodec<ByteBuf, SyncHighlightDirectionsPayload> STREAM_CODEC = StreamCodec.composite(
 			StreamCodecHelper.ofMap(ByteBufCodecs.INT, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()).apply(ByteBufCodecs.list()), HashMap::new),
 			SyncHighlightDirectionsPayload::blockTargets,
 			StreamCodecHelper.ofMap(ByteBufCodecs.INT, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new),
-			SyncHighlightDirectionsPayload::entityTargets,
-			ByteBufCodecs.INT,
-			SyncHighlightDirectionsPayload::durationTicks,
+			SyncHighlightDirectionsPayload::entityTargets, ByteBufCodecs.INT, SyncHighlightDirectionsPayload::durationTicks,
 			SyncHighlightDirectionsPayload::new);
 
 	@Override
