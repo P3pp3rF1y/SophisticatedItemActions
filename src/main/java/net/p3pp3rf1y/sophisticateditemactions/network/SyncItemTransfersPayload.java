@@ -24,13 +24,8 @@ import java.util.List;
 public record SyncItemTransfersPayload(List<ItemTransferData> itemTransferData, Vec3 playerPos, boolean fromPlayer) implements CustomPacketPayload {
 	public static final Type<SyncItemTransfersPayload> TYPE = new Type<>(SophisticatedCore.getIdentifier("sync_item_transfers"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, SyncItemTransfersPayload> STREAM_CODEC = StreamCodec.composite(
-			ItemTransferData.STREAM_CODEC.apply(ByteBufCodecs.list()),
-			SyncItemTransfersPayload::itemTransferData,
-			StreamCodecHelper.VEC3,
-			SyncItemTransfersPayload::playerPos,
-			ByteBufCodecs.BOOL,
-			SyncItemTransfersPayload::fromPlayer,
-			SyncItemTransfersPayload::new);
+			ItemTransferData.STREAM_CODEC.apply(ByteBufCodecs.list()), SyncItemTransfersPayload::itemTransferData, StreamCodecHelper.VEC3,
+			SyncItemTransfersPayload::playerPos, ByteBufCodecs.BOOL, SyncItemTransfersPayload::fromPlayer, SyncItemTransfersPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
@@ -49,7 +44,9 @@ public record SyncItemTransfersPayload(List<ItemTransferData> itemTransferData, 
 			for (ItemStack stack : itemTransferData.itemsTransferred()) {
 				ItemFlightAnimator.startFlight(stack, from, to, level.getGameTime(), payload.fromPlayer() ? 15 : 10, level.getRandom());
 			}
-			float pitch = payload.fromPlayer() ? RandHelper.getRandomMinusOneToOne(level.getRandom()) * 0.1F + 0.2F : RandHelper.getRandomMinusOneToOne(level.getRandom()) * 1.4F + 2.0F;
+			float pitch = payload.fromPlayer()
+					? RandHelper.getRandomMinusOneToOne(level.getRandom()) * 0.1F + 0.2F
+					: RandHelper.getRandomMinusOneToOne(level.getRandom()) * 1.4F + 2.0F;
 			level.playSound(player, to.x(), to.y(), to.z(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.3F, pitch);
 		});
 	}

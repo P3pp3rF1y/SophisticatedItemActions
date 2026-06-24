@@ -9,5 +9,6 @@ public interface IItemActionPayloadHandler<T> {
 
 	StreamCodec<ByteBuf, T> codec();
 
-	record HighlightResult(int stackCounts, int itemCounts) {}
+	record HighlightResult(int stackCounts, int itemCounts) {
+	}
 }

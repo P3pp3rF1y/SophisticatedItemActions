@@ -40,7 +40,8 @@ public class SableClientSubLevelCompat extends SableSubLevelCompat {
 				continue;
 			}
 
-			shape = Shapes.join(shape, storageLevel.getBlockState(pos).getShape(storageLevel, pos).move(pos.getX() - origin.getX(), pos.getY() - origin.getY(), pos.getZ() - origin.getZ()), BooleanOp.OR);
+			shape = Shapes.join(shape, storageLevel.getBlockState(pos).getShape(storageLevel, pos).move(pos.getX() - origin.getX(), pos.getY() - origin.getY(),
+					pos.getZ() - origin.getZ()), BooleanOp.OR);
 			centerSum = centerSum.add(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
 			count++;
 		}

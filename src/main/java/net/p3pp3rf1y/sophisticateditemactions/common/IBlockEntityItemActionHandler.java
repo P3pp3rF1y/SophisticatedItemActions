@@ -4,8 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.p3pp3rf1y.sophisticatedcore.util.BlockHighlightGroups;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
+import net.p3pp3rf1y.sophisticatedcore.util.BlockHighlightGroups;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.List;
@@ -46,7 +46,7 @@ public interface IBlockEntityItemActionHandler<T> extends IBlockItemActionHandle
 
 	@Override
 	default List<BlockPos> getHighlightPositions(ServerPlayer player, BlockPos pos) {
-		return getFromBlockEntity(player, pos, object -> getHighlightPositions(object)).orElse(List.of(pos));
+		return getFromBlockEntity(player, pos, this::getHighlightPositions).orElse(List.of(pos));
 	}
 
 	default List<BlockPos> getHighlightPositions(T object) {

@@ -33,7 +33,8 @@ public class RenderedEntityBlockHighlightRenderer {
 	private static final Map<Integer, List<CachedEntityHighlight>> cachedHighlights = new HashMap<>();
 	private static long highlightExpireTime = 0;
 
-	private RenderedEntityBlockHighlightRenderer() {}
+	private RenderedEntityBlockHighlightRenderer() {
+	}
 
 	public static void addHighlightedPositions(Map<Integer, List<EntityBlockHighlightData>> highlightPositions, int durationTicks) {
 		highlightedPositions.clear();
@@ -143,7 +144,8 @@ public class RenderedEntityBlockHighlightRenderer {
 
 		poseStack.pushPose();
 		poseStack.translate(-cameraPos.x(), -cameraPos.y(), -cameraPos.z());
-		poseStack.translate(Mth.lerp(partialTick, entity.xOld, entity.getX()), Mth.lerp(partialTick, entity.yOld, entity.getY()), Mth.lerp(partialTick, entity.zOld, entity.getZ()));
+		poseStack.translate(Mth.lerp(partialTick, entity.xOld, entity.getX()), Mth.lerp(partialTick, entity.yOld, entity.getY()),
+				Mth.lerp(partialTick, entity.zOld, entity.getZ()));
 		contraptionEntity.applyLocalTransforms(poseStack, partialTick);
 		for (RenderedHighlight highlight : cachedHighlight.highlights()) {
 			poseStack.pushPose();

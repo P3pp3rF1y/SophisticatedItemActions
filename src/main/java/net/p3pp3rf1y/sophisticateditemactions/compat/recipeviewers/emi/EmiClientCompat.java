@@ -12,7 +12,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.p3pp3rf1y.sophisticateditemactions.client.ClientEventHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.HighlightHandler;
 
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class EmiClientCompat {
 
 			@Override
 			public boolean restockSingle(Screen screen) {
-				//in case of crafting grid return single
+				// in case of crafting grid return single
 				return Minecraft.getInstance().gui.screen() instanceof RecipeScreen;
 			}
 

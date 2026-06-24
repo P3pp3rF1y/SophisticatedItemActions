@@ -39,9 +39,9 @@ public class RefinedStorageTerminalItemActionHandler implements IBlockEntityItem
 
 	@Override
 	public ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos, IBlockItemActionHandler.Action action) {
-		return getFromBlockEntity(player, pos, grid -> canPlayerUse(grid, player, getPermission(action))
-				? getItemMatch(stackKey, grid, action)
-				: ItemMatchResult.NO_MATCH).orElse(ItemMatchResult.NO_MATCH);
+		return getFromBlockEntity(player, pos,
+				grid -> canPlayerUse(grid, player, getPermission(action)) ? getItemMatch(stackKey, grid, action) : ItemMatchResult.NO_MATCH)
+				.orElse(ItemMatchResult.NO_MATCH);
 	}
 
 	@Override
@@ -129,9 +129,7 @@ public class RefinedStorageTerminalItemActionHandler implements IBlockEntityItem
 	}
 
 	private static boolean canPlayerUse(AbstractGridBlockEntity grid, ServerPlayer player, Permission permission) {
-		return getNetwork(grid)
-				.map(network -> network.getComponent(PlatformSecurityNetworkComponent.class).isAllowed(permission, player))
-				.orElse(false);
+		return getNetwork(grid).map(network -> network.getComponent(PlatformSecurityNetworkComponent.class).isAllowed(permission, player)).orElse(false);
 	}
 
 	private static Optional<Network> getNetwork(AbstractGridBlockEntity grid) {

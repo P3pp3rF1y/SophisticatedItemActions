@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticateditemactions.client.discovery;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.network.chat.Component;
@@ -26,16 +26,20 @@ public class NudgeToastDisplayer {
 
 	private Component getTitle(NudgeHintType hintType) {
 		return switch (hintType) {
-			case HIGHLIGHT -> Component.translatable(ItemActionsTranslationHelper.INSTANCE.translGui("discovery.nudge.highlight.title")).withStyle(ChatFormatting.GOLD);
-			case RESTOCK -> Component.translatable(ItemActionsTranslationHelper.INSTANCE.translGui("discovery.nudge.restock.title")).withStyle(ChatFormatting.GOLD);
-			case DEPOSIT -> Component.translatable(ItemActionsTranslationHelper.INSTANCE.translGui("discovery.nudge.deposit.title")).withStyle(ChatFormatting.GOLD);
+			case HIGHLIGHT ->
+				Component.translatable(ItemActionsTranslationHelper.INSTANCE.translGui("discovery.nudge.highlight.title")).withStyle(ChatFormatting.GOLD);
+			case RESTOCK ->
+				Component.translatable(ItemActionsTranslationHelper.INSTANCE.translGui("discovery.nudge.restock.title")).withStyle(ChatFormatting.GOLD);
+			case DEPOSIT ->
+				Component.translatable(ItemActionsTranslationHelper.INSTANCE.translGui("discovery.nudge.deposit.title")).withStyle(ChatFormatting.GOLD);
 		};
 	}
 
 	private Component getDescription(NudgeHintType hintType, Component keybindName) {
 		Component highlightedKeybind = keybindName.copy().withStyle(ChatFormatting.AQUA);
 		return switch (hintType) {
-			case HIGHLIGHT -> Component.translatable(ItemActionsTranslationHelper.INSTANCE.translGui("discovery.nudge.highlight.description"), highlightedKeybind);
+			case HIGHLIGHT ->
+				Component.translatable(ItemActionsTranslationHelper.INSTANCE.translGui("discovery.nudge.highlight.description"), highlightedKeybind);
 			case RESTOCK -> Component.translatable(ItemActionsTranslationHelper.INSTANCE.translGui("discovery.nudge.restock.description"), highlightedKeybind);
 			case DEPOSIT -> Component.translatable(ItemActionsTranslationHelper.INSTANCE.translGui("discovery.nudge.deposit.description"), highlightedKeybind);
 		};

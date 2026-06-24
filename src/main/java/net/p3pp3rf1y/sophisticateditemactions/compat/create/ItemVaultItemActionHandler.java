@@ -118,7 +118,8 @@ public class ItemVaultItemActionHandler implements IBlockEntityItemActionHandler
 		}
 
 		ItemVaultBlockEntity targetVault = controller != null ? controller : vault;
-		return Optional.of(new StorageItemHandlerTarget(targetVault.getBlockPos(), getVaultCenter(targetVault), itemHandler, stackKey -> getItemMatch(stackKey, itemHandler)));
+		return Optional.of(new StorageItemHandlerTarget(targetVault.getBlockPos(), getVaultCenter(targetVault), itemHandler,
+				stackKey -> getItemMatch(stackKey, itemHandler)));
 	}
 
 	private static ItemMatchResult getItemMatch(ItemStackKey stackKey, @Nullable ResourceHandler<ItemResource> itemHandler) {
@@ -180,6 +181,7 @@ public class ItemVaultItemActionHandler implements IBlockEntityItemActionHandler
 			min = new BlockPos(Math.min(min.getX(), pos.getX()), Math.min(min.getY(), pos.getY()), Math.min(min.getZ(), pos.getZ()));
 			max = new BlockPos(Math.max(max.getX(), pos.getX()), Math.max(max.getY(), pos.getY()), Math.max(max.getZ(), pos.getZ()));
 		}
-		return SubLevelCompatHelper.projectToWorld(controller.getLevel(), new Vec3((min.getX() + max.getX() + 1) / 2D, (min.getY() + max.getY() + 1) / 2D, (min.getZ() + max.getZ() + 1) / 2D));
+		return SubLevelCompatHelper.projectToWorld(controller.getLevel(),
+				new Vec3((min.getX() + max.getX() + 1) / 2D, (min.getY() + max.getY() + 1) / 2D, (min.getZ() + max.getZ() + 1) / 2D));
 	}
 }

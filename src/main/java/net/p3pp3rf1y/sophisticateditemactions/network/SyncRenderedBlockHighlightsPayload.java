@@ -18,11 +18,8 @@ public record SyncRenderedBlockHighlightsPayload(Map<Integer, List<List<BlockPos
 	public static final Type<SyncRenderedBlockHighlightsPayload> TYPE = new Type<>(SophisticatedItemActions.getIdentifier("sync_rendered_block_highlights"));
 	public static final StreamCodec<ByteBuf, SyncRenderedBlockHighlightsPayload> STREAM_CODEC = StreamCodec.composite(
 			StreamCodecHelper.ofMap(ByteBufCodecs.INT, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()).apply(ByteBufCodecs.list()), HashMap::new),
-			SyncRenderedBlockHighlightsPayload::highlightPositions,
-			ByteBufCodecs.INT,
-			SyncRenderedBlockHighlightsPayload::durationTicks,
-			SyncRenderedBlockHighlightsPayload::new
-	);
+			SyncRenderedBlockHighlightsPayload::highlightPositions, ByteBufCodecs.INT, SyncRenderedBlockHighlightsPayload::durationTicks,
+			SyncRenderedBlockHighlightsPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

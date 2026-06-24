@@ -20,7 +20,8 @@ public class RenderedBlockHighlightRenderer {
 	private static final Map<Integer, List<List<net.minecraft.core.BlockPos>>> highlightedPositions = new HashMap<>();
 	private static long highlightExpireTime = 0;
 
-	private RenderedBlockHighlightRenderer() {}
+	private RenderedBlockHighlightRenderer() {
+	}
 
 	public static void addHighlightedPositions(Map<Integer, List<List<net.minecraft.core.BlockPos>>> highlightPositions, int durationTicks) {
 		highlightedPositions.clear();
@@ -43,12 +44,10 @@ public class RenderedBlockHighlightRenderer {
 
 		Map<Integer, List<RenderedHighlight>> renderedHighlights = new HashMap<>();
 		highlightedPositions.forEach((color, positionGroups) -> renderedHighlights.put(color, positionGroups.stream()
-				.map(positions -> SubLevelCompatHelper.getRenderedHighlight(mc.level, positions, partialTick))
-				.filter(Objects::nonNull)
-				.toList()));
+				.map(positions -> SubLevelCompatHelper.getRenderedHighlight(mc.level, positions, partialTick)).filter(Objects::nonNull).toList()));
 
-		renderedHighlights.forEach((color, highlights) -> highlights.forEach(highlight ->
-				renderHighlightedBlock(submitNodeCollector, poseStack, partialTick, cameraPos, highlight, mc, color)));
+		renderedHighlights.forEach((color, highlights) -> highlights
+				.forEach(highlight -> renderHighlightedBlock(submitNodeCollector, poseStack, partialTick, cameraPos, highlight, mc, color)));
 	}
 
 	private static void renderHighlightedBlock(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos,
