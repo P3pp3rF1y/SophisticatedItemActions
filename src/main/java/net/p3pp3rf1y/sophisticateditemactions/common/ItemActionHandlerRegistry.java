@@ -19,7 +19,6 @@ public class ItemActionHandlerRegistry {
 
 	static {
 		register(ControllerItemActionHandler.INSTANCE);
-		register(ControllableStorageItemActionHandler.INSTANCE);
 	}
 
 	public static void register(IBlockItemActionHandler handler) {
@@ -38,7 +37,8 @@ public class ItemActionHandlerRegistry {
 		return getBlockHandlerFor(level, pos, blockEntity, action).map(IBlockItemActionHandler::id);
 	}
 
-	public static Optional<IBlockItemActionHandler> getBlockHandlerFor(Level level, BlockPos pos, BlockEntity blockEntity, IBlockItemActionHandler.Action action) {
+	public static Optional<IBlockItemActionHandler> getBlockHandlerFor(Level level, BlockPos pos, BlockEntity blockEntity,
+			IBlockItemActionHandler.Action action) {
 		for (IBlockItemActionHandler h : blockHandlersRegistry.values()) {
 			if (h.canActOn(level, pos, blockEntity)) {
 				return Optional.of(h);
