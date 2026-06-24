@@ -17,6 +17,6 @@ public class SophisticatedBackpacksCompat implements ICompat {
 
 	@Override
 	public void setup() {
-		//noop
+		// noop
 	}
 }

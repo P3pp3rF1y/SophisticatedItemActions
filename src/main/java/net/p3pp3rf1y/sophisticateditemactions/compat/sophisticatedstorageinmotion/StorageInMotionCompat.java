@@ -12,6 +12,6 @@ public class StorageInMotionCompat implements ICompat {
 
 	@Override
 	public void setup() {
-		//noop
+		// noop
 	}
 }

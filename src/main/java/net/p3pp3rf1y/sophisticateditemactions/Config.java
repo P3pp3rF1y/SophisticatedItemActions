@@ -47,13 +47,22 @@ public class Config {
 			builder.comment("Client-only discoverability nudges for highlight, restock and deposit keybind actions").push("discoveryNudges");
 
 			enabled = builder.comment("Master toggle for discovery nudges").define("enabled", true);
-			globalCooldownTicks = builder.comment("Global cooldown between any two nudges in ticks (default: 2 hours)").defineInRange("globalCooldownTicks", 144000, 0, Integer.MAX_VALUE);
-			maxNudgesPerSession = builder.comment("Maximum total number of nudges shown during one world connection session").defineInRange("maxNudgesPerSession", 3, 0, Integer.MAX_VALUE);
-			actionCooldownTicks = builder.comment("Cooldown between repeated nudges or successful uses of the same action in ticks (default: 4 hours)").defineInRange("actionCooldownTicks", 288000, 0, Integer.MAX_VALUE);
-			maxSuccessfulUsesBeforeSuppressing = builder.comment("Maximum successful uses of one action before its nudge stops appearing").defineInRange("maxSuccessfulUsesBeforeSuppressing", 5, 0, Integer.MAX_VALUE);
-			highlightActionThreshold = builder.comment("Number of storage opens without transfers before showing highlight hint (-1 disables)").defineInRange("highlightActionThreshold", 4, -1, Integer.MAX_VALUE);
-			restockActionThreshold = builder.comment("Number of storage sessions with transfer from storage to inventory before showing restock hint (-1 disables)").defineInRange("restockActionThreshold", 3, -1, Integer.MAX_VALUE);
-			depositActionThreshold = builder.comment("Number of storage sessions with transfer from inventory to storage before showing deposit hint (-1 disables)").defineInRange("depositActionThreshold", 3, -1, Integer.MAX_VALUE);
+			globalCooldownTicks = builder.comment("Global cooldown between any two nudges in ticks (default: 2 hours)").defineInRange("globalCooldownTicks",
+					144000, 0, Integer.MAX_VALUE);
+			maxNudgesPerSession = builder.comment("Maximum total number of nudges shown during one world connection session")
+					.defineInRange("maxNudgesPerSession", 3, 0, Integer.MAX_VALUE);
+			actionCooldownTicks = builder.comment("Cooldown between repeated nudges or successful uses of the same action in ticks (default: 4 hours)")
+					.defineInRange("actionCooldownTicks", 288000, 0, Integer.MAX_VALUE);
+			maxSuccessfulUsesBeforeSuppressing = builder.comment("Maximum successful uses of one action before its nudge stops appearing")
+					.defineInRange("maxSuccessfulUsesBeforeSuppressing", 5, 0, Integer.MAX_VALUE);
+			highlightActionThreshold = builder.comment("Number of storage opens without transfers before showing highlight hint (-1 disables)")
+					.defineInRange("highlightActionThreshold", 4, -1, Integer.MAX_VALUE);
+			restockActionThreshold = builder
+					.comment("Number of storage sessions with transfer from storage to inventory before showing restock hint (-1 disables)")
+					.defineInRange("restockActionThreshold", 3, -1, Integer.MAX_VALUE);
+			depositActionThreshold = builder
+					.comment("Number of storage sessions with transfer from inventory to storage before showing deposit hint (-1 disables)")
+					.defineInRange("depositActionThreshold", 3, -1, Integer.MAX_VALUE);
 			highlightEnabled = builder.comment("Whether highlight hint can be shown").define("highlightEnabled", true);
 			restockEnabled = builder.comment("Whether restock hint can be shown").define("restockEnabled", true);
 			depositEnabled = builder.comment("Whether deposit hint can be shown").define("depositEnabled", true);

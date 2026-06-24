@@ -34,7 +34,8 @@ public class ItemFlightAnimator {
 
 	public static void render(PoseStack poseStack, float partialTick, Vec3 cameraPos) {
 		Minecraft mc = Minecraft.getInstance();
-		if (flights.isEmpty() || mc.level == null) return;
+		if (flights.isEmpty() || mc.level == null)
+			return;
 
 		long gameTime = mc.level.getGameTime();
 
@@ -60,26 +61,20 @@ public class ItemFlightAnimator {
 			poseStack.scale(scale, scale, scale);
 
 			MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
-			mc.getItemRenderer().renderStatic(
-					flight.stack,
-					ItemDisplayContext.GROUND,
-					LevelRenderer.getLightColor(mc.level, new BlockPos((int) pos.x, (int) pos.y, (int) pos.z)),
-					OverlayTexture.NO_OVERLAY,
-					poseStack,
-					buffer,
-					mc.level,
-					0
-			);
+			mc.getItemRenderer().renderStatic(flight.stack, ItemDisplayContext.GROUND,
+					LevelRenderer.getLightColor(mc.level, new BlockPos((int) pos.x, (int) pos.y, (int) pos.z)), OverlayTexture.NO_OVERLAY, poseStack, buffer,
+					mc.level, 0);
 
 			poseStack.popPose();
 
-			if (time >= 1.0)  {
+			if (time >= 1.0) {
 				it.remove();
 			}
 		}
 	}
 
-	public record FlightPayload(ItemStack stack, Vec3 from, Vec3 to, long startGameTime, int durationTicks) {}
+	public record FlightPayload(ItemStack stack, Vec3 from, Vec3 to, long startGameTime, int durationTicks) {
+	}
 
 	private static final class Flight {
 		final ItemStack stack;
@@ -117,4 +112,3 @@ public class ItemFlightAnimator {
 		return a.add(b.subtract(a).scale(t));
 	}
 }
-

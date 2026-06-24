@@ -1,12 +1,5 @@
 package net.p3pp3rf1y.sophisticateditemactions.init;
 
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.CREATE;
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.REFINED_STORAGE;
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SABLE;
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_BACKPACKS;
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_STORAGE;
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.STORAGE_IN_MOTION;
-
 import net.p3pp3rf1y.sophisticatedcore.compat.CompatInfo;
 import net.p3pp3rf1y.sophisticatedcore.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedcore.compat.CompatRegistry;
@@ -20,6 +13,13 @@ import net.p3pp3rf1y.sophisticateditemactions.compat.sable.SableCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedbackpacks.SophisticatedBackpacksCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorage.SophisticatedStorageCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorageinmotion.StorageInMotionCompat;
+
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.CREATE;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.REFINED_STORAGE;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SABLE;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_BACKPACKS;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_STORAGE;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.STORAGE_IN_MOTION;
 
 public class ModCompat {
 	private ModCompat() {
