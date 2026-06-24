@@ -66,8 +66,8 @@ public class ItemVaultItemActionHandler implements IBlockEntityItemActionHandler
 		BlockPos controllerPos = controller != null ? controller.getBlockPos() : vault.getBlockPos();
 		return new IDepositHandler() {
 			@Override
-			public java.util.Optional<BlockPos> getPositionToOpen() {
-				return java.util.Optional.of(controllerPos);
+			public Optional<BlockPos> getPositionToOpen() {
+				return Optional.of(controllerPos);
 			}
 
 			@Override
@@ -95,8 +95,8 @@ public class ItemVaultItemActionHandler implements IBlockEntityItemActionHandler
 		BlockPos controllerPos = controller != null ? controller.getBlockPos() : vault.getBlockPos();
 		return new IRestockHandler() {
 			@Override
-			public java.util.Optional<BlockPos> getPositionToOpen() {
-				return java.util.Optional.of(controllerPos);
+			public Optional<BlockPos> getPositionToOpen() {
+				return Optional.of(controllerPos);
 			}
 
 			@Override
@@ -120,7 +120,8 @@ public class ItemVaultItemActionHandler implements IBlockEntityItemActionHandler
 		}
 
 		ItemVaultBlockEntity targetVault = controller != null ? controller : vault;
-		return Optional.of(new StorageItemHandlerTarget(targetVault.getBlockPos(), getVaultCenter(targetVault), itemHandler, stackKey -> getItemMatch(stackKey, itemHandler)));
+		return Optional.of(new StorageItemHandlerTarget(targetVault.getBlockPos(), getVaultCenter(targetVault), itemHandler,
+				stackKey -> getItemMatch(stackKey, itemHandler)));
 	}
 
 	private static ItemMatchResult getItemMatch(ItemStackKey stackKey, @Nullable ResourceHandler<ItemResource> itemHandler) {

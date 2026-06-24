@@ -18,10 +18,7 @@ public record SyncEntityHighlightsPayload(Map<Integer, List<Integer>> entityHigh
 	public static final Type<SyncEntityHighlightsPayload> TYPE = new Type<>(SophisticatedItemActions.getIdentifier("sync_entity_highlights"));
 	public static final StreamCodec<ByteBuf, SyncEntityHighlightsPayload> STREAM_CODEC = StreamCodec.composite(
 			StreamCodecHelper.ofMap(ByteBufCodecs.INT, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new),
-			SyncEntityHighlightsPayload::entityHighlights,
-			ByteBufCodecs.INT,
-			SyncEntityHighlightsPayload::durationTicks,
-			SyncEntityHighlightsPayload::new);
+			SyncEntityHighlightsPayload::entityHighlights, ByteBufCodecs.INT, SyncEntityHighlightsPayload::durationTicks, SyncEntityHighlightsPayload::new);
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
 		return TYPE;

@@ -47,8 +47,8 @@ public class RenderedBlockHighlightRenderer {
 				.map(positions -> SubLevelCompatHelper.getRenderedHighlight(mc.level, positions, partialTick)).filter(Objects::nonNull).toList()));
 
 		SubmitNodeCollector submitNodeCollector = mc.gameRenderer.getSubmitNodeStorage();
-		renderedHighlights.forEach((color, highlights) -> highlights.forEach(highlight -> renderHighlightedBlock(submitNodeCollector, poseStack, partialTick,
-				cameraPos, highlight, mc, color)));
+		renderedHighlights.forEach((color, highlights) -> highlights
+				.forEach(highlight -> renderHighlightedBlock(submitNodeCollector, poseStack, partialTick, cameraPos, highlight, mc, color)));
 	}
 
 	private static void renderHighlightedBlock(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos,

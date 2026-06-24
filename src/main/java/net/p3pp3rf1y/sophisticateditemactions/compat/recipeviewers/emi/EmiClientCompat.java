@@ -29,7 +29,7 @@ public class EmiClientCompat {
 
 			@Override
 			public boolean restockSingle(Screen screen) {
-				//in case of crafting grid return single
+				// in case of crafting grid return single
 				return Minecraft.getInstance().screen instanceof RecipeScreen;
 			}
 

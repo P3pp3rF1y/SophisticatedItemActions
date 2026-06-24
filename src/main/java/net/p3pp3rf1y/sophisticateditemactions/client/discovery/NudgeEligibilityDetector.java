@@ -34,11 +34,8 @@ public class NudgeEligibilityDetector {
 			return cachedEligibility;
 		}
 
-		if (!(screen instanceof AbstractContainerScreen<?> containerScreen)
-				|| screen instanceof InventoryScreen
-				|| screen instanceof CreativeModeInventoryScreen
-				|| screen instanceof SettingsScreen
-				|| NudgeScreenSuppressorRegistry.isSuppressed(screen)) {
+		if (!(screen instanceof AbstractContainerScreen<?> containerScreen) || screen instanceof InventoryScreen
+				|| screen instanceof CreativeModeInventoryScreen || screen instanceof SettingsScreen || NudgeScreenSuppressorRegistry.isSuppressed(screen)) {
 			cachedScreen = screen;
 			cachedEligibility = false;
 			return false;

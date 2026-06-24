@@ -1,8 +1,5 @@
 package net.p3pp3rf1y.sophisticateditemactions.client;
 
-import static net.neoforged.neoforge.client.settings.KeyConflictContext.GUI;
-import static net.neoforged.neoforge.client.settings.KeyConflictContext.IN_GAME;
-
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -35,6 +32,9 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static net.neoforged.neoforge.client.settings.KeyConflictContext.GUI;
+import static net.neoforged.neoforge.client.settings.KeyConflictContext.IN_GAME;
 
 public class ClientEventHandler {
 	private static final KeyMapping.Category KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY = new KeyMapping.Category(
