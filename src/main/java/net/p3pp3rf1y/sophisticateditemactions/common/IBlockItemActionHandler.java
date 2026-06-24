@@ -5,8 +5,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.p3pp3rf1y.sophisticatedcore.util.BlockHighlightGroups;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
+import net.p3pp3rf1y.sophisticatedcore.util.BlockHighlightGroups;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,8 +46,6 @@ public interface IBlockItemActionHandler {
 	}
 
 	enum Action {
-		DEPOSIT,
-		RESTOCK,
-		HIGHLIGHT
+		DEPOSIT, RESTOCK, HIGHLIGHT
 	}
 }

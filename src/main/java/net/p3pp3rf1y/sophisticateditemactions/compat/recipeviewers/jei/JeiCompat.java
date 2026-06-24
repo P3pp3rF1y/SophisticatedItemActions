@@ -15,6 +15,6 @@ public class JeiCompat implements ICompat {
 
 	@Override
 	public void setup() {
-		//noop
+		// noop
 	}
 }

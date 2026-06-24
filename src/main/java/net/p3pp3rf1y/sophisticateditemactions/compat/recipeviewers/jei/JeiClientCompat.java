@@ -15,6 +15,7 @@ import net.p3pp3rf1y.sophisticateditemactions.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.HighlightHandler;
 
 import javax.annotation.Nullable;
+
 import java.util.Optional;
 
 public class JeiClientCompat {
@@ -37,7 +38,7 @@ public class JeiClientCompat {
 
 			@Override
 			public boolean restockSingle(Screen screen) {
-				//in case of crafting grid return single
+				// in case of crafting grid return single
 				return runtime != null && runtime.getRecipesGui().getIngredientUnderMouse(VanillaTypes.ITEM_STACK).isPresent();
 			}
 
@@ -49,10 +50,10 @@ public class JeiClientCompat {
 	}
 
 	private static Optional<ItemStack> getStack() {
-		return runtime == null ? Optional.empty() : runtime.getIngredientListOverlay().getIngredientUnderMouse()
-				.or(() -> runtime.getBookmarkOverlay().getIngredientUnderMouse())
-				.flatMap(ITypedIngredient::getItemStack)
-				.or(() -> runtime.getRecipesGui().getIngredientUnderMouse(VanillaTypes.ITEM_STACK));
+		return runtime == null
+				? Optional.empty()
+				: runtime.getIngredientListOverlay().getIngredientUnderMouse().or(() -> runtime.getBookmarkOverlay().getIngredientUnderMouse())
+						.flatMap(ITypedIngredient::getItemStack).or(() -> runtime.getRecipesGui().getIngredientUnderMouse(VanillaTypes.ITEM_STACK));
 	}
 
 	public static void handleGuiKeyPress(ScreenEvent.KeyPressed.Pre event) {

@@ -35,7 +35,7 @@ public class SubLevelCompatHelper {
 
 	public static void setCompat(ISubLevelCompat compat) {
 		SubLevelCompatHelper.compat = compat;
-		SubLevelCompatHelper.clientCompat = compat.getClientCompat();
+		clientCompat = compat.getClientCompat();
 	}
 
 	public static void setClientCompat(ISubLevelCompat compat) {

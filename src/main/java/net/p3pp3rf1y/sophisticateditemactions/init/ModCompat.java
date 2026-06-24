@@ -1,12 +1,5 @@
 package net.p3pp3rf1y.sophisticateditemactions.init;
 
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.CREATE;
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.REFINED_STORAGE;
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SABLE;
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_BACKPACKS;
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_STORAGE;
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.STORAGE_IN_MOTION;
-
 import net.p3pp3rf1y.sophisticatedcore.compat.CompatInfo;
 import net.p3pp3rf1y.sophisticatedcore.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedcore.compat.CompatRegistry;
@@ -21,12 +14,20 @@ import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedbackpacks.Soph
 import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorage.SophisticatedStorageCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorageinmotion.StorageInMotionCompat;
 
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.CREATE;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.REFINED_STORAGE;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SABLE;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_BACKPACKS;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_STORAGE;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.STORAGE_IN_MOTION;
+
 public class ModCompat {
 	private ModCompat() {
 	}
 
 	public static void register() {
-		CompatRegistry.registerCompat(new CompatInfo(net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.AE2), () -> modBus -> new AppliedEnergistics2Compat());
+		CompatRegistry.registerCompat(new CompatInfo(net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.AE2),
+				() -> modBus -> new AppliedEnergistics2Compat());
 		CompatRegistry.registerCompat(new CompatInfo(CREATE), () -> modBus -> new CreateCompat());
 		CompatRegistry.registerCompat(new CompatInfo(CompatModIds.JEI), () -> modBus -> new JeiCompat());
 		CompatRegistry.registerCompat(new CompatInfo(CompatModIds.EMI), () -> modBus -> new EmiCompat());
