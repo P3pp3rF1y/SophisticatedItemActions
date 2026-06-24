@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticateditemactions.compat.refinedstorage;
 
 import com.refinedmods.refinedstorage.api.storage.Storage;
+import com.refinedmods.refinedstorage.common.api.grid.Grid;
 import com.refinedmods.refinedstorage.common.storage.portablegrid.AbstractPortableGridBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -93,8 +94,7 @@ public class RefinedStoragePortableGridItemActionHandler implements IBlockEntity
 	}
 
 	private static Optional<Storage> getStorage(AbstractPortableGridBlockEntity portableGrid) {
-		com.refinedmods.refinedstorage.common.api.grid.Grid grid =
-				((AccessorAbstractPortableGridBlockEntity) portableGrid).sophisticatedItemActions$invokeGetGrid();
+		Grid grid = ((AccessorAbstractPortableGridBlockEntity) portableGrid).sophisticatedItemActions$invokeGetGrid();
 		return grid.isGridActive() ? Optional.of(grid.getItemStorage()) : Optional.empty();
 	}
 }

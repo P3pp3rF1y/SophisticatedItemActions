@@ -33,5 +33,6 @@ public class ChestOpeningAnimator {
 		});
 	}
 
-	private record ChestClosingInfo(long closeStartTime, Runnable startClose) {}
+	private record ChestClosingInfo(long closeStartTime, Runnable startClose) {
+	}
 }

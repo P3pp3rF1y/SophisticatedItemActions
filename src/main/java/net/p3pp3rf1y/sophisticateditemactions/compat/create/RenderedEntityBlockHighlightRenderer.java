@@ -25,6 +25,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.EntityBlockHighlightData;
 import net.p3pp3rf1y.sophisticateditemactions.common.RenderedHighlight;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +36,8 @@ public class RenderedEntityBlockHighlightRenderer {
 	private static final Map<Integer, List<CachedEntityHighlight>> cachedHighlights = new HashMap<>();
 	private static long highlightExpireTime = 0;
 
-	private RenderedEntityBlockHighlightRenderer() {}
+	private RenderedEntityBlockHighlightRenderer() {
+	}
 
 	public static void addHighlightedPositions(Map<Integer, List<EntityBlockHighlightData>> highlightPositions, int durationTicks) {
 		highlightedPositions.clear();

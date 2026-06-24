@@ -42,8 +42,8 @@ public class AppliedEnergistics2TerminalItemActionHandler implements IBlockEntit
 	@Override
 	public ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos, IBlockItemActionHandler.Action action) {
 		return getFromBlockEntity(player, pos, cableBus -> getTerminal(cableBus)
-				.map(terminal -> AppliedEnergistics2ItemActionHelper.getItemMatch(player, stackKey, terminal, action))
-				.orElse(ItemMatchResult.NO_MATCH)).orElse(ItemMatchResult.NO_MATCH);
+				.map(terminal -> AppliedEnergistics2ItemActionHelper.getItemMatch(player, stackKey, terminal, action)).orElse(ItemMatchResult.NO_MATCH))
+				.orElse(ItemMatchResult.NO_MATCH);
 	}
 
 	@Override

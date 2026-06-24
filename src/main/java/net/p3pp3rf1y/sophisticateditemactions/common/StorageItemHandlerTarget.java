@@ -1,17 +1,19 @@
 package net.p3pp3rf1y.sophisticateditemactions.common;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 
 import javax.annotation.Nullable;
+
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import net.minecraft.world.phys.Vec3;
 
-public record StorageItemHandlerTarget(@Nullable BlockPos positionToOpen, Vec3 position, ResourceHandler<ItemResource> itemHandler, Function<ItemStackKey, ItemMatchResult> itemMatcher) {
+public record StorageItemHandlerTarget(@Nullable BlockPos positionToOpen, Vec3 position, ResourceHandler<ItemResource> itemHandler,
+		Function<ItemStackKey, ItemMatchResult> itemMatcher) {
 	public StorageItemHandlerTarget(@Nullable BlockPos positionToOpen, Vec3 position, ResourceHandler<ItemResource> itemHandler) {
 		this(positionToOpen, position, itemHandler, stackKey -> getItemMatch(stackKey, itemHandler));
 	}

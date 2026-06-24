@@ -14,6 +14,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.RenderedHighlight;
 import org.joml.Quaternionf;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 

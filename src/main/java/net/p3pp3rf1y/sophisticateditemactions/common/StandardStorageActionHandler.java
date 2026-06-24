@@ -24,6 +24,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -162,7 +163,9 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 		if (state.getBlock() == Blocks.CHEST && state.getValue(ChestBlock.TYPE) == ChestType.RIGHT) {
 			return ItemMatchResult.NO_MATCH;
 		}
-		return action == Action.DEPOSIT ? getDepositItemMatch(stackKey, player.level(), pos) : getItemMatch(stackKey, player.level().getCapability(Capabilities.Item.BLOCK, pos, null));
+		return action == Action.DEPOSIT
+				? getDepositItemMatch(stackKey, player.level(), pos)
+				: getItemMatch(stackKey, player.level().getCapability(Capabilities.Item.BLOCK, pos, null));
 	}
 
 	private static ItemMatchResult getDepositItemMatch(ItemStackKey stackKey, Level level, BlockPos pos) {
@@ -279,7 +282,7 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 
 			@Override
 			public ItemMatchResult getItemMatch(ItemStackKey stackKey) {
-				return StandardStorageActionHandler.getDepositItemMatch(stackKey, level, pos);
+				return getDepositItemMatch(stackKey, level, pos);
 			}
 
 			@Override

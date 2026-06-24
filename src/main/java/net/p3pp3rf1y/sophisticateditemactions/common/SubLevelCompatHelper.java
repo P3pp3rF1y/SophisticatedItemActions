@@ -8,6 +8,7 @@ import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 
 public class SubLevelCompatHelper {
@@ -29,11 +30,12 @@ public class SubLevelCompatHelper {
 	};
 	private static ISubLevelCompat clientCompat = compat;
 
-	private SubLevelCompatHelper() {}
+	private SubLevelCompatHelper() {
+	}
 
 	public static void setCompat(ISubLevelCompat compat) {
 		SubLevelCompatHelper.compat = compat;
-		SubLevelCompatHelper.clientCompat = compat.getClientCompat();
+		clientCompat = compat.getClientCompat();
 	}
 
 	public static void setClientCompat(ISubLevelCompat compat) {

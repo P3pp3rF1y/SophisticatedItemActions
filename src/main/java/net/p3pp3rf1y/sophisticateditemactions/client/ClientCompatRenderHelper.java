@@ -13,7 +13,8 @@ public class ClientCompatRenderHelper {
 	private static RenderCallback renderCallback = (poseStack, partialTick, cameraPos) -> {
 	};
 
-	private ClientCompatRenderHelper() {}
+	private ClientCompatRenderHelper() {
+	}
 
 	public static void registerEntityBlockHighlightSink(EntityBlockHighlightSink sink) {
 		entityBlockHighlightSink = sink;

@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticateditemactions.compat.refinedstorage;
 
+import com.refinedmods.refinedstorage.api.core.Action;
 import com.refinedmods.refinedstorage.api.resource.ResourceAmount;
 import com.refinedmods.refinedstorage.api.storage.Storage;
 import com.refinedmods.refinedstorage.common.api.storage.PlayerActor;
@@ -36,13 +37,13 @@ public final class RefinedStorageItemActionHelper {
 
 	public static int insertItem(Storage storage, ServerPlayer player, ItemStack stack) {
 		ItemResource resource = ItemResource.ofItemStack(stack);
-		long inserted = storage.insert(resource, stack.getCount(), com.refinedmods.refinedstorage.api.core.Action.EXECUTE, new PlayerActor(player));
+		long inserted = storage.insert(resource, stack.getCount(), Action.EXECUTE, new PlayerActor(player));
 		return (int) Math.max(0, inserted);
 	}
 
 	public static int extractItem(Storage storage, ServerPlayer player, ItemStack stack) {
 		ItemResource resource = ItemResource.ofItemStack(stack);
-		long extracted = storage.extract(resource, stack.getCount(), com.refinedmods.refinedstorage.api.core.Action.EXECUTE, new PlayerActor(player));
+		long extracted = storage.extract(resource, stack.getCount(), Action.EXECUTE, new PlayerActor(player));
 		return (int) Math.max(0, extracted);
 	}
 }

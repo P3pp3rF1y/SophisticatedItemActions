@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticateditemactions.client.gui;
 
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,6 +18,7 @@ import net.neoforged.neoforge.client.gui.GuiLayer;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -74,7 +76,7 @@ public class HighlightDirectionOverlay {
 		return new Vec3(x / count, y / count, z / count);
 	}
 
-	private static void render(GuiGraphics guiGraphics, net.minecraft.client.DeltaTracker deltaTracker) {
+	private static void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		Minecraft mc = Minecraft.getInstance();
 		LocalPlayer player = mc.player;
 		if (player == null || mc.level == null || mc.options.hideGui || mc.screen != null) {
@@ -100,11 +102,13 @@ public class HighlightDirectionOverlay {
 
 		int x = (guiGraphics.guiWidth() - LINE_WIDTH) / 2;
 		int y = guiGraphics.guiHeight() - HUD_Y_OFFSET;
-		guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CONTROLS, x, y, 0, 0, LINE_WIDTH, LINE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT, getColor(0xFFFFFF, visibilityAlpha));
+		guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CONTROLS, x, y, 0, 0, LINE_WIDTH, LINE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT,
+				getColor(0xFFFFFF, visibilityAlpha));
 
 		for (Dot dot : groupDots(dots)) {
 			int dotX = x + Math.round((dot.normalizedPosition() + 1F) * (LINE_WIDTH - DOT_SIZE) / 2F);
-			guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CONTROLS, dotX, y, 0, DOT_V, DOT_SIZE, DOT_SIZE, TEXTURE_WIDTH, TEXTURE_HEIGHT, getColor(dot.color(), visibilityAlpha));
+			guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CONTROLS, dotX, y, 0, DOT_V, DOT_SIZE, DOT_SIZE, TEXTURE_WIDTH, TEXTURE_HEIGHT,
+					getColor(dot.color(), visibilityAlpha));
 		}
 
 		dots.stream().min(Comparator.comparingDouble(Dot::distance)).ifPresent(closest -> renderDistance(guiGraphics, mc.font, x, y, closest));
@@ -144,11 +148,13 @@ public class HighlightDirectionOverlay {
 	}
 
 	private static boolean isCloseCenteredAndVisible(LocalPlayer player, Vec3 playerPos, Vec3 eyePos, TrackedBlockTarget target) {
-		return playerPos.distanceToSqr(target.center()) <= HIDE_DISTANCE * HIDE_DISTANCE && isCentered(player, target.center()) && isBlockTargetVisible(player, eyePos, target.positions());
+		return playerPos.distanceToSqr(target.center()) <= HIDE_DISTANCE * HIDE_DISTANCE && isCentered(player, target.center())
+				&& isBlockTargetVisible(player, eyePos, target.positions());
 	}
 
 	private static boolean isCloseCenteredAndVisible(LocalPlayer player, Vec3 playerPos, Vec3 eyePos, Vec3 targetPos) {
-		return playerPos.distanceToSqr(targetPos) <= HIDE_DISTANCE * HIDE_DISTANCE && isCentered(player, targetPos) && isPointVisible(player, eyePos, targetPos, null);
+		return playerPos.distanceToSqr(targetPos) <= HIDE_DISTANCE * HIDE_DISTANCE && isCentered(player, targetPos)
+				&& isPointVisible(player, eyePos, targetPos, null);
 	}
 
 	private static boolean isCentered(LocalPlayer player, Vec3 targetPos) {
@@ -187,7 +193,8 @@ public class HighlightDirectionOverlay {
 		dots.stream().sorted(Comparator.comparingDouble(Dot::normalizedPosition)).forEach(dot -> {
 			for (int i = 0; i < groupedDots.size(); i++) {
 				Dot grouped = groupedDots.get(i);
-				if (grouped.color() == dot.color() && (Math.abs(grouped.relativeYaw() - dot.relativeYaw()) <= GROUP_YAW_DEGREES || grouped.normalizedPosition() == dot.normalizedPosition())) {
+				if (grouped.color() == dot.color() && (Math.abs(grouped.relativeYaw() - dot.relativeYaw()) <= GROUP_YAW_DEGREES
+						|| grouped.normalizedPosition() == dot.normalizedPosition())) {
 					if (dot.distance() < grouped.distance()) {
 						groupedDots.set(i, dot);
 					}

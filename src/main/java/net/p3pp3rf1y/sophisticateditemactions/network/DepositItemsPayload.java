@@ -15,23 +15,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public record DepositItemsPayload(int minSlot, int maxSlot,
-								  Map<ResourceLocation, List<BlockPos>> storagePositions,
-								  Map<ResourceLocation, List<Integer>> entityIds,
-								  boolean onlyMatching) implements CustomPacketPayload {
+public record DepositItemsPayload(int minSlot, int maxSlot, Map<ResourceLocation, List<BlockPos>> storagePositions,
+		Map<ResourceLocation, List<Integer>> entityIds, boolean onlyMatching) implements CustomPacketPayload {
 	public static final Type<DepositItemsPayload> TYPE = new Type<>(SophisticatedCore.getRL("deposit_items"));
-	public static final StreamCodec<RegistryFriendlyByteBuf, DepositItemsPayload> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.INT,
-			DepositItemsPayload::minSlot,
-			ByteBufCodecs.INT,
-			DepositItemsPayload::maxSlot,
+	public static final StreamCodec<RegistryFriendlyByteBuf, DepositItemsPayload> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.INT,
+			DepositItemsPayload::minSlot, ByteBufCodecs.INT, DepositItemsPayload::maxSlot,
 			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()), HashMap::new),
 			DepositItemsPayload::storagePositions,
-			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new),
-			DepositItemsPayload::entityIds,
-			ByteBufCodecs.BOOL,
-			DepositItemsPayload::onlyMatching,
-			DepositItemsPayload::new);
+			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new), DepositItemsPayload::entityIds,
+			ByteBufCodecs.BOOL, DepositItemsPayload::onlyMatching, DepositItemsPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
@@ -39,6 +31,7 @@ public record DepositItemsPayload(int minSlot, int maxSlot,
 	}
 
 	public static void handlePayload(DepositItemsPayload payload, IPayloadContext context) {
-		ItemTransferHandler.handleDeposit(context.player(), payload.minSlot(), payload.maxSlot(), payload.storagePositions(), payload.entityIds(), payload.onlyMatching());
+		ItemTransferHandler.handleDeposit(context.player(), payload.minSlot(), payload.maxSlot(), payload.storagePositions(), payload.entityIds(),
+				payload.onlyMatching());
 	}
 }

@@ -23,7 +23,8 @@ public class RenderedBlockHighlightRenderer {
 	private static final Map<Integer, List<List<BlockPos>>> highlightedPositions = new HashMap<>();
 	private static long highlightExpireTime = 0;
 
-	private RenderedBlockHighlightRenderer() {}
+	private RenderedBlockHighlightRenderer() {
+	}
 
 	public static void addHighlightedPositions(Map<Integer, List<List<BlockPos>>> highlightPositions, int durationTicks) {
 		highlightedPositions.forEach((color, positions) -> positions.clear());
@@ -51,7 +52,8 @@ public class RenderedBlockHighlightRenderer {
 
 		MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
 		SubmitNodeStorage submitNodeStorage = mc.gameRenderer.getSubmitNodeStorage();
-		renderedHighlights.forEach((color, highlights) -> highlights.forEach(highlight -> submitHighlightedBlock(submitNodeStorage, poseStack, partialTick, cameraPos, highlight, mc, buffer, color)));
+		renderedHighlights.forEach((color, highlights) -> highlights
+				.forEach(highlight -> submitHighlightedBlock(submitNodeStorage, poseStack, partialTick, cameraPos, highlight, mc, buffer, color)));
 	}
 
 	private static void submitHighlightedBlock(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos,

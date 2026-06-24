@@ -30,7 +30,8 @@ import java.util.Map;
 public class BackpackItemTransferHandler implements IItemTransferExtension {
 	public static final BackpackItemTransferHandler INSTANCE = new BackpackItemTransferHandler();
 
-	private BackpackItemTransferHandler() {}
+	private BackpackItemTransferHandler() {
+	}
 
 	@Override
 	public boolean hasInventorySourceInScope(Player player, int minSlot, int maxSlot) {
@@ -44,7 +45,8 @@ public class BackpackItemTransferHandler implements IItemTransferExtension {
 	}
 
 	@Override
-	public int depositFromInventorySources(Player player, int minSlot, int maxSlot, boolean onlyMatching, List<StorageItemHandlerTarget> storageTargets, Map<Vec3, ItemTransferData> inserted) {
+	public int depositFromInventorySources(Player player, int minSlot, int maxSlot, boolean onlyMatching, List<StorageItemHandlerTarget> storageTargets,
+			Map<Vec3, ItemTransferData> inserted) {
 		int transferredStackCount = 0;
 		for (ItemStack backpack : getBackpacksInScope(player, minSlot, maxSlot)) {
 			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
@@ -65,20 +67,22 @@ public class BackpackItemTransferHandler implements IItemTransferExtension {
 	public Component getDepositMessage(int inventoryTransferred, int backpackTransferred) {
 		Component inventoryCount = Component.literal(String.valueOf(inventoryTransferred)).withStyle(ChatFormatting.DARK_GREEN);
 		Component backpackCount = Component.literal(String.valueOf(backpackTransferred)).withStyle(ChatFormatting.DARK_GREEN);
-		return inventoryTransferred > 0 ?
-				ItemActionsTranslationHelper.INSTANCE.translStatusMessage("deposited_items_from_inventory_and_backpacks", inventoryCount, backpackCount) :
-				ItemActionsTranslationHelper.INSTANCE.translStatusMessage("deposited_items_from_backpacks", backpackCount);
+		return inventoryTransferred > 0
+				? ItemActionsTranslationHelper.INSTANCE.translStatusMessage("deposited_items_from_inventory_and_backpacks", inventoryCount, backpackCount)
+				: ItemActionsTranslationHelper.INSTANCE.translStatusMessage("deposited_items_from_backpacks", backpackCount);
 	}
 
 	@Override
-	public int restockToInventorySources(Player player, int minSlot, int maxSlot, ItemStack filter, boolean fillEmpty, List<StorageItemHandlerTarget> storageTargets, Map<Vec3, ItemTransferData> restocked) {
+	public int restockToInventorySources(Player player, int minSlot, int maxSlot, ItemStack filter, boolean fillEmpty,
+			List<StorageItemHandlerTarget> storageTargets, Map<Vec3, ItemTransferData> restocked) {
 		int transferredStackCount = 0;
 		for (ItemStack backpack : getBackpacksInScope(player, minSlot, maxSlot)) {
 			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
 			List<RestockUpgradeWrapper> restockUpgrades = backpackWrapper.getUpgradeHandler().getWrappersThatImplement(RestockUpgradeWrapper.class);
 			ResourceHandler<ItemResource> backpackInventory = backpackWrapper.getInventoryForUpgradeProcessing();
 			for (StorageItemHandlerTarget storageTarget : storageTargets) {
-				ResourceHandler<ItemResource> filteredStorageHandler = new RestockFilteredResourceHandler(storageTarget.itemHandler(), backpackInventory, filter, fillEmpty);
+				ResourceHandler<ItemResource> filteredStorageHandler = new RestockFilteredResourceHandler(storageTarget.itemHandler(), backpackInventory,
+						filter, fillEmpty);
 				for (RestockUpgradeWrapper restockUpgrade : restockUpgrades) {
 					List<ItemStack> transferredStacks = restockUpgrade.restockFromHandler(filteredStorageHandler);
 					transferredStackCount += transferredStacks.size();
@@ -93,9 +97,9 @@ public class BackpackItemTransferHandler implements IItemTransferExtension {
 	public Component getRestockMessage(int inventoryTransferred, int backpackTransferred) {
 		Component inventoryCount = Component.literal(String.valueOf(inventoryTransferred)).withStyle(ChatFormatting.DARK_GREEN);
 		Component backpackCount = Component.literal(String.valueOf(backpackTransferred)).withStyle(ChatFormatting.DARK_GREEN);
-		return inventoryTransferred > 0 ?
-				ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_items_to_inventory_and_backpacks", inventoryCount, backpackCount) :
-				ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_items_to_backpacks", backpackCount);
+		return inventoryTransferred > 0
+				? ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_items_to_inventory_and_backpacks", inventoryCount, backpackCount)
+				: ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_items_to_backpacks", backpackCount);
 	}
 
 	private static List<ItemStack> getBackpacksInScope(Player player, int minSlot, int maxSlot) {
@@ -114,7 +118,9 @@ public class BackpackItemTransferHandler implements IItemTransferExtension {
 			}
 
 			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> {
-				if (!inventoryHandlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY) && !inventoryHandlerName.equals(PlayerInventoryProvider.OFFHAND_INVENTORY) && !inventoryHandlerName.equals(PlayerInventoryProvider.ARMOR_INVENTORY)) {
+				if (!inventoryHandlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)
+						&& !inventoryHandlerName.equals(PlayerInventoryProvider.OFFHAND_INVENTORY)
+						&& !inventoryHandlerName.equals(PlayerInventoryProvider.ARMOR_INVENTORY)) {
 					backpacks.add(backpack);
 				}
 				return false;
@@ -129,12 +135,15 @@ public class BackpackItemTransferHandler implements IItemTransferExtension {
 		return !backpackWrapper.getUpgradeHandler().getWrappersThatImplement(DepositUpgradeWrapper.class).isEmpty();
 	}
 
-	private static void logTransferredStacks(Map<Vec3, ItemTransferData> transferData, StorageItemHandlerTarget storageTarget, List<ItemStack> transferredStacks) {
+	private static void logTransferredStacks(Map<Vec3, ItemTransferData> transferData, StorageItemHandlerTarget storageTarget,
+			List<ItemStack> transferredStacks) {
 		if (transferredStacks.isEmpty()) {
 			return;
 		}
 
-		transferData.computeIfAbsent(storageTarget.position(), k -> new ItemTransferData(storageTarget.positionToOpen(), storageTarget.position(), new ArrayList<>()))
+		transferData
+				.computeIfAbsent(storageTarget.position(),
+						k -> new ItemTransferData(storageTarget.positionToOpen(), storageTarget.position(), new ArrayList<>()))
 				.itemsTransferred().addAll(transferredStacks);
 	}
 
@@ -220,7 +229,8 @@ public class BackpackItemTransferHandler implements IItemTransferExtension {
 
 		private boolean allowsInsert(ItemResource resource) {
 			ItemMatchResult matchResult = storageTarget.itemMatcher().apply(ItemStackKey.of(resource.toStack()));
-			return matchResult == ItemMatchResult.MATCHING_STACK || matchResult == ItemMatchResult.MATCHING_ITEM || (!onlyMatching && matchResult == ItemMatchResult.NO_MATCH);
+			return matchResult == ItemMatchResult.MATCHING_STACK || matchResult == ItemMatchResult.MATCHING_ITEM
+					|| (!onlyMatching && matchResult == ItemMatchResult.NO_MATCH);
 		}
 	}
 
@@ -230,7 +240,8 @@ public class BackpackItemTransferHandler implements IItemTransferExtension {
 		private final ItemStack filter;
 		private final boolean fillEmpty;
 
-		private RestockFilteredResourceHandler(ResourceHandler<ItemResource> storageHandler, ResourceHandler<ItemResource> backpackInventory, ItemStack filter, boolean fillEmpty) {
+		private RestockFilteredResourceHandler(ResourceHandler<ItemResource> storageHandler, ResourceHandler<ItemResource> backpackInventory, ItemStack filter,
+				boolean fillEmpty) {
 			this.storageHandler = storageHandler;
 			this.backpackInventory = backpackInventory;
 			this.filter = filter;
@@ -294,7 +305,9 @@ public class BackpackItemTransferHandler implements IItemTransferExtension {
 			}
 
 			ItemStackKey stackKey = ItemStackKey.of(stack);
-			return InventoryHelper.iterate(backpackInventory, (slot, backpackResource, amount) -> !backpackResource.isEmpty() && stackKey.matches(backpackResource.toStack(amount)), () -> false, Boolean.TRUE::equals);
+			return InventoryHelper.iterate(backpackInventory,
+					(slot, backpackResource, amount) -> !backpackResource.isEmpty() && stackKey.matches(backpackResource.toStack(amount)), () -> false,
+					Boolean.TRUE::equals);
 		}
 	}
 }
