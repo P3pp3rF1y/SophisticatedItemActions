@@ -1,10 +1,9 @@
 package net.p3pp3rf1y.sophisticateditemactions.compat.refinedstorage;
 
 import com.refinedmods.refinedstorage.api.network.Network;
+import com.refinedmods.refinedstorage.api.network.node.NetworkNode;
 import com.refinedmods.refinedstorage.api.network.security.Permission;
 import com.refinedmods.refinedstorage.api.network.storage.StorageNetworkComponent;
-import com.refinedmods.refinedstorage.api.network.node.NetworkNode;
-import com.refinedmods.refinedstorage.api.storage.Storage;
 import com.refinedmods.refinedstorage.common.api.security.PlatformSecurityNetworkComponent;
 import com.refinedmods.refinedstorage.common.grid.AbstractGridBlockEntity;
 import com.refinedmods.refinedstorage.common.security.BuiltinPermission;
@@ -15,12 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
-import net.p3pp3rf1y.sophisticateditemactions.common.IBlockEntityItemActionHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.IBlockItemActionHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.IDepositHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
-import net.p3pp3rf1y.sophisticateditemactions.common.SubLevelCompatHelper;
+import net.p3pp3rf1y.sophisticateditemactions.common.*;
 import net.p3pp3rf1y.sophisticateditemactions.mixin.AccessorAbstractGridBlockEntity;
 
 import java.util.Optional;
@@ -41,9 +35,9 @@ public class RefinedStorageTerminalItemActionHandler implements IBlockEntityItem
 
 	@Override
 	public ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos, IBlockItemActionHandler.Action action) {
-		return getFromBlockEntity(player, pos, grid -> canPlayerUse(grid, player, getPermission(action))
-				? getItemMatch(stackKey, grid, action)
-				: ItemMatchResult.NO_MATCH).orElse(ItemMatchResult.NO_MATCH);
+		return getFromBlockEntity(player, pos,
+				grid -> canPlayerUse(grid, player, getPermission(action)) ? getItemMatch(stackKey, grid, action) : ItemMatchResult.NO_MATCH)
+				.orElse(ItemMatchResult.NO_MATCH);
 	}
 
 	@Override
@@ -58,8 +52,7 @@ public class RefinedStorageTerminalItemActionHandler implements IBlockEntityItem
 
 	@Override
 	public Optional<IDepositHandler> getDepositHandler(ServerPlayer player, BlockPos pos) {
-		return getFromBlockEntity(player, pos, grid -> createDepositHandler(player, grid))
-				.flatMap(handler -> handler);
+		return getFromBlockEntity(player, pos, grid -> createDepositHandler(player, grid)).flatMap(handler -> handler);
 	}
 
 	@Override
@@ -69,8 +62,7 @@ public class RefinedStorageTerminalItemActionHandler implements IBlockEntityItem
 
 	@Override
 	public Optional<IRestockHandler> getRestockHandler(ServerPlayer player, BlockPos pos) {
-		return getFromBlockEntity(player, pos, grid -> createRestockHandler(player, grid))
-				.flatMap(handler -> handler);
+		return getFromBlockEntity(player, pos, grid -> createRestockHandler(player, grid)).flatMap(handler -> handler);
 	}
 
 	private Optional<IDepositHandler> createDepositHandler(ServerPlayer player, AbstractGridBlockEntity grid) {
@@ -129,14 +121,11 @@ public class RefinedStorageTerminalItemActionHandler implements IBlockEntityItem
 			return Optional.empty();
 		}
 
-		return getNetwork(grid)
-				.map(network -> network.getComponent(StorageNetworkComponent.class));
+		return getNetwork(grid).map(network -> network.getComponent(StorageNetworkComponent.class));
 	}
 
 	private static boolean canPlayerUse(AbstractGridBlockEntity grid, ServerPlayer player, Permission permission) {
-		return getNetwork(grid)
-				.map(network -> network.getComponent(PlatformSecurityNetworkComponent.class).isAllowed(permission, player))
-				.orElse(false);
+		return getNetwork(grid).map(network -> network.getComponent(PlatformSecurityNetworkComponent.class).isAllowed(permission, player)).orElse(false);
 	}
 
 	private static Optional<Network> getNetwork(AbstractGridBlockEntity grid) {

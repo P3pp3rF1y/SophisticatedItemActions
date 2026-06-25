@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticateditemactions.compat.create;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import com.simibubi.create.content.contraptions.render.ClientContraption;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
@@ -89,7 +89,7 @@ public class RenderedEntityBlockHighlightRenderer {
 			return null;
 		}
 
- 		List<RenderedHighlight> highlights = new ArrayList<>();
+		List<RenderedHighlight> highlights = new ArrayList<>();
 		ClientContraption clientContraption = contraptionEntity.getContraption().getOrCreateClientContraptionLazy();
 		Level renderLevel = clientContraption.getRenderLevel();
 		for (List<BlockPos> group : highlightData.positionGroups()) {
@@ -136,7 +136,8 @@ public class RenderedEntityBlockHighlightRenderer {
 		return new RenderedHighlight(edges, pivotSum.scale(1D / count));
 	}
 
-	private static void renderHighlightedBlock(PoseStack poseStack, float partialTick, Vec3 cameraPos, CachedEntityHighlight cachedHighlight, Minecraft mc, MultiBufferSource.BufferSource buffer, int color) {
+	private static void renderHighlightedBlock(PoseStack poseStack, float partialTick, Vec3 cameraPos, CachedEntityHighlight cachedHighlight, Minecraft mc,
+			MultiBufferSource.BufferSource buffer, int color) {
 		Entity entity = mc.level.getEntity(cachedHighlight.entityId());
 		if (!(entity instanceof AbstractContraptionEntity contraptionEntity) || contraptionEntity.getContraption() == null) {
 			return;
@@ -144,7 +145,8 @@ public class RenderedEntityBlockHighlightRenderer {
 
 		poseStack.pushPose();
 		poseStack.translate(-cameraPos.x(), -cameraPos.y(), -cameraPos.z());
-		poseStack.translate(Mth.lerp(partialTick, entity.xOld, entity.getX()), Mth.lerp(partialTick, entity.yOld, entity.getY()), Mth.lerp(partialTick, entity.zOld, entity.getZ()));
+		poseStack.translate(Mth.lerp(partialTick, entity.xOld, entity.getX()), Mth.lerp(partialTick, entity.yOld, entity.getY()),
+				Mth.lerp(partialTick, entity.zOld, entity.getZ()));
 		contraptionEntity.applyLocalTransforms(poseStack, partialTick);
 		for (RenderedHighlight highlight : cachedHighlight.highlights()) {
 			poseStack.pushPose();

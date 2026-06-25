@@ -15,6 +15,6 @@ public class ReiCompat implements ICompat {
 
 	@Override
 	public void setup() {
-		//noop
+		// noop
 	}
 }

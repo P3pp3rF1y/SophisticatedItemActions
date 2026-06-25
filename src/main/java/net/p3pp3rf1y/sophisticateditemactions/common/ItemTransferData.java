@@ -11,12 +11,8 @@ import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public record ItemTransferData(@Nullable BlockPos positionToOpen, Vec3 itemFlightPos,
-							   List<ItemStack> itemsTransferred) {
+public record ItemTransferData(@Nullable BlockPos positionToOpen, Vec3 itemFlightPos, List<ItemStack> itemsTransferred) {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ItemTransferData> STREAM_CODEC = StreamCodec.composite(
-			StreamCodecHelper.ofNullable(BlockPos.STREAM_CODEC), ItemTransferData::positionToOpen,
-			StreamCodecHelper.VEC3, ItemTransferData::itemFlightPos,
-			ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()), ItemTransferData::itemsTransferred,
-			ItemTransferData::new
-	);
+			StreamCodecHelper.ofNullable(BlockPos.STREAM_CODEC), ItemTransferData::positionToOpen, StreamCodecHelper.VEC3, ItemTransferData::itemFlightPos,
+			ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()), ItemTransferData::itemsTransferred, ItemTransferData::new);
 }

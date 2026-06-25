@@ -12,12 +12,7 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.util.BlockHighlightGroups;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
-import net.p3pp3rf1y.sophisticateditemactions.common.IBlockEntityItemActionHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.IDepositHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
-import net.p3pp3rf1y.sophisticateditemactions.common.StorageItemHandlerTarget;
-import net.p3pp3rf1y.sophisticateditemactions.common.SubLevelCompatHelper;
+import net.p3pp3rf1y.sophisticateditemactions.common.*;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -118,7 +113,8 @@ public class ItemVaultItemActionHandler implements IBlockEntityItemActionHandler
 		}
 
 		ItemVaultBlockEntity targetVault = controller != null ? controller : vault;
-		return Optional.of(new StorageItemHandlerTarget(targetVault.getBlockPos(), getVaultCenter(targetVault), itemHandler, stackKey -> getItemMatch(stackKey, itemHandler)));
+		return Optional.of(new StorageItemHandlerTarget(targetVault.getBlockPos(), getVaultCenter(targetVault), itemHandler,
+				stackKey -> getItemMatch(stackKey, itemHandler)));
 	}
 
 	private static ItemMatchResult getItemMatch(ItemStackKey stackKey, @Nullable IItemHandler itemHandler) {
@@ -180,6 +176,7 @@ public class ItemVaultItemActionHandler implements IBlockEntityItemActionHandler
 			min = new BlockPos(Math.min(min.getX(), pos.getX()), Math.min(min.getY(), pos.getY()), Math.min(min.getZ(), pos.getZ()));
 			max = new BlockPos(Math.max(max.getX(), pos.getX()), Math.max(max.getY(), pos.getY()), Math.max(max.getZ(), pos.getZ()));
 		}
-		return SubLevelCompatHelper.projectToWorld(controller.getLevel(), new Vec3((min.getX() + max.getX() + 1) / 2D, (min.getY() + max.getY() + 1) / 2D, (min.getZ() + max.getZ() + 1) / 2D));
+		return SubLevelCompatHelper.projectToWorld(controller.getLevel(),
+				new Vec3((min.getX() + max.getX() + 1) / 2D, (min.getY() + max.getY() + 1) / 2D, (min.getZ() + max.getZ() + 1) / 2D));
 	}
 }

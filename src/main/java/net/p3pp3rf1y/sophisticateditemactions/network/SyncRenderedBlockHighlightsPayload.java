@@ -14,14 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public record SyncRenderedBlockHighlightsPayload(Map<Integer, List<List<BlockPos>>> highlightPositions,
-											 int durationTicks) implements CustomPacketPayload {
+public record SyncRenderedBlockHighlightsPayload(Map<Integer, List<List<BlockPos>>> highlightPositions, int durationTicks) implements CustomPacketPayload {
 	public static final Type<SyncRenderedBlockHighlightsPayload> TYPE = new Type<>(SophisticatedItemActions.getRL("sync_rendered_block_highlights"));
 	public static final StreamCodec<ByteBuf, SyncRenderedBlockHighlightsPayload> STREAM_CODEC = StreamCodec.composite(
 			StreamCodecHelper.ofMap(ByteBufCodecs.INT, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()).apply(ByteBufCodecs.list()), HashMap::new),
-			SyncRenderedBlockHighlightsPayload::highlightPositions,
-			ByteBufCodecs.INT,
-			SyncRenderedBlockHighlightsPayload::durationTicks,
+			SyncRenderedBlockHighlightsPayload::highlightPositions, ByteBufCodecs.INT, SyncRenderedBlockHighlightsPayload::durationTicks,
 			SyncRenderedBlockHighlightsPayload::new);
 
 	@Override

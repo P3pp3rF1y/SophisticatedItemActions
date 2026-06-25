@@ -12,12 +12,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
-import net.p3pp3rf1y.sophisticateditemactions.common.IBlockEntityItemActionHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.IBlockItemActionHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.IDepositHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
-import net.p3pp3rf1y.sophisticateditemactions.common.SubLevelCompatHelper;
+import net.p3pp3rf1y.sophisticateditemactions.common.*;
 
 import java.util.Optional;
 
@@ -43,8 +38,8 @@ public class AppliedEnergistics2TerminalItemActionHandler implements IBlockEntit
 	@Override
 	public ItemMatchResult getItemMatch(ServerPlayer player, ItemStackKey stackKey, BlockPos pos, IBlockItemActionHandler.Action action) {
 		return getFromBlockEntity(player, pos, cableBus -> getTerminal(cableBus)
-				.map(terminal -> AppliedEnergistics2ItemActionHelper.getItemMatch(player, stackKey, terminal, action))
-				.orElse(ItemMatchResult.NO_MATCH)).orElse(ItemMatchResult.NO_MATCH);
+				.map(terminal -> AppliedEnergistics2ItemActionHelper.getItemMatch(player, stackKey, terminal, action)).orElse(ItemMatchResult.NO_MATCH))
+				.orElse(ItemMatchResult.NO_MATCH);
 	}
 
 	@Override

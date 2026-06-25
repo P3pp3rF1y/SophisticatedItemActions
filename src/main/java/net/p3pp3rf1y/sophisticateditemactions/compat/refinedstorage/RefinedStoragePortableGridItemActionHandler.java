@@ -9,12 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
-import net.p3pp3rf1y.sophisticateditemactions.common.IBlockEntityItemActionHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.IBlockItemActionHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.IDepositHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.IRestockHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.ItemMatchResult;
-import net.p3pp3rf1y.sophisticateditemactions.common.SubLevelCompatHelper;
+import net.p3pp3rf1y.sophisticateditemactions.common.*;
 import net.p3pp3rf1y.sophisticateditemactions.mixin.AccessorAbstractPortableGridBlockEntity;
 
 import java.util.Optional;
@@ -94,8 +89,8 @@ public class RefinedStoragePortableGridItemActionHandler implements IBlockEntity
 	}
 
 	private static Optional<Storage> getStorage(AbstractPortableGridBlockEntity portableGrid) {
-		com.refinedmods.refinedstorage.common.api.grid.Grid grid =
-				((AccessorAbstractPortableGridBlockEntity) portableGrid).sophisticatedItemActions$invokeGetGrid();
+		com.refinedmods.refinedstorage.common.api.grid.Grid grid = ((AccessorAbstractPortableGridBlockEntity) portableGrid)
+				.sophisticatedItemActions$invokeGetGrid();
 		return grid.isGridActive() ? Optional.of(grid.getItemStorage()) : Optional.empty();
 	}
 }

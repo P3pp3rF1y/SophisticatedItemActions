@@ -40,7 +40,8 @@ public class SableClientSubLevelCompat extends SableSubLevelCompat {
 				continue;
 			}
 
-			shape = Shapes.join(shape, storageLevel.getBlockState(pos).getShape(storageLevel, pos).move(pos.getX() - origin.getX(), pos.getY() - origin.getY(), pos.getZ() - origin.getZ()), BooleanOp.OR);
+			shape = Shapes.join(shape, storageLevel.getBlockState(pos).getShape(storageLevel, pos).move(pos.getX() - origin.getX(), pos.getY() - origin.getY(),
+					pos.getZ() - origin.getZ()), BooleanOp.OR);
 			centerSum = centerSum.add(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
 			count++;
 		}
@@ -57,11 +58,8 @@ public class SableClientSubLevelCompat extends SableSubLevelCompat {
 			edges.add(new VoxelOutliner.Edge(edge.a(), edge.b()));
 		}
 
-		return new RenderedHighlight(edges, centerSum.scale(1D / count).subtract(localOrigin), new RenderedHighlight.RenderTransform(
-				new Vec3(renderPose.position().x(), renderPose.position().y(), renderPose.position().z()),
-				rotationPoint,
-				new Quaternionf(renderPose.orientation()),
-				new Vec3(renderPose.scale().x(), renderPose.scale().y(), renderPose.scale().z())
-		));
+		return new RenderedHighlight(edges, centerSum.scale(1D / count).subtract(localOrigin),
+				new RenderedHighlight.RenderTransform(new Vec3(renderPose.position().x(), renderPose.position().y(), renderPose.position().z()), rotationPoint,
+						new Quaternionf(renderPose.orientation()), new Vec3(renderPose.scale().x(), renderPose.scale().y(), renderPose.scale().z())));
 	}
 }

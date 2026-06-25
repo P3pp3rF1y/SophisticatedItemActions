@@ -2,10 +2,9 @@ package net.p3pp3rf1y.sophisticateditemactions.common;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
-
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
@@ -35,7 +34,7 @@ public class SubLevelCompatHelper {
 
 	public static void setCompat(ISubLevelCompat compat) {
 		SubLevelCompatHelper.compat = compat;
-		SubLevelCompatHelper.clientCompat = compat.getClientCompat();
+		clientCompat = compat.getClientCompat();
 	}
 
 	public static void setClientCompat(ISubLevelCompat compat) {

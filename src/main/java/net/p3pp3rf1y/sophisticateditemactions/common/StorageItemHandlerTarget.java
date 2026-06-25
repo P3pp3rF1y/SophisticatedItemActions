@@ -9,7 +9,8 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import javax.annotation.Nullable;
 import java.util.function.Function;
 
-public record StorageItemHandlerTarget(@Nullable BlockPos positionToOpen, Vec3 position, IItemHandler itemHandler, Function<ItemStackKey, ItemMatchResult> itemMatcher) {
+public record StorageItemHandlerTarget(@Nullable BlockPos positionToOpen, Vec3 position, IItemHandler itemHandler,
+		Function<ItemStackKey, ItemMatchResult> itemMatcher) {
 	public StorageItemHandlerTarget(@Nullable BlockPos positionToOpen, Vec3 position, IItemHandler itemHandler) {
 		this(positionToOpen, position, itemHandler, stackKey -> getItemMatch(stackKey, itemHandler));
 	}

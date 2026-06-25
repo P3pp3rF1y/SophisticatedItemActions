@@ -39,17 +39,16 @@ public class RenderedBlockHighlightRenderer {
 		}
 
 		Map<Integer, List<RenderedHighlight>> renderedHighlights = new HashMap<>();
-		highlightedPositions.forEach((color, positionGroups) -> renderedHighlights.put(color,
-				positionGroups.stream()
-						.map(positions -> SubLevelCompatHelper.getRenderedHighlight(mc.level, positions, partialTick))
-						.filter(Objects::nonNull)
-						.toList()));
+		highlightedPositions.forEach((color, positionGroups) -> renderedHighlights.put(color, positionGroups.stream()
+				.map(positions -> SubLevelCompatHelper.getRenderedHighlight(mc.level, positions, partialTick)).filter(Objects::nonNull).toList()));
 
 		MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
-		renderedHighlights.forEach((color, highlights) -> highlights.forEach(highlight -> renderHighlightedBlock(poseStack, partialTick, cameraPos, highlight, mc, buffer, color)));
+		renderedHighlights.forEach((color, highlights) -> highlights
+				.forEach(highlight -> renderHighlightedBlock(poseStack, partialTick, cameraPos, highlight, mc, buffer, color)));
 	}
 
-	private static void renderHighlightedBlock(PoseStack poseStack, float partialTick, Vec3 cameraPos, RenderedHighlight highlight, Minecraft mc, MultiBufferSource.BufferSource buffer, int color) {
+	private static void renderHighlightedBlock(PoseStack poseStack, float partialTick, Vec3 cameraPos, RenderedHighlight highlight, Minecraft mc,
+			MultiBufferSource.BufferSource buffer, int color) {
 		poseStack.pushPose();
 		RenderedHighlight.RenderTransform transform = highlight.transform();
 		if (transform == null) {

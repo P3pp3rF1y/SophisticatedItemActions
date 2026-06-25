@@ -43,22 +43,21 @@ public class ReiClientCompat {
 	}
 
 	private static ItemStack getStack() {
-		return REIRuntime.getInstance().getOverlay()
-				.<ItemStack>flatMap(overlay -> {
-					EntryStack<?> focusedStack = overlay.getEntryList().getFocusedStack();
-					if (!focusedStack.isEmpty()) {
-						return Optional.of(focusedStack.castValue());
-					}
+		return REIRuntime.getInstance().getOverlay().<ItemStack>flatMap(overlay -> {
+			EntryStack<?> focusedStack = overlay.getEntryList().getFocusedStack();
+			if (!focusedStack.isEmpty()) {
+				return Optional.of(focusedStack.castValue());
+			}
 
-					if (overlay.getFavoritesList().isPresent()) {
-						focusedStack = overlay.getFavoritesList().get().getFocusedStack();
-						if (!focusedStack.isEmpty()) {
-							return Optional.of(focusedStack.castValue());
-						}
-					}
+			if (overlay.getFavoritesList().isPresent()) {
+				focusedStack = overlay.getFavoritesList().get().getFocusedStack();
+				if (!focusedStack.isEmpty()) {
+					return Optional.of(focusedStack.castValue());
+				}
+			}
 
-					return Optional.empty();
-				}).orElseGet(ReiClientCompat::getRecipeViewStack);
+			return Optional.empty();
+		}).orElseGet(ReiClientCompat::getRecipeViewStack);
 	}
 
 	private static ItemStack getRecipeViewStack() {

@@ -18,18 +18,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public record RequestItemHighlightsPayload(ItemStack stack,
-										   Map<ResourceLocation, List<BlockPos>> inventoryPositions,
-										   Map<ResourceLocation, List<Integer>> entities) implements CustomPacketPayload {
+public record RequestItemHighlightsPayload(ItemStack stack, Map<ResourceLocation, List<BlockPos>> inventoryPositions,
+		Map<ResourceLocation, List<Integer>> entities) implements CustomPacketPayload {
 	public static final Type<RequestItemHighlightsPayload> TYPE = new Type<>(SophisticatedCore.getRL("request_item_highlights"));
-	public static final StreamCodec<RegistryFriendlyByteBuf, RequestItemHighlightsPayload> STREAM_CODEC = StreamCodec.composite(
-			ItemStack.STREAM_CODEC,
+	public static final StreamCodec<RegistryFriendlyByteBuf, RequestItemHighlightsPayload> STREAM_CODEC = StreamCodec.composite(ItemStack.STREAM_CODEC,
 			RequestItemHighlightsPayload::stack,
 			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()), HashMap::new),
 			RequestItemHighlightsPayload::inventoryPositions,
 			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new),
-			RequestItemHighlightsPayload::entities,
-			RequestItemHighlightsPayload::new);
+			RequestItemHighlightsPayload::entities, RequestItemHighlightsPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

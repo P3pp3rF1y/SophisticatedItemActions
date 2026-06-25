@@ -72,7 +72,8 @@ public class SableSubLevelCompat implements ISubLevelCompat {
 				if (blockEntity == null || blockEntity.isRemoved()) {
 					continue;
 				}
-				if (SableCompanion.INSTANCE.distanceSquaredWithSubLevels(level, origin.getCenter(), Vec3.atCenterOf(blockEntity.getBlockPos())) <= (double) range * range) {
+				if (SableCompanion.INSTANCE.distanceSquaredWithSubLevels(level, origin.getCenter(),
+						Vec3.atCenterOf(blockEntity.getBlockPos())) <= (double) range * range) {
 					blockEntities.add(blockEntity);
 				}
 			}

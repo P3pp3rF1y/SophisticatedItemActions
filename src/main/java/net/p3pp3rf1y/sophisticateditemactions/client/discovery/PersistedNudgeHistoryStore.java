@@ -73,11 +73,7 @@ public class PersistedNudgeHistoryStore {
 	}
 
 	private static Path getDataFilePath(Minecraft minecraft, String connectionKey) {
-		return minecraft.gameDirectory.toPath()
-				.resolve("local")
-				.resolve(SophisticatedItemActions.MOD_ID)
-				.resolve("data")
-				.resolve(connectionKey)
+		return minecraft.gameDirectory.toPath().resolve("local").resolve(SophisticatedItemActions.MOD_ID).resolve("data").resolve(connectionKey)
 				.resolve(DATA_FILE_NAME);
 	}
 
