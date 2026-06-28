@@ -205,7 +205,7 @@ public class ClientEventHandler {
 		boolean fillEmpty = (mods & GLFW.GLFW_MOD_CONTROL) != 0;
 
 		Screen screen = Minecraft.getInstance().screen;
-		if (keybindSettings.restockOnlyInGUI.get() && !(screen instanceof AbstractContainerScreen<?>)) {
+		if (keybindSettings.restockOnlyInGUI.get() && screen != null) {
 			return false;
 		}
 		ItemStack filter = ItemStack.EMPTY;
