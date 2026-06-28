@@ -39,5 +39,8 @@
   "sophisticateditemactions.configuration.restockEnabled": "Enable Restock Nudge",
   "sophisticateditemactions.configuration.depositEnabled": "Enable Deposit Nudge",
   "sophisticateditemactions.configuration.checkIntervalTicks": "Check Interval",
-  "sophisticateditemactions.configuration.debugLogging": "Debug Logging"
+  "sophisticateditemactions.configuration.debugLogging": "Debug Logging",
+  "sophisticateditemactions.configuration.keybindSettings": "Keybind Settings",
+  "sophisticateditemactions.configuration.depositOnlyInGUI": "Only allow depositing while a GUI is open",
+  "sophisticateditemactions.configuration.restockOnlyInGUI": "Only allow restocking while a GUI is open"
 }

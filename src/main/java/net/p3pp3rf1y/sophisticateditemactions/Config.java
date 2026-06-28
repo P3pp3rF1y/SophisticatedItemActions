@@ -18,11 +18,13 @@ public class Config {
 
 	public static class Client {
 		public final DiscoveryNudges discoveryNudges;
+		public final KeybindSettings keybindSettings;
 
 		public Client(ModConfigSpec.Builder builder) {
 			builder.comment("Client-side Settings").push("client");
 
 			discoveryNudges = new DiscoveryNudges(builder);
+			keybindSettings = new KeybindSettings(builder);
 
 			builder.pop();
 		}
@@ -68,6 +70,20 @@ public class Config {
 			depositEnabled = builder.comment("Whether deposit hint can be shown").define("depositEnabled", true);
 			checkIntervalTicks = builder.comment("How often to evaluate nudge state in ticks").defineInRange("checkIntervalTicks", 40, 1, Integer.MAX_VALUE);
 			debugLogging = builder.comment("Logs nudge state transitions to debug log").define("debugLogging", false);
+
+			builder.pop();
+		}
+	}
+
+	public static class KeybindSettings {
+		public final ModConfigSpec.BooleanValue depositOnlyInGUI;
+		public final ModConfigSpec.BooleanValue restockOnlyInGUI;
+
+		public KeybindSettings(ModConfigSpec.Builder builder) {
+			builder.comment("Client configuration for keybind behavior").push("keybindSettings");
+
+			depositOnlyInGUI = builder.comment("Whether deposit key should be enabled only in GUIs").define("depositOnlyInGUI", false);
+			restockOnlyInGUI = builder.comment("Whether restock key should be enabled only in GUIs").define("restockOnlyInGUI", false);
 
 			builder.pop();
 		}

@@ -16,6 +16,8 @@ import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.IKeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
+import net.p3pp3rf1y.sophisticateditemactions.Config;
+import net.p3pp3rf1y.sophisticateditemactions.Config.KeybindSettings;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.ItemActionNudgeManager;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
@@ -49,6 +51,7 @@ public class ClientEventHandler {
 			KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY);
 	private static final List<IHoveredStackProvider> HOVERED_STACK_PROVIDERS = new ArrayList<>();
 	private static final ItemActionNudgeManager NUDGE_MANAGER = new ItemActionNudgeManager();
+	private static final KeybindSettings keybindSettings = Config.CLIENT.keybindSettings;
 	private static final IHoveredStackProvider DEFAULT_HOVERED_STACK_PROVIDER = new IHoveredStackProvider() {
 		@Override
 		public ItemStack getHoveredStack(Screen screen) {
@@ -202,6 +205,9 @@ public class ClientEventHandler {
 		boolean fillEmpty = (mods & GLFW.GLFW_MOD_CONTROL) != 0;
 
 		Screen screen = Minecraft.getInstance().screen;
+		if (keybindSettings.restockOnlyInGUI.get() && screen == null) {
+			return false;
+		}
 		ItemStack filter = ItemStack.EMPTY;
 		int slot = -1;
 		boolean refillSingle = false;
@@ -267,6 +273,10 @@ public class ClientEventHandler {
 			return false;
 		}
 
+		
+		if (keybindSettings.depositOnlyInGUI.get()) {
+			return false;
+		}
 		return tryDepositItem(player, onlyMatching);
 	}
 
