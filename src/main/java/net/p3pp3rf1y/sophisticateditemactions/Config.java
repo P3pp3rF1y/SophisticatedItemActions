@@ -77,11 +77,13 @@ public class Config {
 
 	public static class KeybindSettings {
 		public final ModConfigSpec.BooleanValue depositOnlyInGUI;
+		public final ModConfigSpec.BooleanValue restockOnlyInGUI;
 
 		public KeybindSettings(ModConfigSpec.Builder builder) {
 			builder.comment("Client configuration for keybind behavior").push("keybindSettings");
 
 			depositOnlyInGUI = builder.comment("Whether deposit key should be enabled only in GUIs").define("depositOnlyInGUI", false);
+			restockOnlyInGUI = builder.comment("Whether restock key should be enabled only in GUIs").define("restockOnlyInGUI", false);
 
 			builder.pop();
 		}
