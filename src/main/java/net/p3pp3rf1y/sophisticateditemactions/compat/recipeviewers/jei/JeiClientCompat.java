@@ -4,15 +4,12 @@ import com.mojang.blaze3d.platform.InputConstants;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.runtime.IJeiRuntime;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.p3pp3rf1y.sophisticateditemactions.client.ClientEventHandler;
-import net.p3pp3rf1y.sophisticateditemactions.common.HighlightHandler;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
@@ -56,36 +53,23 @@ public class JeiClientCompat {
 	}
 
 	public static void handleGuiKeyPress(ScreenEvent.KeyPressed.Pre event) {
-		if (runtime == null) {
+		if (runtime == null || ClientEventHandler.shouldSkipGuiItemAction(event.getScreen())) {
 			return;
 		}
 		InputConstants.Key key = InputConstants.getKey(event.getKeyEvent());
-		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key) && getStack().map(JeiClientCompat::tryHighlightItem).orElse(false)) {
-			event.getScreen().getMinecraft().setScreen(null);
+		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key) && getStack().map(ClientEventHandler::tryHighlightGuiItem).orElse(false)) {
 			event.setCanceled(true);
 		}
 	}
 
 	public static void handleGuiMouseKeyPress(ScreenEvent.MouseButtonPressed.Pre event) {
-		if (runtime == null) {
+		if (runtime == null || ClientEventHandler.shouldSkipGuiItemAction(event.getScreen())) {
 			return;
 		}
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
-		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input) && getStack().map(JeiClientCompat::tryHighlightItem).orElse(false)) {
-			event.getScreen().getMinecraft().setScreen(null);
+		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input) && getStack().map(ClientEventHandler::tryHighlightGuiItem).orElse(false)) {
 			event.setCanceled(true);
 		}
 	}
 
-	private static boolean tryHighlightItem(ItemStack stack) {
-		Minecraft mc = Minecraft.getInstance();
-		LocalPlayer player = mc.player;
-		if (player == null) {
-			return false;
-		}
-
-		HighlightHandler.highlightItem(player, stack);
-
-		return true;
-	}
 }
