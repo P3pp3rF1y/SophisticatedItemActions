@@ -6,7 +6,6 @@ import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.screen.RecipeScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ScreenEvent;
@@ -50,33 +49,29 @@ public class EmiClientCompat {
 	}
 
 	public static void handleGuiKeyPress(ScreenEvent.KeyPressed.Pre event) {
+		if (ClientEventHandler.shouldSkipGuiItemAction(event.getScreen())) {
+			return;
+		}
 		InputConstants.Key key = InputConstants.getKey(event.getKeyEvent());
 		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key)) {
 			ItemStack stack = getStack();
-			if (!stack.isEmpty() && tryHighlightItem(stack)) {
-				event.getScreen().getMinecraft().setScreen(null);
+			if (ClientEventHandler.tryHighlightGuiItem(stack)) {
 				event.setCanceled(true);
 			}
 		}
 	}
 
 	public static void handleGuiMouseKeyPress(ScreenEvent.MouseButtonPressed.Pre event) {
+		if (ClientEventHandler.shouldSkipGuiItemAction(event.getScreen())) {
+			return;
+		}
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
 		if (ClientEventHandler.ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input)) {
 			ItemStack stack = getStack();
-			if (!stack.isEmpty() && tryHighlightItem(stack)) {
-				event.getScreen().getMinecraft().setScreen(null);
+			if (ClientEventHandler.tryHighlightGuiItem(stack)) {
 				event.setCanceled(true);
 			}
 		}
 	}
 
-	private static boolean tryHighlightItem(ItemStack stack) {
-		Minecraft mc = Minecraft.getInstance();
-		LocalPlayer player = mc.player;
-		if (player == null) {
-			return false;
-		}
-		return ClientEventHandler.tryHighlightItem(player, stack);
-	}
 }

@@ -39,7 +39,6 @@ public class HighlightHandler {
 	private static final int HIGHLIGHT_RANGE = 32;
 	private static final int MIN_HIGHLIGHT_DURATION = 40;
 	private static final int MAX_HIGHLIGHT_DURATION = 160;
-
 	public static RequestItemHighlightsPayload createHighlightRequestPayload(Player player, ItemStack stack) {
 		Map<Identifier, List<BlockPos>> positions = new HashMap<>();
 		Map<Identifier, Map<BlockPos, BlockPos>> canonicalPositions = new HashMap<>();
@@ -149,8 +148,9 @@ public class HighlightHandler {
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncRenderedEntityBlockHighlightsPayload(
 				mergeRenderedEntityHighlights(renderedEntityStackHighlights, renderedEntityItemHighlights), highlightDuration));
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncEntityHighlightsPayload(entityHighlights, highlightDuration));
+		boolean hasMatches = stackMatchNumber.get() > 0 || itemMatchNumber.get() > 0;
 		PacketDistributor.sendToPlayer(serverPlayer,
-				new SyncHighlightDirectionsPayload(projectBlockHighlights(serverPlayer, blockHighlights), entityHighlights, highlightDuration));
+				new SyncHighlightDirectionsPayload(projectBlockHighlights(serverPlayer, blockHighlights), entityHighlights, hasMatches, highlightDuration));
 
 		Level level = player.level();
 
