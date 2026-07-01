@@ -50,7 +50,11 @@ public class ClientEventHandler {
 			ClientEventHandler.ItemHighlightKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_BACKSLASH),
 			KEYBIND_SOPHISTICATEDITEMACTIONS_CATEGORY);
 	private static final List<IHoveredStackProvider> HOVERED_STACK_PROVIDERS = new ArrayList<>();
+	private static final List<IFocusedScreenProvider> FOCUSED_SCREEN_PROVIDERS = new ArrayList<>();
 	private static final ItemActionNudgeManager NUDGE_MANAGER = new ItemActionNudgeManager();
+	private static int guiHighlightRequestsPendingResult = 0;
+	@Nullable
+	private static Screen guiHighlightRequestScreen = null;
 	private static final IHoveredStackProvider DEFAULT_HOVERED_STACK_PROVIDER = new IHoveredStackProvider() {
 		@Override
 		public ItemStack getHoveredStack(Screen screen) {
@@ -81,6 +85,10 @@ public class ClientEventHandler {
 		HOVERED_STACK_PROVIDERS.add(provider);
 	}
 
+	public static void registerFocusedScreenProvider(IFocusedScreenProvider provider) {
+		FOCUSED_SCREEN_PROVIDERS.add(provider);
+	}
+
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addListener(ClientEventHandler::registerKeyMappings);
 		modBus.addListener(ClientEventHandler::registerOverlay);
@@ -96,6 +104,8 @@ public class ClientEventHandler {
 	}
 
 	private static void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+		guiHighlightRequestsPendingResult = 0;
+		guiHighlightRequestScreen = null;
 		NUDGE_MANAGER.onWorldLeft(Minecraft.getInstance());
 	}
 
@@ -128,41 +138,71 @@ public class ClientEventHandler {
 
 	public static void handleGuiKeyPress(ScreenEvent.KeyPressed.Pre event) {
 		InputConstants.Key key = InputConstants.getKey(event.getKeyCode(), event.getScanCode());
-		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key) && event.getScreen() instanceof AbstractContainerScreen<?> screen
-				&& tryHighlightItem(screen.getSlotUnderMouse())) {
+		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(key) && !shouldSkipGuiItemAction(event.getScreen())
+				&& event.getScreen() instanceof AbstractContainerScreen<?> screen && tryHighlightGuiItem(screen.getSlotUnderMouse())) {
 			NudgeActionUsageTracker.markUsed(NudgeHintType.HIGHLIGHT);
-			event.getScreen().getMinecraft().setScreen(null);
 			event.setCanceled(true);
 		}
 	}
 
 	public static void handleGuiMouseKeyPress(ScreenEvent.MouseButtonPressed.Pre event) {
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
-		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input) && event.getScreen() instanceof AbstractContainerScreen<?> screen
-				&& tryHighlightItem(screen.getSlotUnderMouse())) {
+		if (ITEM_HIGHLIGHT_KEYBIND.isActiveAndMatches(input) && !shouldSkipGuiItemAction(event.getScreen())
+				&& event.getScreen() instanceof AbstractContainerScreen<?> screen && tryHighlightGuiItem(screen.getSlotUnderMouse())) {
 			NudgeActionUsageTracker.markUsed(NudgeHintType.HIGHLIGHT);
-			event.getScreen().getMinecraft().setScreen(null);
 			event.setCanceled(true);
 		}
 	}
 
 	public static void onPostClientTick(ClientTickEvent.Post event) {
-		if (ITEM_HIGHLIGHT_KEYBIND.consumeClick() && tryHighlightItem()) {
+		if (isInWorld() && ITEM_HIGHLIGHT_KEYBIND.consumeClick() && tryHighlightItem()) {
 			NudgeActionUsageTracker.markUsed(NudgeHintType.HIGHLIGHT);
 		}
 		NUDGE_MANAGER.tick(Minecraft.getInstance());
 	}
 
-	private static boolean tryHighlightItem(@Nullable Slot slot) {
+	public static boolean isInWorld() {
 		Minecraft mc = Minecraft.getInstance();
-		LocalPlayer player = mc.player;
-		if (slot == null || player == null || slot.getItem().isEmpty()) {
+		return mc.player != null && mc.level != null;
+	}
+
+	public static boolean shouldSkipGuiItemAction(Screen screen) {
+		return !isInWorld() || isTextInputFocused(screen);
+	}
+
+	private static boolean isTextInputFocused(Screen screen) {
+		return screen.isFocused() || FOCUSED_SCREEN_PROVIDERS.stream().anyMatch(provider -> provider.isFocused(screen));
+	}
+
+	public static boolean tryHighlightGuiItem(ItemStack stack) {
+		LocalPlayer player = Minecraft.getInstance().player;
+		if (player == null || stack.isEmpty()) {
 			return false;
 		}
 
-		HighlightHandler.highlightItem(player, slot.getItem());
-
+		if (HighlightHandler.highlightItem(player, stack)) {
+			guiHighlightRequestsPendingResult++;
+			guiHighlightRequestScreen = Minecraft.getInstance().screen;
+		}
 		return true;
+	}
+
+	private static boolean tryHighlightGuiItem(@Nullable Slot slot) {
+		return slot != null && tryHighlightGuiItem(slot.getItem());
+	}
+
+	public static void handleHighlightResult(boolean hasMatches) {
+		if (guiHighlightRequestsPendingResult <= 0) {
+			return;
+		}
+
+		guiHighlightRequestsPendingResult--;
+		if (hasMatches && Minecraft.getInstance().screen == guiHighlightRequestScreen) {
+			Minecraft.getInstance().setScreen(null);
+		}
+		if (guiHighlightRequestsPendingResult == 0) {
+			guiHighlightRequestScreen = null;
+		}
 	}
 
 	private static boolean tryHighlightItem() {
@@ -178,7 +218,7 @@ public class ClientEventHandler {
 
 	public static void handleKeyInput(InputEvent.Key event) {
 		Screen screen = Minecraft.getInstance().screen;
-		if (screen != null && screen.isFocused()) {
+		if (!isInWorld() || screen != null && isTextInputFocused(screen)) {
 			return;
 		}
 
@@ -300,8 +340,7 @@ public class ClientEventHandler {
 
 		@Override
 		public boolean isActive() {
-			return (IN_GAME.isActive() && Minecraft.getInstance().player != null && !Minecraft.getInstance().player.getMainHandItem().isEmpty())
-					|| GUI.isActive();
+			return isInWorld() && ((IN_GAME.isActive() && !Minecraft.getInstance().player.getMainHandItem().isEmpty()) || GUI.isActive());
 		}
 
 		@Override
@@ -330,5 +369,9 @@ public class ClientEventHandler {
 		default boolean restockEmptySlot() {
 			return false;
 		}
+	}
+
+	public interface IFocusedScreenProvider {
+		boolean isFocused(Screen screen);
 	}
 }
