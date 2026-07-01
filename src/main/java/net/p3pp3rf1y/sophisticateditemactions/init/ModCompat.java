@@ -5,6 +5,7 @@ import net.p3pp3rf1y.sophisticatedcore.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedcore.compat.CompatRegistry;
 import net.p3pp3rf1y.sophisticateditemactions.compat.ae2.AppliedEnergistics2Compat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.create.CreateCompat;
+import net.p3pp3rf1y.sophisticateditemactions.compat.ftblibrary.FtbLibraryCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.emi.EmiCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.jei.JeiCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.rei.ReiCompat;
@@ -21,12 +22,12 @@ public class ModCompat {
 	}
 
 	public static void register() {
-		CompatRegistry.registerCompat(new CompatInfo(net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.AE2),
-				() -> modBus -> new AppliedEnergistics2Compat());
+		CompatRegistry.registerCompat(new CompatInfo(AE2), () -> modBus -> new AppliedEnergistics2Compat());
 		CompatRegistry.registerCompat(new CompatInfo(CompatModIds.CREATE), () -> modBus -> new CreateCompat());
 		CompatRegistry.registerCompat(new CompatInfo(CompatModIds.JEI), () -> modBus -> new JeiCompat());
 		CompatRegistry.registerCompat(new CompatInfo(CompatModIds.EMI), () -> modBus -> new EmiCompat());
 		CompatRegistry.registerCompat(new CompatInfo(CompatModIds.REI), () -> modBus -> new ReiCompat());
+		CompatRegistry.registerCompat(new CompatInfo(FTB_LIBRARY), () -> modBus -> new FtbLibraryCompat());
 		CompatRegistry.registerCompat(new CompatInfo(REFINED_STORAGE), () -> modBus -> new RefinedStorageCompat());
 		CompatRegistry.registerCompat(new CompatInfo(SABLE), () -> modBus -> new SableCompat());
 		CompatRegistry.registerCompat(new CompatInfo(SOPHISTICATED_BACKPACKS), () -> modBus -> new SophisticatedBackpacksCompat());

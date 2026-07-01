@@ -9,6 +9,7 @@ import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 
 public record ItemTransferData(@Nullable BlockPos positionToOpen, Vec3 itemFlightPos, List<ItemStack> itemsTransferred) {

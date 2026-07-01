@@ -23,6 +23,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.EntityBlockHighlightData;
 import net.p3pp3rf1y.sophisticateditemactions.common.RenderedHighlight;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

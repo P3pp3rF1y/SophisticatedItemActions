@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticateditemactions.common;
 
 import javax.annotation.Nullable;
+
 import java.util.Optional;
 
 public class ItemTransferExtensionRegistry {

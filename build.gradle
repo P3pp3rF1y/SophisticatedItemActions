@@ -53,6 +53,12 @@ group = mod_group_id
 repositories {
     mavenCentral()
     maven {
+        url "https://maven.ftb.dev/releases"
+        content {
+            includeGroup "dev.ftb.mods"
+        }
+    }
+    maven {
         url "https://minecraft.curseforge.com/api/maven/"
         content {
             includeGroup "curse.maven"
@@ -274,6 +280,7 @@ dependencies {
     compileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
     localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
     localRuntime "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
+    compileOnly "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
 
     if (findProject(':SophisticatedCore') != null) {
         dependencies.implementation project(':SophisticatedCore')

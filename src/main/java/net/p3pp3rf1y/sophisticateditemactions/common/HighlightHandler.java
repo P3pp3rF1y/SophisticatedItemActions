@@ -32,7 +32,7 @@ public class HighlightHandler {
 	private static final int HIGHLIGHT_RANGE = 32;
 	private static final int MIN_HIGHLIGHT_DURATION = 40;
 	private static final int MAX_HIGHLIGHT_DURATION = 160;
-	public static void highlightItem(Player player, ItemStack stack) {
+	public static boolean highlightItem(Player player, ItemStack stack) {
 		Map<ResourceLocation, List<BlockPos>> positions = new HashMap<>();
 		Map<ResourceLocation, Map<BlockPos, BlockPos>> canonicalPositions = new HashMap<>();
 
@@ -53,10 +53,12 @@ public class HighlightHandler {
 						.ifPresent(id -> entities.computeIfAbsent(id, k -> new ArrayList<>()).add(e.getId())));
 		if (!positions.isEmpty() || !entities.isEmpty()) {
 			PacketDistributor.sendToServer(new RequestItemHighlightsPayload(stack, positions, entities));
+			return true;
 		} else {
 			player.displayClientMessage(
 					ItemActionsTranslationHelper.INSTANCE.translStatusMessage("no_storage_in_range").setStyle(Style.EMPTY.withColor(0xFF5555)), true);
 			player.playSound(SoundEvents.NOTE_BLOCK_BASS.value(), 1, 0.45f + RandHelper.getRandomMinusOneToOne(player.level().random) * 0.1F);
+			return false;
 		}
 	}
 
@@ -142,7 +144,9 @@ public class HighlightHandler {
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncRenderedEntityBlockHighlightsPayload(
 				mergeRenderedEntityHighlights(renderedEntityStackHighlights, renderedEntityItemHighlights), highlightDuration));
 		PacketDistributor.sendToPlayer(serverPlayer, new SyncEntityHighlightsPayload(entityHighlights, highlightDuration));
-		PacketDistributor.sendToPlayer(serverPlayer, new SyncHighlightDirectionsPayload(projectedBlockHighlights, entityHighlights, highlightDuration));
+		boolean hasMatches = stackMatchNumber.get() > 0 || itemMatchNumber.get() > 0;
+		PacketDistributor.sendToPlayer(serverPlayer,
+				new SyncHighlightDirectionsPayload(projectedBlockHighlights, entityHighlights, hasMatches, highlightDuration));
 
 		Level level = player.level();
 

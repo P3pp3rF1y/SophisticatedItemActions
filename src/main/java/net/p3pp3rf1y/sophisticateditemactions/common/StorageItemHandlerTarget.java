@@ -7,6 +7,7 @@ import net.neoforged.neoforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 
 import javax.annotation.Nullable;
+
 import java.util.function.Function;
 
 public record StorageItemHandlerTarget(@Nullable BlockPos positionToOpen, Vec3 position, IItemHandler itemHandler,
