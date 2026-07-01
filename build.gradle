@@ -56,6 +56,12 @@ group = mod_group_id
 repositories {
     mavenCentral()
     maven {
+        url "https://maven.ftb.dev/releases"
+        content {
+            includeGroup "dev.ftb.mods"
+        }
+    }
+    maven {
         url "https://minecraft.curseforge.com/api/maven/"
         content {
             includeGroup "curse.maven"
@@ -258,13 +264,14 @@ dependencies {
     localRuntime "mezz.jei:jei-${jei_mc_version}:${jei_version}"
     compileOnly "dev.emi:emi-neoforge:${emi_version}"
     localRuntime "dev.emi:emi-neoforge:${emi_version}"
-    compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
-    compileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
-    localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
-    localRuntime "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
-    compileOnly("com.simibubi.create:create-${create_mc_version}:${create_version}") {
-        transitive = false
-    }
+	compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
+	compileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
+	localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
+	localRuntime "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
+	compileOnly "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
+	compileOnly("com.simibubi.create:create-${create_mc_version}:${create_version}") {
+		transitive = false
+	}
     compileOnly("dev.engine-room.flywheel:flywheel-neoforge-${create_mc_version}:${flywheel_version}") {
         transitive = false
     }
@@ -277,11 +284,11 @@ dependencies {
     compileOnly("dev.ryanhcode.sable-companion:sable-companion-common-${sable_mc_version}:${sable_companion_version}") {
         transitive = false
     }
-    compileOnly("dev.eriksonn.aeronautics:aeronautics-neoforge-${sable_mc_version}:${aeronautics_version}") {
-        transitive = false
-    }
+	compileOnly("dev.eriksonn.aeronautics:aeronautics-neoforge-${sable_mc_version}:${aeronautics_version}") {
+		transitive = false
+	}
 
-    if (findProject(':SophisticatedCore') != null) {
+	if (findProject(':SophisticatedCore') != null) {
         dependencies.implementation project(':SophisticatedCore')
     } else {
         dependencies.implementation("net.p3pp3rf1y:sophisticatedcore:${sc_version}") {
