@@ -58,6 +58,12 @@ repositories {
     mavenCentral()
     maven { url = "https://modmaven.dev/" }
     maven {
+        url "https://maven.ftb.dev/releases"
+        content {
+            includeGroup "dev.ftb.mods"
+        }
+    }
+    maven {
         url "https://minecraft.curseforge.com/api/maven/"
         content {
             includeGroup "curse.maven"
@@ -240,6 +246,7 @@ dependencies {
     compileOnly fg.deobf("dev.emi:emi-forge:${emi_version}")
     compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
     compileOnly fg.deobf("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
+    compileOnly fg.deobf("dev.ftb.mods:ftb-library-forge:${ftb_library_version}")
 
     if (findProject(':SophisticatedCore') != null) {
         implementation project(':SophisticatedCore')

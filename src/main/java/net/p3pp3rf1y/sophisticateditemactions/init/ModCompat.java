@@ -5,6 +5,7 @@ import net.p3pp3rf1y.sophisticatedcore.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.ae2.AppliedEnergistics2Compat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.create.CreateCompat;
+import net.p3pp3rf1y.sophisticateditemactions.compat.ftblibrary.FtbLibraryCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.emi.EmiCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.jei.JeiCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.rei.ReiCompat;
@@ -20,6 +21,9 @@ import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.REFINED_STORAGE;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.AE2;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.CREATE;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.FTB_LIBRARY;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_BACKPACKS;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_STORAGE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.STORAGE_IN_MOTION;
@@ -32,11 +36,12 @@ public class ModCompat {
 	private static final Map<String, ICompat> loadedCompats = new HashMap<>();
 
 	public static void register() {
-		compatFactories.put(net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.AE2, () -> AppliedEnergistics2Compat::new);
-		compatFactories.put(net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.CREATE, () -> CreateCompat::new);
+		compatFactories.put(AE2, () -> AppliedEnergistics2Compat::new);
+		compatFactories.put(CREATE, () -> CreateCompat::new);
 		compatFactories.put(CompatModIds.JEI, () -> JeiCompat::new);
 		compatFactories.put(CompatModIds.EMI, () -> EmiCompat::new);
 		compatFactories.put(CompatModIds.REI, () -> ReiCompat::new);
+		compatFactories.put(FTB_LIBRARY, () -> FtbLibraryCompat::new);
 		compatFactories.put(REFINED_STORAGE, () -> RefinedStorageCompat::new);
 		compatFactories.put(SOPHISTICATED_BACKPACKS, () -> SophisticatedBackpacksCompat::new);
 		compatFactories.put(SOPHISTICATED_STORAGE, () -> SophisticatedStorageCompat::new);
