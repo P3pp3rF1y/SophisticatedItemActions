@@ -57,6 +57,12 @@ def isClientDataRun = gradle.startParameter.taskNames.any { it.toLowerCase().con
 repositories {
     mavenCentral()
     maven {
+        url "https://maven.ftb.dev/releases"
+        content {
+            includeGroup "dev.ftb.mods"
+        }
+    }
+    maven {
         url "https://minecraft.curseforge.com/api/maven/"
         content {
             includeGroup "curse.maven"
@@ -276,14 +282,15 @@ dependencies {
     if (!isClientDataRun) {
         localRuntime "dev.emi:emi-neoforge:${emi_version}"
     }
-    compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
-    compileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
-    if (!isClientDataRun) {
-        localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
-        localRuntime "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
-    }
+	compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
+	compileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
+	if (!isClientDataRun) {
+		localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
+		localRuntime "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
+	}
+	compileOnly "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
 
-    if (findProject(':SophisticatedCore') != null) {
+	if (findProject(':SophisticatedCore') != null) {
         dependencies.implementation project(':SophisticatedCore')
     } else {
         dependencies.implementation("net.p3pp3rf1y:sophisticatedcore:${sc_version}") {
