@@ -20,10 +20,10 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.REFINED_STORAGE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.AE2;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.CREATE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.FTB_LIBRARY;
+import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.REFINED_STORAGE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_BACKPACKS;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SOPHISTICATED_STORAGE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.STORAGE_IN_MOTION;
