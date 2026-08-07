@@ -39,7 +39,7 @@ jobs:
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build --no-daemon --console=plain --info
+        run: ./gradlew assemble test --no-daemon --console=plain
 
       - name: Report Gradle cache layout
         if: always()
