@@ -1,6 +1,8 @@
 name: Gradle Cache Probe
 
-on: workflow_dispatch
+on:
+  push:
+    branches: [cache-probe]
 
 permissions:
   contents: read
