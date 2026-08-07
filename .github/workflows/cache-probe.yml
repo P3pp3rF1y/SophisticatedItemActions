@@ -36,8 +36,10 @@ jobs:
         id: neoformruntime-cache
         uses: actions/cache/restore@v5
         with:
-          path: ~/.gradle/caches/neoformruntime
-          key: cache-probe-v1-neoforge-mc1.21.1-${{ runner.os }}-jdk21-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
+          path: |
+            ~/.gradle/caches/neoformruntime/artifacts
+            ~/.gradle/caches/neoformruntime/intermediate_results
+          key: cache-probe-v2-neoforge-mc1.21.1-${{ runner.os }}-jdk21-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Build
         env:
@@ -66,5 +68,7 @@ jobs:
         if: steps.neoformruntime-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
         with:
-          path: ~/.gradle/caches/neoformruntime
+          path: |
+            ~/.gradle/caches/neoformruntime/artifacts
+            ~/.gradle/caches/neoformruntime/intermediate_results
           key: ${{ steps.neoformruntime-cache.outputs.cache-primary-key }}
