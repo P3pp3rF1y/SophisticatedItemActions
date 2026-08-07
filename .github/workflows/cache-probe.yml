@@ -24,13 +24,8 @@ jobs:
         id: common-cache
         uses: actions/cache/restore@v5
         with:
-          path: |
-            ~/.gradle/wrapper
-            ~/.gradle/caches/8.9
-            ~/.gradle/caches/modules-2
-          key: cache-probe-v1-common-${{ runner.os }}-jdk21-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            cache-probe-v1-common-${{ runner.os }}-jdk21-
+          path: ~/.gradle/wrapper
+          key: cache-probe-v3-wrapper-${{ runner.os }}-jdk21-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Restore NeoForm runtime cache
         id: neoformruntime-cache
@@ -59,10 +54,7 @@ jobs:
         if: steps.common-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
         with:
-          path: |
-            ~/.gradle/wrapper
-            ~/.gradle/caches/8.9
-            ~/.gradle/caches/modules-2
+          path: ~/.gradle/wrapper
           key: ${{ steps.common-cache.outputs.cache-primary-key }}
 
       - name: Save NeoForm runtime cache
