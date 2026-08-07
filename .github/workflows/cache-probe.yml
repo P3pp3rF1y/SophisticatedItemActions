@@ -53,6 +53,7 @@ jobs:
         shell: bash
         run: |
           echo "NeoForm assets excluded from the specialized cache"
+          echo "Gradle dependency metadata cached separately from artifacts"
           du -sh "$HOME/.gradle/wrapper" "$HOME/.gradle/caches" || true
           du -sh "$HOME/.gradle/caches"/* 2>/dev/null | sort -h || true
           du -sh "$HOME/.gradle/caches/modules-2"/* 2>/dev/null | sort -h || true
