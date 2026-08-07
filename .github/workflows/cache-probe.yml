@@ -36,10 +36,17 @@ jobs:
             ~/.gradle/caches/neoformruntime/intermediate_results
           key: cache-probe-v2-neoforge-mc1.21.1-${{ runner.os }}-jdk21-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
 
+      - name: Restore Gradle dependency metadata
+        id: dependency-metadata-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.gradle/caches/modules-2/metadata-2.106
+          key: cache-probe-v1-dependency-metadata-neoforge-mc1.21.1-${{ runner.os }}-jdk21-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
+
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew assemble test --no-daemon --console=plain
+        run: ./gradlew build --no-daemon --console=plain
 
       - name: Report Gradle cache layout
         if: always()
@@ -48,6 +55,7 @@ jobs:
           echo "NeoForm assets excluded from the specialized cache"
           du -sh "$HOME/.gradle/wrapper" "$HOME/.gradle/caches" || true
           du -sh "$HOME/.gradle/caches"/* 2>/dev/null | sort -h || true
+          du -sh "$HOME/.gradle/caches/modules-2"/* 2>/dev/null | sort -h || true
           du -sh "$HOME/.gradle/caches/neoformruntime"/* 2>/dev/null | sort -h || true
 
       - name: Save common Gradle cache
@@ -65,3 +73,10 @@ jobs:
             ~/.gradle/caches/neoformruntime/artifacts
             ~/.gradle/caches/neoformruntime/intermediate_results
           key: ${{ steps.neoformruntime-cache.outputs.cache-primary-key }}
+
+      - name: Save Gradle dependency metadata
+        if: steps.dependency-metadata-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.gradle/caches/modules-2/metadata-2.106
+          key: ${{ steps.dependency-metadata-cache.outputs.cache-primary-key }}
