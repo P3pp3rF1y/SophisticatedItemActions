@@ -50,6 +50,7 @@ jobs:
         run: |
           du -sh "$HOME/.gradle/wrapper" "$HOME/.gradle/caches" || true
           du -sh "$HOME/.gradle/caches"/* 2>/dev/null | sort -h || true
+          du -sh "$HOME/.gradle/caches/neoformruntime"/* 2>/dev/null | sort -h || true
 
       - name: Save common Gradle cache
         if: steps.common-cache.outputs.cache-hit != 'true'
