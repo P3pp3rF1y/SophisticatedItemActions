@@ -38,8 +38,6 @@ jobs:
         with:
           path: ~/.gradle/caches/neoformruntime
           key: cache-probe-v1-neoforge-mc1.21.1-${{ runner.os }}-jdk21-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            cache-probe-v1-neoforge-mc1.21.1-${{ runner.os }}-jdk21-
 
       - name: Build
         env:
