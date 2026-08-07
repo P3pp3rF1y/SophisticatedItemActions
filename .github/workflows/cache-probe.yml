@@ -9,7 +9,7 @@ permissions:
   packages: read
 
 jobs:
-  measure-cold-build:
+  measure-layered-cache:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -20,7 +20,28 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Build without a restored cache
+      - name: Restore common Gradle cache
+        id: common-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            ~/.gradle/wrapper
+            ~/.gradle/caches/8.9
+            ~/.gradle/caches/modules-2
+          key: cache-probe-v1-common-${{ runner.os }}-jdk21-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            cache-probe-v1-common-${{ runner.os }}-jdk21-
+
+      - name: Restore NeoForm runtime cache
+        id: neoformruntime-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.gradle/caches/neoformruntime
+          key: cache-probe-v1-neoforge-mc1.21.1-${{ runner.os }}-jdk21-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            cache-probe-v1-neoforge-mc1.21.1-${{ runner.os }}-jdk21-
+
+      - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build --no-daemon --console=plain
@@ -31,3 +52,20 @@ jobs:
         run: |
           du -sh "$HOME/.gradle/wrapper" "$HOME/.gradle/caches" || true
           du -sh "$HOME/.gradle/caches"/* 2>/dev/null | sort -h || true
+
+      - name: Save common Gradle cache
+        if: steps.common-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            ~/.gradle/wrapper
+            ~/.gradle/caches/8.9
+            ~/.gradle/caches/modules-2
+          key: ${{ steps.common-cache.outputs.cache-primary-key }}
+
+      - name: Save NeoForm runtime cache
+        if: steps.neoformruntime-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.gradle/caches/neoformruntime
+          key: ${{ steps.neoformruntime-cache.outputs.cache-primary-key }}
