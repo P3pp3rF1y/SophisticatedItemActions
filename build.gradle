@@ -287,6 +287,8 @@ dependencies {
     localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
     localRuntime "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
     compileOnly "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.+'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.+'
 
     if (findProject(':SophisticatedCore') != null) {
         dependencies.implementation project(':SophisticatedCore')
