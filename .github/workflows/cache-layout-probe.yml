@@ -17,6 +17,24 @@ jobs:
         with:
           java-version: "17"
           distribution: zulu
+      - name: Restore Gradle wrapper cache
+        id: wrapper-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.gradle/wrapper
+          key: cache-probe-v1-wrapper-${{ runner.os }}-jdk17-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Restore dependency metadata cache
+        id: dependency-metadata-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.gradle/caches/modules-2/metadata-2.105
+          key: cache-probe-v1-neoforgegradle-dependency-metadata-${{ runner.os }}-jdk17-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Restore NeoForgeGradle cache
+        id: forge-gradle-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.gradle/caches/forge_gradle
+          key: cache-probe-v1-neoforgegradle-runtime-${{ runner.os }}-jdk17-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
       - name: Build with Gradle
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -28,3 +46,21 @@ jobs:
           du -sh "$HOME/.gradle/caches"/* 2>/dev/null | sort -h || true
           du -sh "$HOME/.gradle/caches/modules-2"/* 2>/dev/null | sort -h || true
           du -sh "$HOME/.gradle/caches/forge_gradle"/* 2>/dev/null | sort -h || true
+      - name: Save Gradle wrapper cache
+        if: always() && steps.wrapper-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.gradle/wrapper
+          key: cache-probe-v1-wrapper-${{ runner.os }}-jdk17-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Save dependency metadata cache
+        if: always() && steps.dependency-metadata-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.gradle/caches/modules-2/metadata-2.105
+          key: cache-probe-v1-neoforgegradle-dependency-metadata-${{ runner.os }}-jdk17-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Save NeoForgeGradle cache
+        if: always() && steps.forge-gradle-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.gradle/caches/forge_gradle
+          key: cache-probe-v1-neoforgegradle-runtime-${{ runner.os }}-jdk17-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
