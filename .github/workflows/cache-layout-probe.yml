@@ -1,6 +1,7 @@
 name: Gradle Cache Layout Probe
 
 on:
+  workflow_dispatch:
   push:
     branches: [cache-probe-262]
 
