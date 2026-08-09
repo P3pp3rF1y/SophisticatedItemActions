@@ -37,6 +37,7 @@ jobs:
             ~/.gradle/caches/neoformruntime/artifacts
             ~/.gradle/caches/neoformruntime/intermediate_results
           key: cache-probe-v1-moddev2-runtime-${{ runner.os }}-jdk25-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
+      # A workflow-only change triggers the exact-cache warm verification run.
       - name: Build with Gradle
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
