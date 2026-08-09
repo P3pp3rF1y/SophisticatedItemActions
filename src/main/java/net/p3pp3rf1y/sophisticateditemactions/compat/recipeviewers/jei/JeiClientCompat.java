@@ -5,6 +5,7 @@ import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -13,6 +14,7 @@ import net.p3pp3rf1y.sophisticateditemactions.client.ClientEventHandler;
 
 import javax.annotation.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 
 public class JeiClientCompat {
@@ -30,13 +32,32 @@ public class JeiClientCompat {
 		ClientEventHandler.registerHoveredStackProvider(new ClientEventHandler.IHoveredStackProvider() {
 			@Override
 			public ItemStack getHoveredStack(Screen screen) {
-				return getStack().orElse(ItemStack.EMPTY);
+				List<ItemStack> alternatives = getHoveredRecipeIngredientAlternatives();
+				return alternatives.isEmpty() ? getStack().orElse(ItemStack.EMPTY) : alternatives.get(0);
+			}
+
+			@Override
+			public List<ItemStack> getHoveredStackAlternatives(Screen screen) {
+				List<ItemStack> alternatives = getHoveredRecipeIngredientAlternatives();
+				return alternatives.isEmpty() ? List.of(getStack().orElse(ItemStack.EMPTY)) : alternatives;
 			}
 
 			@Override
 			public boolean restockSingle(Screen screen) {
 				// in case of crafting grid return single
 				return runtime != null && runtime.getRecipesGui().getIngredientUnderMouse(VanillaTypes.ITEM_STACK).isPresent();
+			}
+
+			@Override
+			public int getRestockSlot(Screen screen, Player player, List<ItemStack> filters) {
+				for (int slot = 0; slot < player.getInventory().items.size(); slot++) {
+					ItemStack stack = player.getInventory().items.get(slot);
+					if (!stack.isEmpty() && filters.stream().anyMatch(filter -> ItemStack.isSameItemSameTags(stack, filter))
+							&& stack.getCount() < stack.getMaxStackSize()) {
+						return slot;
+					}
+				}
+				return player.getInventory().getFreeSlot();
 			}
 
 			@Override
@@ -51,6 +72,10 @@ public class JeiClientCompat {
 				? Optional.empty()
 				: runtime.getIngredientListOverlay().getIngredientUnderMouse().or(() -> runtime.getBookmarkOverlay().getIngredientUnderMouse())
 						.flatMap(ITypedIngredient::getItemStack).or(() -> runtime.getRecipesGui().getIngredientUnderMouse(VanillaTypes.ITEM_STACK));
+	}
+
+	private static List<ItemStack> getHoveredRecipeIngredientAlternatives() {
+		return ItemActionsPlugin.getHoveredRecipeIngredientAlternatives();
 	}
 
 	public static void handleGuiKeyPress(ScreenEvent.KeyPressed.Pre event) {

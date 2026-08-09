@@ -9,11 +9,29 @@ public class Config {
 
 	public static final Client CLIENT;
 	public static final ForgeConfigSpec CLIENT_SPEC;
+	public static final Server SERVER;
+	public static final ForgeConfigSpec SERVER_SPEC;
 
 	static {
+		final Pair<Server, ForgeConfigSpec> serverSpec = new ForgeConfigSpec.Builder().configure(Server::new);
+		SERVER_SPEC = serverSpec.getRight();
+		SERVER = serverSpec.getLeft();
 		final Pair<Client, ForgeConfigSpec> clientSpec = new ForgeConfigSpec.Builder().configure(Client::new);
 		CLIENT_SPEC = clientSpec.getRight();
 		CLIENT = clientSpec.getLeft();
+	}
+
+	public static class Server {
+		public final ForgeConfigSpec.BooleanValue recipeRestockEnabled;
+
+		public Server(ForgeConfigSpec.Builder builder) {
+			builder.comment("Server-side Settings").push("server");
+
+			recipeRestockEnabled = builder.comment("Whether recipe restocking can pull recipe ingredients from nearby storage").define("recipeRestockEnabled",
+					true);
+
+			builder.pop();
+		}
 	}
 
 	public static class Client {

@@ -24,6 +24,7 @@ public class SophisticatedItemActions {
 	public SophisticatedItemActions() {
 		networkProtocolVersion = ModLoadingContext.get().getActiveContainer().getModInfo().getVersion().toString();
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC);
 		ModCompat.register();
 		ModCompat.initCompats();

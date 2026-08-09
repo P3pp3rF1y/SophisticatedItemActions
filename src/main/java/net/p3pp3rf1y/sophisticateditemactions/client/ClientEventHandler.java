@@ -251,18 +251,21 @@ public class ClientEventHandler {
 
 		Screen screen = Minecraft.getInstance().screen;
 		ItemStack filter = ItemStack.EMPTY;
+		List<ItemStack> filters = List.of();
 		int slot = -1;
 		boolean refillSingle = false;
 		if (screen != null) {
 			IHoveredStackProvider provider = getHoveredStackProvider(screen);
 			if (provider != null) {
-				filter = provider.getHoveredStack(screen);
-				slot = provider.getRestockSlot(screen, player, filter);
+				filters = provider.getHoveredStackAlternatives(screen);
+				filter = filters.isEmpty() ? ItemStack.EMPTY : filters.get(0);
+				slot = provider.getRestockSlot(screen, player, filters);
 				fillEmpty |= provider.restockEmptySlot();
 				refillSingle = provider.restockSingle(screen);
 			}
 		} else {
 			filter = player.getMainHandItem();
+			filters = List.of(filter);
 			slot = player.getInventory().selected;
 		}
 
@@ -270,7 +273,13 @@ public class ClientEventHandler {
 			return false;
 		}
 
-		if (mainInventory || hotbar) {
+		if (filters.size() > 1) {
+			if (mainInventory || hotbar) {
+				ItemTransferHandler.restockAlternativeItems(player, filters, mainInventory, hotbar, fillEmpty, refillSingle);
+			} else {
+				ItemTransferHandler.restockAlternativeItem(player, filters, slot, fillEmpty, refillSingle);
+			}
+		} else if (mainInventory || hotbar) {
 			ItemTransferHandler.restockMultipleItems(player, filter, mainInventory, hotbar, fillEmpty, refillSingle);
 		} else {
 			ItemTransferHandler.restockItem(player, filter, slot, fillEmpty, refillSingle);
@@ -357,6 +366,10 @@ public class ClientEventHandler {
 	public interface IHoveredStackProvider {
 		ItemStack getHoveredStack(Screen screen);
 
+		default List<ItemStack> getHoveredStackAlternatives(Screen screen) {
+			return List.of(getHoveredStack(screen));
+		}
+
 		boolean restockSingle(Screen screen);
 
 		default int getRestockSlot(Screen screen, Player player, ItemStack filter) {
@@ -369,6 +382,10 @@ public class ClientEventHandler {
 			}
 
 			return player.getInventory().getFreeSlot();
+		}
+
+		default int getRestockSlot(Screen screen, Player player, List<ItemStack> filters) {
+			return getRestockSlot(screen, player, filters.get(0));
 		}
 
 		default boolean restockEmptySlot() {

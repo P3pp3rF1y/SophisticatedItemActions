@@ -16,6 +16,10 @@ public class ItemActionsPacketHandler extends PacketHandler {
 		registerMessage(RequestItemHighlightsMessage.class, RequestItemHighlightsMessage::encode, RequestItemHighlightsMessage::decode,
 				RequestItemHighlightsMessage::onMessage);
 		registerMessage(RestockItemsMessage.class, RestockItemsMessage::encode, RestockItemsMessage::decode, RestockItemsMessage::onMessage);
+		registerMessage(RestockAlternativeItemsMessage.class, RestockAlternativeItemsMessage::encode, RestockAlternativeItemsMessage::decode,
+				RestockAlternativeItemsMessage::onMessage);
+		registerMessage(RestockRecipeItemsMessage.class, RestockRecipeItemsMessage::encode, RestockRecipeItemsMessage::decode,
+				RestockRecipeItemsMessage::onMessage);
 		registerMessage(SyncEntityHighlightsMessage.class, SyncEntityHighlightsMessage::encode, SyncEntityHighlightsMessage::decode,
 				SyncEntityHighlightsMessage::onMessage);
 		registerMessage(SyncHighlightDirectionsMessage.class, SyncHighlightDirectionsMessage::encode, SyncHighlightDirectionsMessage::decode,
