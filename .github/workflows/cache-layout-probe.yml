@@ -27,3 +27,4 @@ jobs:
           du -sh "$HOME/.gradle/wrapper" "$HOME/.gradle/caches" 2>/dev/null || true
           du -sh "$HOME/.gradle/caches"/* 2>/dev/null | sort -h || true
           du -sh "$HOME/.gradle/caches/modules-2"/* 2>/dev/null | sort -h || true
+          du -sh "$HOME/.gradle/caches/neoformruntime"/* 2>/dev/null | sort -h || true
