@@ -282,6 +282,9 @@ dependencies {
     if (!isClientDataRun) {
         localRuntime "dev.emi:emi-neoforge:${emi_version}"
     }
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.+'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.+'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.+'
 	compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
 	compileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
 	if (!isClientDataRun) {
