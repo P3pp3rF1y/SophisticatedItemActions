@@ -29,7 +29,7 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: ~/.gradle/caches/modules-2/metadata-2.107
-          key: cache-probe-v1-moddev2-dependency-metadata-${{ runner.os }}-jdk25-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
+          key: cache-probe-v2-moddev2-dependency-metadata-${{ runner.os }}-jdk25-${{ hashFiles('**/*.gradle', '!**/build/**', '!**/.gradle/**', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
       - name: Restore NeoForm runtime cache
         id: neoformruntime-cache
         uses: actions/cache/restore@v5
@@ -37,7 +37,7 @@ jobs:
           path: |
             ~/.gradle/caches/neoformruntime/artifacts
             ~/.gradle/caches/neoformruntime/intermediate_results
-          key: cache-probe-v1-moddev2-runtime-${{ runner.os }}-jdk25-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
+          key: cache-probe-v2-moddev2-runtime-${{ runner.os }}-jdk25-${{ hashFiles('**/*.gradle', '!**/build/**', '!**/.gradle/**', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
       # A workflow-only change triggers the exact-cache warm verification run.
       - name: Build with Gradle
         env:
@@ -61,7 +61,7 @@ jobs:
         uses: actions/cache/save@v5
         with:
           path: ~/.gradle/caches/modules-2/metadata-2.107
-          key: cache-probe-v1-moddev2-dependency-metadata-${{ runner.os }}-jdk25-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
+          key: cache-probe-v2-moddev2-dependency-metadata-${{ runner.os }}-jdk25-${{ hashFiles('**/*.gradle', '!**/build/**', '!**/.gradle/**', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
       - name: Save NeoForm runtime cache
         if: always() && steps.neoformruntime-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
@@ -69,4 +69,4 @@ jobs:
           path: |
             ~/.gradle/caches/neoformruntime/artifacts
             ~/.gradle/caches/neoformruntime/intermediate_results
-          key: cache-probe-v1-moddev2-runtime-${{ runner.os }}-jdk25-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
+          key: cache-probe-v2-moddev2-runtime-${{ runner.os }}-jdk25-${{ hashFiles('**/*.gradle', '!**/build/**', '!**/.gradle/**', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
