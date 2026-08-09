@@ -284,9 +284,11 @@ dependencies {
     compileOnly("dev.ryanhcode.sable-companion:sable-companion-common-${sable_mc_version}:${sable_companion_version}") {
         transitive = false
     }
-	compileOnly("dev.eriksonn.aeronautics:aeronautics-neoforge-${sable_mc_version}:${aeronautics_version}") {
-		transitive = false
-	}
+    compileOnly("dev.eriksonn.aeronautics:aeronautics-neoforge-${sable_mc_version}:${aeronautics_version}") {
+        transitive = false
+    }
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.+'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.+'
 
 	if (findProject(':SophisticatedCore') != null) {
         dependencies.implementation project(':SophisticatedCore')
