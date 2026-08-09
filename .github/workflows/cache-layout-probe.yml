@@ -17,6 +17,26 @@ jobs:
         with:
           java-version: "25"
           distribution: zulu
+      - name: Restore Gradle wrapper cache
+        id: wrapper-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.gradle/wrapper
+          key: cache-probe-v1-wrapper-${{ runner.os }}-jdk25-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Restore dependency metadata cache
+        id: dependency-metadata-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.gradle/caches/modules-2/metadata-2.107
+          key: cache-probe-v1-moddev2-dependency-metadata-${{ runner.os }}-jdk25-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Restore NeoForm runtime cache
+        id: neoformruntime-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            ~/.gradle/caches/neoformruntime/artifacts
+            ~/.gradle/caches/neoformruntime/intermediate_results
+          key: cache-probe-v1-moddev2-runtime-${{ runner.os }}-jdk25-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
       - name: Build with Gradle
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -28,3 +48,23 @@ jobs:
           du -sh "$HOME/.gradle/caches"/* 2>/dev/null | sort -h || true
           du -sh "$HOME/.gradle/caches/modules-2"/* 2>/dev/null | sort -h || true
           du -sh "$HOME/.gradle/caches/neoformruntime"/* 2>/dev/null | sort -h || true
+      - name: Save Gradle wrapper cache
+        if: always() && steps.wrapper-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.gradle/wrapper
+          key: cache-probe-v1-wrapper-${{ runner.os }}-jdk25-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Save dependency metadata cache
+        if: always() && steps.dependency-metadata-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.gradle/caches/modules-2/metadata-2.107
+          key: cache-probe-v1-moddev2-dependency-metadata-${{ runner.os }}-jdk25-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
+      - name: Save NeoForm runtime cache
+        if: always() && steps.neoformruntime-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            ~/.gradle/caches/neoformruntime/artifacts
+            ~/.gradle/caches/neoformruntime/intermediate_results
+          key: cache-probe-v1-moddev2-runtime-${{ runner.os }}-jdk25-${{ hashFiles('**/*.gradle', '**/gradle.properties', '**/gradle/wrapper/gradle-wrapper.properties') }}
