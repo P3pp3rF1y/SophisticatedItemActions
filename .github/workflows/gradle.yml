@@ -1,13 +1,6 @@
 name: Mod Build
 
-on:
-  workflow_dispatch:
-    inputs:
-      changelog_range:
-        description: Optional git commit range for release changelog generation, e.g. abc123^..def456
-        required: false
-        type: string
-  push:
+on: workflow_dispatch
 
 jobs:
   mod_build:
@@ -15,6 +8,4 @@ jobs:
       contents: read
       packages: write
     uses: P3pp3rF1y/MultiWorkspace/.github/workflows/mod-build-template.yml@26.2
-    with:
-      changelog_range: ${{ inputs.changelog_range || '' }}
     secrets: inherit
