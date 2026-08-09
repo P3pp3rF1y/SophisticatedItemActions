@@ -9,11 +9,29 @@ public class Config {
 
 	public static final Client CLIENT;
 	public static final ModConfigSpec CLIENT_SPEC;
+	public static final Server SERVER;
+	public static final ModConfigSpec SERVER_SPEC;
 
 	static {
+		final Pair<Server, ModConfigSpec> serverSpec = new ModConfigSpec.Builder().configure(Server::new);
+		SERVER_SPEC = serverSpec.getRight();
+		SERVER = serverSpec.getLeft();
 		final Pair<Client, ModConfigSpec> clientSpec = new ModConfigSpec.Builder().configure(Client::new);
 		CLIENT_SPEC = clientSpec.getRight();
 		CLIENT = clientSpec.getLeft();
+	}
+
+	public static class Server {
+		public final ModConfigSpec.BooleanValue recipeRestockEnabled;
+
+		public Server(ModConfigSpec.Builder builder) {
+			builder.comment("Server-side Settings").push("server");
+
+			recipeRestockEnabled = builder.comment("Whether recipe restocking can pull recipe ingredients from nearby storage").define("recipeRestockEnabled",
+					true);
+
+			builder.pop();
+		}
 	}
 
 	public static class Client {

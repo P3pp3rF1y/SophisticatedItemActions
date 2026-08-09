@@ -3,7 +3,16 @@ package net.p3pp3rf1y.sophisticateditemactions.init;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
-import net.p3pp3rf1y.sophisticateditemactions.network.*;
+import net.p3pp3rf1y.sophisticateditemactions.network.DepositItemsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.RequestItemHighlightsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.RestockAlternativeItemsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.RestockItemsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.RestockRecipeItemsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.SyncEntityHighlightsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.SyncHighlightDirectionsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.SyncItemTransfersPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.SyncRenderedBlockHighlightsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.SyncRenderedEntityBlockHighlightsPayload;
 
 public class ModPayloads {
 	private ModPayloads() {
@@ -13,6 +22,8 @@ public class ModPayloads {
 		final PayloadRegistrar registrar = event.registrar(SophisticatedItemActions.MOD_ID).versioned(SophisticatedItemActions.getNetworkProtocolVersion());
 		registrar.playToServer(DepositItemsPayload.TYPE, DepositItemsPayload.STREAM_CODEC, DepositItemsPayload::handlePayload);
 		registrar.playToServer(RestockItemsPayload.TYPE, RestockItemsPayload.STREAM_CODEC, RestockItemsPayload::handlePayload);
+		registrar.playToServer(RestockAlternativeItemsPayload.TYPE, RestockAlternativeItemsPayload.STREAM_CODEC, RestockAlternativeItemsPayload::handlePayload);
+		registrar.playToServer(RestockRecipeItemsPayload.TYPE, RestockRecipeItemsPayload.STREAM_CODEC, RestockRecipeItemsPayload::handlePayload);
 		registrar.playToClient(SyncItemTransfersPayload.TYPE, SyncItemTransfersPayload.STREAM_CODEC, SyncItemTransfersPayload::handlePayload);
 		registrar.playToServer(RequestItemHighlightsPayload.TYPE, RequestItemHighlightsPayload.STREAM_CODEC, RequestItemHighlightsPayload::handlePayload);
 		registrar.playToClient(SyncRenderedBlockHighlightsPayload.TYPE, SyncRenderedBlockHighlightsPayload.STREAM_CODEC,

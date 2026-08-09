@@ -26,8 +26,10 @@ import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 import javax.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class StandardStorageActionHandler implements IBlockItemActionHandler, IEntityItemActionHandler {
@@ -98,6 +100,9 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 		}
 
 		return Optional.of(new IRestockHandler() {
+			@Nullable
+			private Set<ItemResource> availableItems;
+
 			@Override
 			public Optional<BlockPos> getPositionToOpen() {
 				return Optional.empty();
@@ -109,8 +114,39 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 			}
 
 			@Override
+			public void prepareForAlternativeRestock(List<ItemStack> filters) {
+				cacheAvailableItems(cap);
+			}
+
+			@Override
 			public int extractItem(ItemStack stack) {
-				return InventoryHelper.extract(cap, stack);
+				return extractCachedItem(stack, cap);
+			}
+
+			private void cacheAvailableItems(ResourceHandler<ItemResource> itemHandler) {
+				if (availableItems != null) {
+					return;
+				}
+
+				availableItems = new HashSet<>();
+				InventoryHelper.iterate(itemHandler, (slot, resource, amount) -> {
+					if (!resource.isEmpty()) {
+						availableItems.add(resource);
+					}
+				});
+			}
+
+			private int extractCachedItem(ItemStack stack, ResourceHandler<ItemResource> itemHandler) {
+				ItemResource item = ItemResource.of(stack);
+				if (availableItems != null && !availableItems.contains(item)) {
+					return 0;
+				}
+
+				int extracted = InventoryHelper.extract(itemHandler, stack);
+				if (extracted == 0 && availableItems != null) {
+					availableItems.remove(item);
+				}
+				return extracted;
 			}
 		});
 	}
@@ -299,6 +335,9 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 			return Optional.empty();
 		}
 		return Optional.of(new IRestockHandler() {
+			@Nullable
+			private Set<ItemResource> availableItems;
+
 			@Override
 			public Optional<BlockPos> getPositionToOpen() {
 				if (player.level().getBlockEntity(pos) instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.getOpenNess(0) == 0) {
@@ -313,8 +352,39 @@ public class StandardStorageActionHandler implements IBlockItemActionHandler, IE
 			}
 
 			@Override
+			public void prepareForAlternativeRestock(List<ItemStack> filters) {
+				cacheAvailableItems(itemHandler);
+			}
+
+			@Override
 			public int extractItem(ItemStack stack) {
-				return InventoryHelper.extract(itemHandler, stack);
+				return extractCachedItem(stack, itemHandler);
+			}
+
+			private void cacheAvailableItems(ResourceHandler<ItemResource> inventory) {
+				if (availableItems != null) {
+					return;
+				}
+
+				availableItems = new HashSet<>();
+				InventoryHelper.iterate(inventory, (slot, resource, amount) -> {
+					if (!resource.isEmpty()) {
+						availableItems.add(resource);
+					}
+				});
+			}
+
+			private int extractCachedItem(ItemStack stack, ResourceHandler<ItemResource> inventory) {
+				ItemResource item = ItemResource.of(stack);
+				if (availableItems != null && !availableItems.contains(item)) {
+					return 0;
+				}
+
+				int extracted = InventoryHelper.extract(inventory, stack);
+				if (extracted == 0 && availableItems != null) {
+					availableItems.remove(item);
+				}
+				return extracted;
 			}
 		});
 	}
