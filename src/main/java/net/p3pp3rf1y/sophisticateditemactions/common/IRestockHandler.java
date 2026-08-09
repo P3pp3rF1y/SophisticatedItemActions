@@ -14,6 +14,12 @@ public interface IRestockHandler {
 	Vec3 getPosition();
 	ItemStack extractItem(ItemStack stack);
 
+	/**
+	 * Allows enumerable inventories to cache their available item types before alternatives are probed.
+	 */
+	default void prepareForAlternativeRestock(List<ItemStack> filters) {
+	}
+
 	default List<RestockTransfer> extractTransfers(ItemStack stack) {
 		ItemStack extracted = extractItem(stack);
 		return extracted.isEmpty() ? List.of() : List.of(new RestockTransfer(getPositionToOpen().orElse(null), getPosition(), extracted));

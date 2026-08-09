@@ -23,6 +23,7 @@ public class SophisticatedItemActions {
 
 	public SophisticatedItemActions(IEventBus modBus, Dist dist, ModContainer container) {
 		networkProtocolVersion = container.getModInfo().getVersion().toString();
+		container.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
 		container.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC);
 		if (dist == Dist.CLIENT && !ModList.get().isLoaded("configured")) {
 			container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
