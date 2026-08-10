@@ -27,7 +27,7 @@ public class Config {
 		public Server(ModConfigSpec.Builder builder) {
 			builder.comment("Server-side Settings").push("server");
 
-			recipeRestockEnabled = builder.comment("Whether the JEI recipe restock button can pull recipe ingredients from nearby storage")
+			recipeRestockEnabled = builder.comment("Whether recipe viewer restock buttons can pull recipe ingredients from nearby storage")
 					.define("recipeRestockEnabled", true);
 
 			builder.pop();
