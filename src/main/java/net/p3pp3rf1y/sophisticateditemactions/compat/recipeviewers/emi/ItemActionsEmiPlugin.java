@@ -33,8 +33,8 @@ public class ItemActionsEmiPlugin implements EmiPlugin {
 	}
 
 	private static void addRestockButton(EmiRecipe recipe, WidgetHolder widgets) {
-		if (recipe.getCategory() != VanillaEmiRecipeCategories.CRAFTING || !Config.SERVER.recipeRestockEnabled.get() || Minecraft.getInstance().player == null
-				|| getIngredientOptions(recipe, false).isEmpty()) {
+		if (recipe.getCategory() != VanillaEmiRecipeCategories.CRAFTING || !Config.SERVER.recipeRestockEnabled.get()
+				|| Minecraft.getInstance().player == null) {
 			return;
 		}
 		int x = widgets.getWidth() + 5;
