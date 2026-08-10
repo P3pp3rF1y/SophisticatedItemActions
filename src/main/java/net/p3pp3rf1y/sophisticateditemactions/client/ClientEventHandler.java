@@ -58,6 +58,8 @@ public class ClientEventHandler {
 	private static final List<IHoveredStackProvider> HOVERED_STACK_PROVIDERS = new ArrayList<>();
 	private static final List<IFocusedScreenProvider> FOCUSED_SCREEN_PROVIDERS = new ArrayList<>();
 	private static final ItemActionNudgeManager NUDGE_MANAGER = new ItemActionNudgeManager();
+	private static Runnable recipeRestockSyncHandler = () -> {
+	};
 	private static int guiHighlightRequestsPendingResult = 0;
 	@Nullable
 	private static Screen guiHighlightRequestScreen = null;
@@ -93,6 +95,14 @@ public class ClientEventHandler {
 
 	public static void registerFocusedScreenProvider(IFocusedScreenProvider provider) {
 		FOCUSED_SCREEN_PROVIDERS.add(provider);
+	}
+
+	public static void registerRecipeRestockSyncHandler(Runnable handler) {
+		recipeRestockSyncHandler = handler;
+	}
+
+	public static void handleRecipeRestockSync() {
+		recipeRestockSyncHandler.run();
 	}
 
 	public static void registerHandlers(IEventBus modBus) {

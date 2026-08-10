@@ -146,8 +146,8 @@ public class ItemTransferHandler {
 
 		Vec3 playerPos = SubLevelCompatHelper.projectToWorld(player.level(), player.getEyePosition().add(0, -0.1, 0));
 		List<ItemTransferData> itemTransferData = deposited.values().stream().toList();
-		PacketDistributor.sendToPlayer(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, true));
-		PacketDistributor.sendToPlayersTrackingEntity(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, true));
+		PacketDistributor.sendToPlayer(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, true, false));
+		PacketDistributor.sendToPlayersTrackingEntity(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, true, false));
 
 		showDepositMessage(player, minSlot, maxSlot, depositedFromSlots, depositedStacks, extensionDepositedStacks,
 				hasDepositExtensionSourceInScope(player, minSlot, maxSlot));
@@ -441,8 +441,8 @@ public class ItemTransferHandler {
 
 		Vec3 playerPos = SubLevelCompatHelper.projectToWorld(player.level(), player.getEyePosition().add(0, -0.3, 0));
 		List<ItemTransferData> itemTransferData = restocked.values().stream().toList();
-		PacketDistributor.sendToPlayer(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, false));
-		PacketDistributor.sendToPlayersTrackingEntity(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, false));
+		PacketDistributor.sendToPlayer(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, false, false));
+		PacketDistributor.sendToPlayersTrackingEntity(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, false, false));
 
 		showRestockMessage(player, minSlot, maxSlot, filter, fillEmpty, restockedPlayerSlots, restockedStacks, extensionRestockedStacks);
 	}
@@ -482,8 +482,8 @@ public class ItemTransferHandler {
 	private static void syncRestockTransfers(ServerPlayer player, Map<Vec3, ItemTransferData> restocked) {
 		Vec3 playerPos = SubLevelCompatHelper.projectToWorld(player.level(), player.getEyePosition().add(0, -0.3, 0));
 		List<ItemTransferData> itemTransferData = restocked.values().stream().toList();
-		PacketDistributor.sendToPlayer(player, new SyncItemTransfersPayload(itemTransferData, playerPos, false));
-		PacketDistributor.sendToPlayersTrackingEntity(player, new SyncItemTransfersPayload(itemTransferData, playerPos, false));
+		PacketDistributor.sendToPlayer(player, new SyncItemTransfersPayload(itemTransferData, playerPos, false, false));
+		PacketDistributor.sendToPlayersTrackingEntity(player, new SyncItemTransfersPayload(itemTransferData, playerPos, false, false));
 	}
 
 	private static void showAlternativeRestockMessage(Player player, int minSlot, int maxSlot, boolean fillEmpty, ItemStack filter,
@@ -568,7 +568,10 @@ public class ItemTransferHandler {
 			restockRecipeIngredient(restockHandlers, ingredientOptionsToRestock, player, restocked, restockedPlayerSlots, restockedStacks);
 		}
 
-		syncRestockTransfers(serverPlayer, restocked);
+		Vec3 playerPos = SubLevelCompatHelper.projectToWorld(player.level(), player.getEyePosition().add(0, -0.3, 0));
+		List<ItemTransferData> itemTransferData = restocked.values().stream().toList();
+		PacketDistributor.sendToPlayer(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, false, !restockedPlayerSlots.isEmpty()));
+		PacketDistributor.sendToPlayersTrackingEntity(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, false, false));
 		if (restockedPlayerSlots.isEmpty()) {
 			player.level().playSound(null, player, SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 1,
 					0.7f + RandHelper.getRandomMinusOneToOne(player.level().getRandom()) * 0.1F);
