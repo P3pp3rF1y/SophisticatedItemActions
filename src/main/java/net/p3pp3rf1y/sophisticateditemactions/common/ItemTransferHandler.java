@@ -606,8 +606,14 @@ public class ItemTransferHandler {
 		}
 		int count = Math.min(firstOption.getCount(), 36 * firstOption.getMaxStackSize());
 		List<ItemStack> normalizedOptions = new ArrayList<>();
+		Map<Integer, List<ItemStack>> optionsByHash = new HashMap<>();
 		for (ItemStack option : options) {
-			if (!option.isEmpty() && !matchesAnyFilter(option, normalizedOptions)) {
+			if (option.isEmpty()) {
+				continue;
+			}
+			List<ItemStack> optionsWithSameHash = optionsByHash.computeIfAbsent(ItemStack.hashItemAndComponents(option), key -> new ArrayList<>());
+			if (optionsWithSameHash.stream().noneMatch(existing -> ItemStack.isSameItemSameComponents(existing, option))) {
+				optionsWithSameHash.add(option);
 				normalizedOptions.add(option.copyWithCount(count));
 			}
 		}
