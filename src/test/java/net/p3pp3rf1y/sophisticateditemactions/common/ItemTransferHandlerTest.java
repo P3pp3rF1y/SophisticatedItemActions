@@ -48,6 +48,15 @@ class ItemTransferHandlerTest {
 	}
 
 	@Test
+	void removesDuplicateIngredientAlternatives() {
+		List<List<ItemStack>> missingIngredients = ItemTransferHandler.getMissingRecipeIngredientOptions(
+				List.of(List.of(new ItemStack(Items.OAK_PLANKS), new ItemStack(Items.BIRCH_PLANKS), new ItemStack(Items.OAK_PLANKS))), List.of());
+
+		assertEquals(1, missingIngredients.size());
+		assertEquals(2, missingIngredients.getFirst().size());
+	}
+
+	@Test
 	void reservesAlternativesForMoreConstrainedRecipeInputs() {
 		List<List<ItemStack>> missingIngredients = ItemTransferHandler.getMissingRecipeIngredientOptions(
 				List.of(List.of(new ItemStack(Items.OAK_PLANKS)), List.of(new ItemStack(Items.OAK_PLANKS), new ItemStack(Items.BIRCH_PLANKS))),
