@@ -27,8 +27,8 @@ public class Config {
 		public Server(ForgeConfigSpec.Builder builder) {
 			builder.comment("Server-side Settings").push("server");
 
-			recipeRestockEnabled = builder.comment("Whether recipe restocking can pull recipe ingredients from nearby storage").define("recipeRestockEnabled",
-					true);
+			recipeRestockEnabled = builder.comment("Whether recipe viewer restock buttons can pull recipe ingredients from nearby storage")
+					.define("recipeRestockEnabled", true);
 
 			builder.pop();
 		}
