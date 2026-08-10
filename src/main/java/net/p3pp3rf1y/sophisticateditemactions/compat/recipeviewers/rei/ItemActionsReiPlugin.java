@@ -51,7 +51,7 @@ public class ItemActionsReiPlugin implements REIClientPlugin {
 			@Override
 			public List<Widget> setupDisplay(T display, Rectangle bounds) {
 				List<Widget> widgets = new ArrayList<>(lastView.setupDisplay(display, bounds));
-				if (Config.SERVER.recipeRestockEnabled.get() && Minecraft.getInstance().player != null && !getIngredientOptions(display, false).isEmpty()) {
+				if (Config.SERVER.recipeRestockEnabled.get() && Minecraft.getInstance().player != null) {
 					Rectangle buttonBounds = new Rectangle(bounds.getMaxX() + 2, bounds.getMaxY() - RESTOCK_BUTTON_SIZE * 2 - 8, RESTOCK_BUTTON_SIZE,
 							RESTOCK_BUTTON_SIZE);
 					widgets.add(Widgets.createButton(buttonBounds, Component.literal("R")).focusable(false).onClick(ignored -> restockRecipeItems(display))

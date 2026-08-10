@@ -103,7 +103,7 @@ public class ItemActionsPlugin implements IModPlugin {
 			lastUpdateTick = minecraft.player == null ? -1 : minecraft.player.tickCount;
 			boolean restockEnabled = Config.SERVER.recipeRestockEnabled.get();
 			state.setVisible(restockEnabled);
-			state.setActive(restockEnabled && minecraft.player != null && !getIngredientOptions(false).isEmpty());
+			state.setActive(restockEnabled && minecraft.player != null);
 		}
 
 		@Override
