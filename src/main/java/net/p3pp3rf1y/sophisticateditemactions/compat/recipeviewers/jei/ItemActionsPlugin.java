@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.jei;
 
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.IRecipeLayoutDrawable;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.buttons.IButtonState;
@@ -12,6 +13,7 @@ import mezz.jei.api.gui.inputs.IJeiUserInput;
 import mezz.jei.api.gui.inputs.RecipeSlotUnderMouse;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.advanced.IRecipeButtonControllerFactory;
+import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.registration.IAdvancedRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.Minecraft;
@@ -36,6 +38,8 @@ import java.util.WeakHashMap;
 @JeiPlugin
 public class ItemActionsPlugin implements IModPlugin {
 	private static final Identifier ID = SophisticatedItemActions.getIdentifier("default");
+	private static final Set<IRecipeType<?>> RECIPE_RESTOCK_RECIPE_TYPES = Set.of(RecipeTypes.CRAFTING, RecipeTypes.ANVIL, RecipeTypes.STONECUTTING,
+			RecipeTypes.SMITHING);
 	private static final Set<RecipeRestockButtonController> RECIPE_RESTOCK_BUTTON_CONTROLLERS = Collections.newSetFromMap(new WeakHashMap<>());
 
 	@Override
@@ -49,6 +53,9 @@ public class ItemActionsPlugin implements IModPlugin {
 		registration.addRecipeButtonFactory(new IRecipeButtonControllerFactory() {
 			@Override
 			public <T> IIconButtonController createButtonController(IRecipeLayoutDrawable<T> recipeLayoutDrawable) {
+				if (!RECIPE_RESTOCK_RECIPE_TYPES.contains(recipeLayoutDrawable.getRecipeCategory().getRecipeType())) {
+					return null;
+				}
 				return new RecipeRestockButtonController(recipeLayoutDrawable, restockIcon);
 			}
 		});
