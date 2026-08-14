@@ -8,11 +8,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock.RestockUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
@@ -100,6 +103,125 @@ public class BackpackItemTransferHandler implements IItemTransferExtension {
 		return inventoryTransferred > 0
 				? ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_items_to_inventory_and_backpacks", inventoryCount, backpackCount)
 				: ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_items_to_backpacks", backpackCount);
+	}
+
+	@Override
+	public boolean hasRecipeInventorySource(Player player) {
+		return getRecipeBackpacks(player).stream().anyMatch(backpack -> backpack.getUpgradeHandler().getWrappersThatImplement(RefillUpgradeWrapper.class)
+				.stream().anyMatch(BackpackItemTransferHandler::isAdvancedRefill));
+	}
+
+	@Override
+	public int restockRecipeItems(Player player, List<List<ItemStack>> ingredientOptions) {
+		int restockedItemCount = 0;
+		List<IBackpackWrapper> backpacks = getRecipeBackpacks(player);
+		for (List<ItemStack> options : ingredientOptions) {
+			restockedItemCount += restockRecipeIngredient(player, backpacks, options);
+		}
+		return restockedItemCount;
+	}
+
+	private static int restockRecipeIngredient(Player player, List<IBackpackWrapper> backpacks, List<ItemStack> options) {
+		int remaining = options.getFirst().getCount();
+		for (ItemStack filter : options) {
+			remaining -= restockIngredientFromBackpacks(player, backpacks, filter, remaining);
+			if (remaining == 0) {
+				break;
+			}
+		}
+		return options.getFirst().getCount() - remaining;
+	}
+
+	private static int restockIngredientFromBackpacks(Player player, List<IBackpackWrapper> backpacks, ItemStack filter, int count) {
+		int restockedItemCount = 0;
+		for (IBackpackWrapper backpack : backpacks) {
+			restockedItemCount += restockIngredientFromBackpack(player, backpack, filter, count - restockedItemCount);
+			if (restockedItemCount == count) {
+				break;
+			}
+		}
+		return restockedItemCount;
+	}
+
+	private static int restockIngredientFromBackpack(Player player, IBackpackWrapper backpack, ItemStack filter, int count) {
+		int restockedItemCount = 0;
+		for (RefillUpgradeWrapper refillUpgrade : backpack.getUpgradeHandler().getWrappersThatImplement(RefillUpgradeWrapper.class)) {
+			if (isAdvancedRefill(refillUpgrade)) {
+				restockedItemCount += restockIngredientFromAdvancedRefill(player, backpack, filter, count - restockedItemCount);
+			}
+			if (restockedItemCount == count) {
+				break;
+			}
+		}
+		return restockedItemCount;
+	}
+
+	private static int restockIngredientFromAdvancedRefill(Player player, IBackpackWrapper backpack, ItemStack filter, int count) {
+		int restockedItemCount = 0;
+		while (restockedItemCount < count) {
+			int availableSpace = getAvailableInventorySpace(player, filter);
+			if (availableSpace == 0) {
+				return restockedItemCount;
+			}
+
+			int countToExtract = Math.min(Math.min(count - restockedItemCount, availableSpace), filter.getMaxStackSize());
+			try (Transaction tx = Transaction.openRoot()) {
+				int extracted = backpack.getInventoryForUpgradeProcessing().extract(ItemResource.of(filter), countToExtract, tx);
+				if (extracted == 0) {
+					return restockedItemCount;
+				}
+
+				restockedItemCount += insertIntoPlayerInventory(player, filter.copyWithCount(extracted));
+				tx.commit();
+			}
+		}
+		return restockedItemCount;
+	}
+
+	private static boolean isAdvancedRefill(RefillUpgradeWrapper refillUpgrade) {
+		return refillUpgrade.getUpgradeStack().getItem() instanceof RefillUpgradeItem refillUpgradeItem && refillUpgradeItem.supportsBlockPick();
+	}
+
+	private static List<IBackpackWrapper> getRecipeBackpacks(Player player) {
+		List<IBackpackWrapper> backpacks = new ArrayList<>();
+		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> {
+			backpacks.add(BackpackWrapper.fromStack(backpack));
+			return false;
+		});
+		return backpacks;
+	}
+
+	private static int getAvailableInventorySpace(Player player, ItemStack stack) {
+		int availableSpace = 0;
+		for (int slot = 0; slot < 36; slot++) {
+			ItemStack inventoryStack = player.getInventory().getItem(slot);
+			if (inventoryStack.isEmpty()) {
+				availableSpace += stack.getMaxStackSize();
+			} else if (ItemStack.isSameItemSameComponents(inventoryStack, stack)) {
+				availableSpace += inventoryStack.getMaxStackSize() - inventoryStack.getCount();
+			}
+		}
+		return availableSpace;
+	}
+
+	private static int insertIntoPlayerInventory(Player player, ItemStack stack) {
+		int originalCount = stack.getCount();
+		for (int slot = 0; slot < 36 && !stack.isEmpty(); slot++) {
+			ItemStack inventoryStack = player.getInventory().getItem(slot);
+			if (ItemStack.isSameItemSameComponents(inventoryStack, stack)) {
+				int countToAdd = Math.min(stack.getCount(), inventoryStack.getMaxStackSize() - inventoryStack.getCount());
+				inventoryStack.grow(countToAdd);
+				stack.shrink(countToAdd);
+			}
+		}
+		for (int slot = 0; slot < 36 && !stack.isEmpty(); slot++) {
+			if (player.getInventory().getItem(slot).isEmpty()) {
+				int countToAdd = Math.min(stack.getCount(), stack.getMaxStackSize());
+				player.getInventory().setItem(slot, stack.copyWithCount(countToAdd));
+				stack.shrink(countToAdd);
+			}
+		}
+		return originalCount - stack.getCount();
 	}
 
 	private static List<ItemStack> getBackpacksInScope(Player player, int minSlot, int maxSlot) {

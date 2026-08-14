@@ -144,8 +144,8 @@ public class ItemTransferHandler {
 
 		Vec3 playerPos = SubLevelCompatHelper.projectToWorld(player.level(), player.getEyePosition().add(0, -0.1, 0));
 		List<ItemTransferData> itemTransferData = deposited.values().stream().toList();
-		PacketDistributor.sendToPlayer(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, true));
-		PacketDistributor.sendToPlayersTrackingEntity(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, true));
+		PacketDistributor.sendToPlayer(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, true, false));
+		PacketDistributor.sendToPlayersTrackingEntity(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, true, false));
 
 		showDepositMessage(player, minSlot, maxSlot, depositedFromSlots, depositedStacks, extensionDepositedStacks,
 				hasDepositExtensionSourceInScope(player, minSlot, maxSlot));
@@ -276,7 +276,9 @@ public class ItemTransferHandler {
 
 		Map<Identifier, List<BlockPos>> storages = getInteractionStoragePositionsAround(player);
 		Map<Identifier, List<Integer>> entities = getStorageEntitiesAround(player);
-		if (!storages.isEmpty() || !entities.isEmpty()) {
+		boolean hasRecipeInventorySource = ItemTransferExtensionRegistry.getExtension().map(extension -> extension.hasRecipeInventorySource(player))
+				.orElse(false);
+		if (!storages.isEmpty() || !entities.isEmpty() || hasRecipeInventorySource) {
 			ClientPacketDistributor.sendToServer(new RestockRecipeItemsPayload(ingredientOptions, storages, entities));
 		} else {
 			playError(player, ItemActionsTranslationHelper.INSTANCE.translStatusMessage("no_storage_in_range").setStyle(Style.EMPTY.withColor(0xFF5555)));
@@ -397,8 +399,8 @@ public class ItemTransferHandler {
 	private static void syncRestockTransfers(ServerPlayer player, Map<Vec3, ItemTransferData> restocked) {
 		Vec3 playerPos = SubLevelCompatHelper.projectToWorld(player.level(), player.getEyePosition().add(0, -0.3, 0));
 		List<ItemTransferData> itemTransferData = restocked.values().stream().toList();
-		PacketDistributor.sendToPlayer(player, new SyncItemTransfersPayload(itemTransferData, playerPos, false));
-		PacketDistributor.sendToPlayersTrackingEntity(player, new SyncItemTransfersPayload(itemTransferData, playerPos, false));
+		PacketDistributor.sendToPlayer(player, new SyncItemTransfersPayload(itemTransferData, playerPos, false, false));
+		PacketDistributor.sendToPlayersTrackingEntity(player, new SyncItemTransfersPayload(itemTransferData, playerPos, false, false));
 	}
 
 	private static void showAlternativeRestockMessage(Player player, int minSlot, int maxSlot, boolean fillEmpty, ItemStack filter,
@@ -469,8 +471,25 @@ public class ItemTransferHandler {
 			inventory.add(player.getInventory().getItem(slot));
 		}
 		List<List<ItemStack>> missingIngredientOptions = getMissingRecipeIngredientOptions(ingredientOptions, inventory);
+		List<List<ItemStack>> backpackIngredientOptions = missingIngredientOptions;
+		int backpackRestockedCount = ItemTransferExtensionRegistry.getExtension()
+				.map(extension -> extension.restockRecipeItems(player, backpackIngredientOptions)).orElse(0);
+		if (backpackRestockedCount > 0) {
+			inventory.clear();
+			for (int slot = 0; slot < 36; slot++) {
+				inventory.add(player.getInventory().getItem(slot));
+			}
+			missingIngredientOptions = getMissingRecipeIngredientOptions(ingredientOptions, inventory);
+		}
 		if (missingIngredientOptions.isEmpty()) {
-			player.displayClientMessage(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("recipe_restocked"), true);
+			if (backpackRestockedCount > 0) {
+				player.displayClientMessage(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_recipe_items",
+						Component.literal(String.valueOf(backpackRestockedCount)).withStyle(ChatFormatting.DARK_GREEN)), true);
+				Vec3 playerPos = SubLevelCompatHelper.projectToWorld(player.level(), player.getEyePosition().add(0, -0.3, 0));
+				PacketDistributor.sendToPlayer(serverPlayer, new SyncItemTransfersPayload(List.of(), playerPos, false, true));
+			} else {
+				player.displayClientMessage(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("recipe_restocked"), true);
+			}
 			return;
 		}
 
@@ -482,12 +501,17 @@ public class ItemTransferHandler {
 			restockRecipeIngredient(restockHandlers, ingredientOptionsToRestock, player, restocked, restockedPlayerSlots, restockedStacks);
 		}
 
-		syncRestockTransfers(serverPlayer, restocked);
-		if (restockedPlayerSlots.isEmpty()) {
+		Vec3 playerPos = SubLevelCompatHelper.projectToWorld(player.level(), player.getEyePosition().add(0, -0.3, 0));
+		List<ItemTransferData> itemTransferData = restocked.values().stream().toList();
+		PacketDistributor.sendToPlayer(serverPlayer,
+				new SyncItemTransfersPayload(itemTransferData, playerPos, false, !restockedPlayerSlots.isEmpty() || backpackRestockedCount > 0));
+		PacketDistributor.sendToPlayersTrackingEntity(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, false, false));
+
+		if (restockedPlayerSlots.isEmpty() && backpackRestockedCount == 0) {
 			player.displayClientMessage(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("cannot_restock_recipe"), true);
 			player.playSound(SoundEvents.NOTE_BLOCK_BASS.value(), 1, 0.45f + RandHelper.getRandomMinusOneToOne(player.level().random) * 0.1F);
 		} else {
-			int restockedCount = restockedStacks.stream().mapToInt(ItemStack::getCount).sum();
+			int restockedCount = backpackRestockedCount + restockedStacks.stream().mapToInt(ItemStack::getCount).sum();
 			player.displayClientMessage(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_recipe_items",
 					Component.literal(String.valueOf(restockedCount)).withStyle(ChatFormatting.DARK_GREEN)), true);
 		}
@@ -647,8 +671,8 @@ public class ItemTransferHandler {
 
 		Vec3 playerPos = SubLevelCompatHelper.projectToWorld(player.level(), player.getEyePosition().add(0, -0.3, 0));
 		List<ItemTransferData> itemTransferData = restocked.values().stream().toList();
-		PacketDistributor.sendToPlayer(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, false));
-		PacketDistributor.sendToPlayersTrackingEntity(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, false));
+		PacketDistributor.sendToPlayer(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, false, false));
+		PacketDistributor.sendToPlayersTrackingEntity(serverPlayer, new SyncItemTransfersPayload(itemTransferData, playerPos, false, false));
 
 		showRestockMessage(player, minSlot, maxSlot, filter, fillEmpty, restockedPlayerSlots, restockedStacks, extensionRestockedStacks);
 	}
