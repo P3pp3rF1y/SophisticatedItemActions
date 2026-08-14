@@ -53,6 +53,11 @@ public record SyncItemTransfersPayload(List<ItemTransferData> itemTransferData, 
 			level.playSound(player, to.x(), to.y(), to.z(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.3F, pitch);
 		});
 		if (payload.recipeRestock()) {
+			if (payload.itemTransferData().isEmpty()) {
+				Level level = context.player().level();
+				level.playSound(context.player(), context.player().getX(), context.player().getY(), context.player().getZ(), SoundEvents.ITEM_PICKUP,
+						SoundSource.PLAYERS, 0.3F, RandHelper.getRandomMinusOneToOne(level.random) * 1.4F + 2.0F);
+			}
 			ClientEventHandler.handleRecipeRestockSync();
 		}
 	}
