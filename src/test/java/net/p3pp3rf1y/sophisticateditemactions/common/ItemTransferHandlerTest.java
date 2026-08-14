@@ -69,6 +69,16 @@ class ItemTransferHandlerTest {
 		assertIngredientCount(missingIngredients, Items.BIRCH_PLANKS, 1);
 	}
 
+	@Test
+	void getMissingRecipeIngredientOptionsAccountsForItemsTransferredFromBackpack() {
+		List<List<ItemStack>> missingIngredients = ItemTransferHandler.getMissingRecipeIngredientOptions(
+				List.of(List.of(new ItemStack(Items.OAK_PLANKS, 3)), List.of(new ItemStack(Items.BIRCH_PLANKS))),
+				List.of(new ItemStack(Items.OAK_PLANKS), new ItemStack(Items.BIRCH_PLANKS)));
+
+		assertEquals(1, missingIngredients.size());
+		assertIngredientCount(missingIngredients, Items.OAK_PLANKS, 2);
+	}
+
 	private static void assertIngredientCount(List<List<ItemStack>> ingredients, Item item, int count) {
 		assertTrue(ingredients.stream().flatMap(List::stream).anyMatch(stack -> stack.is(item) && stack.getCount() == count));
 	}

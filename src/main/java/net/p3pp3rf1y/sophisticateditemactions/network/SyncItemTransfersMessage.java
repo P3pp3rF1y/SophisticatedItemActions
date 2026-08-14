@@ -1,10 +1,16 @@
 
 package net.p3pp3rf1y.sophisticateditemactions.network;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedcore.network.ISplittableMessage;
+import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticateditemactions.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticateditemactions.client.render.ItemTransferClientHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferData;
@@ -38,6 +44,12 @@ public record SyncItemTransfersMessage(List<ItemTransferData> itemTransferData, 
 	public static void handleMessage(SyncItemTransfersMessage payload, NetworkEvent.Context context) {
 		ItemTransferClientHandler.handleItemTransfers(payload.itemTransferData(), payload.playerPos(), payload.fromPlayer());
 		if (payload.recipeRestock()) {
+			if (payload.itemTransferData().isEmpty()) {
+				LocalPlayer player = Minecraft.getInstance().player;
+				Level level = player.level();
+				level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.3F,
+						RandHelper.getRandomMinusOneToOne(level.random) * 1.4F + 2.0F);
+			}
 			ClientEventHandler.handleRecipeRestockSync();
 		}
 	}

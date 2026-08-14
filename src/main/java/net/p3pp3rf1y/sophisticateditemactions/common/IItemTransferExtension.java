@@ -22,4 +22,8 @@ public interface IItemTransferExtension {
 			Map<Vec3, ItemTransferData> restocked);
 
 	Component getRestockMessage(int inventoryTransferred, int extensionTransferred);
+
+	boolean hasRecipeInventorySource(Player player);
+
+	int restockRecipeItems(Player player, List<List<ItemStack>> ingredientOptions);
 }

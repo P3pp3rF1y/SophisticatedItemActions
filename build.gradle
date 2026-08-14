@@ -75,6 +75,13 @@ repositories {
             includeGroup "com.mojang"
         }
     }
+    maven {
+        name = "Registrate"
+        url = "https://maven.tterrag.com/"
+        content {
+            includeGroup "com.tterrag.registrate"
+        }
+    }
     maven { url = "https://modmaven.dev/" }
     maven {
         url "https://maven.ftb.dev/releases"
