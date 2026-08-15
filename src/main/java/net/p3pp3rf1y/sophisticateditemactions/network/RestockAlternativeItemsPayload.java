@@ -20,12 +20,12 @@ public record RestockAlternativeItemsPayload(List<ItemStack> filters, int minSlo
 		Map<ResourceLocation, List<BlockPos>> storagePositions, Map<ResourceLocation, List<Integer>> entityIds) implements CustomPacketPayload {
 	public static final Type<RestockAlternativeItemsPayload> TYPE = new Type<>(SophisticatedCore.getRL("restock_alternative_items"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, RestockAlternativeItemsPayload> STREAM_CODEC = StreamCodecHelper.composite(
-			ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()), RestockAlternativeItemsPayload::filters, ByteBufCodecs.INT,
+			ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list(64)), RestockAlternativeItemsPayload::filters, ByteBufCodecs.INT,
 			RestockAlternativeItemsPayload::minSlot, ByteBufCodecs.INT, RestockAlternativeItemsPayload::maxSlot, ByteBufCodecs.BOOL,
 			RestockAlternativeItemsPayload::fillEmpty, ByteBufCodecs.BOOL, RestockAlternativeItemsPayload::refillSingle,
-			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()), HashMap::new),
+			ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list(512)), 16),
 			RestockAlternativeItemsPayload::storagePositions,
-			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new),
+			ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list(512)), 16),
 			RestockAlternativeItemsPayload::entityIds, RestockAlternativeItemsPayload::new);
 
 	@Override

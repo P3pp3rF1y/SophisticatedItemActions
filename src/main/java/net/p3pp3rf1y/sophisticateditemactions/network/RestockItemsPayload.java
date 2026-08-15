@@ -22,10 +22,10 @@ public record RestockItemsPayload(ItemStack filter, int minSlot, int maxSlot, bo
 	public static final StreamCodec<RegistryFriendlyByteBuf, RestockItemsPayload> STREAM_CODEC = StreamCodecHelper.composite(ItemStack.OPTIONAL_STREAM_CODEC,
 			RestockItemsPayload::filter, ByteBufCodecs.INT, RestockItemsPayload::minSlot, ByteBufCodecs.INT, RestockItemsPayload::maxSlot, ByteBufCodecs.BOOL,
 			RestockItemsPayload::fillEmpty, ByteBufCodecs.BOOL, RestockItemsPayload::refillSingle,
-			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()), HashMap::new),
+			ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list(512)), 16),
 			RestockItemsPayload::storagePositions,
-			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new), RestockItemsPayload::entityIds,
-			RestockItemsPayload::new);
+			ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list(512)), 16),
+			RestockItemsPayload::entityIds, RestockItemsPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
