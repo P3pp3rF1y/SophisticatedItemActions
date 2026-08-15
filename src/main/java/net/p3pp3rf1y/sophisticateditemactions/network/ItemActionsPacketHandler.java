@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticateditemactions.network;
 
+import net.minecraftforge.network.NetworkDirection;
 import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 
@@ -12,21 +13,23 @@ public class ItemActionsPacketHandler extends PacketHandler {
 
 	@Override
 	public void registerMessages() {
-		registerMessage(DepositItemsMessage.class, DepositItemsMessage::encode, DepositItemsMessage::decode, DepositItemsMessage::onMessage);
+		registerMessage(DepositItemsMessage.class, DepositItemsMessage::encode, DepositItemsMessage::decode, DepositItemsMessage::onMessage,
+				NetworkDirection.PLAY_TO_SERVER);
 		registerMessage(RequestItemHighlightsMessage.class, RequestItemHighlightsMessage::encode, RequestItemHighlightsMessage::decode,
-				RequestItemHighlightsMessage::onMessage);
-		registerMessage(RestockItemsMessage.class, RestockItemsMessage::encode, RestockItemsMessage::decode, RestockItemsMessage::onMessage);
+				RequestItemHighlightsMessage::onMessage, NetworkDirection.PLAY_TO_SERVER);
+		registerMessage(RestockItemsMessage.class, RestockItemsMessage::encode, RestockItemsMessage::decode, RestockItemsMessage::onMessage,
+				NetworkDirection.PLAY_TO_SERVER);
 		registerMessage(RestockAlternativeItemsMessage.class, RestockAlternativeItemsMessage::encode, RestockAlternativeItemsMessage::decode,
-				RestockAlternativeItemsMessage::onMessage);
+				RestockAlternativeItemsMessage::onMessage, NetworkDirection.PLAY_TO_SERVER);
 		registerMessage(RestockRecipeItemsMessage.class, RestockRecipeItemsMessage::encode, RestockRecipeItemsMessage::decode,
-				RestockRecipeItemsMessage::onMessage);
+				RestockRecipeItemsMessage::onMessage, NetworkDirection.PLAY_TO_SERVER);
 		registerMessage(SyncEntityHighlightsMessage.class, SyncEntityHighlightsMessage::encode, SyncEntityHighlightsMessage::decode,
-				SyncEntityHighlightsMessage::onMessage);
+				SyncEntityHighlightsMessage::onMessage, NetworkDirection.PLAY_TO_CLIENT);
 		registerMessage(SyncHighlightDirectionsMessage.class, SyncHighlightDirectionsMessage::encode, SyncHighlightDirectionsMessage::decode,
-				SyncHighlightDirectionsMessage::onMessage);
-		registerMessage(SyncItemTransfersMessage.class, SyncItemTransfersMessage::encode, SyncItemTransfersMessage::decode,
-				SyncItemTransfersMessage::onMessage);
+				SyncHighlightDirectionsMessage::onMessage, NetworkDirection.PLAY_TO_CLIENT);
+		registerMessage(SyncItemTransfersMessage.class, SyncItemTransfersMessage::encode, SyncItemTransfersMessage::decode, SyncItemTransfersMessage::onMessage,
+				NetworkDirection.PLAY_TO_CLIENT);
 		registerMessage(SyncRenderedEntityBlockHighlightsMessage.class, SyncRenderedEntityBlockHighlightsMessage::encode,
-				SyncRenderedEntityBlockHighlightsMessage::decode, SyncRenderedEntityBlockHighlightsMessage::onMessage);
+				SyncRenderedEntityBlockHighlightsMessage::decode, SyncRenderedEntityBlockHighlightsMessage::onMessage, NetworkDirection.PLAY_TO_CLIENT);
 	}
 }

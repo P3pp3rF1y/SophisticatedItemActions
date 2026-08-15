@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
+import net.p3pp3rf1y.sophisticatedcore.network.PacketBufferHelper;
 import net.p3pp3rf1y.sophisticateditemactions.common.HighlightHandler;
 
 import javax.annotation.Nullable;
@@ -17,6 +18,8 @@ import java.util.function.Supplier;
 
 public record RequestItemHighlightsMessage(ItemStack stack, Map<ResourceLocation, List<BlockPos>> inventoryPositions,
 		Map<ResourceLocation, List<Integer>> entities) {
+	private static final int MAX_TARGET_GROUPS = 16;
+	private static final int MAX_TARGETS_PER_GROUP = 512;
 
 	public static void encode(RequestItemHighlightsMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeItemStack(msg.stack(), false);
@@ -27,8 +30,10 @@ public record RequestItemHighlightsMessage(ItemStack stack, Map<ResourceLocation
 
 	public static RequestItemHighlightsMessage decode(FriendlyByteBuf packetBuffer) {
 		return new RequestItemHighlightsMessage(packetBuffer.readItem(),
-				packetBuffer.readMap(FriendlyByteBuf::readResourceLocation, buf -> buf.readList(FriendlyByteBuf::readBlockPos)),
-				packetBuffer.readMap(FriendlyByteBuf::readResourceLocation, buf -> buf.readList(FriendlyByteBuf::readInt)));
+				PacketBufferHelper.readMap(packetBuffer, FriendlyByteBuf::readResourceLocation,
+						buf -> PacketBufferHelper.readList(buf, FriendlyByteBuf::readBlockPos, MAX_TARGETS_PER_GROUP), MAX_TARGET_GROUPS),
+				PacketBufferHelper.readMap(packetBuffer, FriendlyByteBuf::readResourceLocation,
+						buf -> PacketBufferHelper.readList(buf, FriendlyByteBuf::readInt, MAX_TARGETS_PER_GROUP), MAX_TARGET_GROUPS));
 	}
 
 	static void onMessage(RequestItemHighlightsMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {

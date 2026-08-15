@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
+import net.p3pp3rf1y.sophisticatedcore.network.PacketBufferHelper;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
 
 import java.util.List;
@@ -14,6 +15,8 @@ import java.util.function.Supplier;
 
 public record RestockItemsMessage(ItemStack filter, int minSlot, int maxSlot, boolean fillEmpty, boolean refillSingle,
 		Map<ResourceLocation, List<BlockPos>> storagePositions, Map<ResourceLocation, List<Integer>> entityIds) {
+	private static final int MAX_TARGET_GROUPS = 16;
+	private static final int MAX_TARGETS_PER_GROUP = 512;
 
 	public static void encode(RestockItemsMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeItem(msg.filter);
@@ -28,8 +31,11 @@ public record RestockItemsMessage(ItemStack filter, int minSlot, int maxSlot, bo
 
 	public static RestockItemsMessage decode(FriendlyByteBuf packetBuffer) {
 		return new RestockItemsMessage(packetBuffer.readItem(), packetBuffer.readInt(), packetBuffer.readInt(), packetBuffer.readBoolean(),
-				packetBuffer.readBoolean(), packetBuffer.readMap(FriendlyByteBuf::readResourceLocation, buf -> buf.readList(FriendlyByteBuf::readBlockPos)),
-				packetBuffer.readMap(FriendlyByteBuf::readResourceLocation, buf -> buf.readList(FriendlyByteBuf::readInt)));
+				packetBuffer.readBoolean(),
+				PacketBufferHelper.readMap(packetBuffer, FriendlyByteBuf::readResourceLocation,
+						buf -> PacketBufferHelper.readList(buf, FriendlyByteBuf::readBlockPos, MAX_TARGETS_PER_GROUP), MAX_TARGET_GROUPS),
+				PacketBufferHelper.readMap(packetBuffer, FriendlyByteBuf::readResourceLocation,
+						buf -> PacketBufferHelper.readList(buf, FriendlyByteBuf::readInt, MAX_TARGETS_PER_GROUP), MAX_TARGET_GROUPS));
 	}
 
 	static void onMessage(RestockItemsMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
