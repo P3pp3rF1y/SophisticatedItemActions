@@ -9,7 +9,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
-import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
 
 import java.util.HashMap;
@@ -22,9 +21,9 @@ public record RestockItemsPayload(ItemStack filter, int minSlot, int maxSlot, bo
 	public static final StreamCodec<RegistryFriendlyByteBuf, RestockItemsPayload> STREAM_CODEC = StreamCodec.composite(ItemStack.OPTIONAL_STREAM_CODEC,
 			RestockItemsPayload::filter, ByteBufCodecs.INT, RestockItemsPayload::minSlot, ByteBufCodecs.INT, RestockItemsPayload::maxSlot, ByteBufCodecs.BOOL,
 			RestockItemsPayload::fillEmpty, ByteBufCodecs.BOOL, RestockItemsPayload::refillSingle,
-			StreamCodecHelper.ofMap(Identifier.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()), HashMap::new),
+			ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list(512)), 16),
 			RestockItemsPayload::storagePositions,
-			StreamCodecHelper.ofMap(Identifier.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new), RestockItemsPayload::entityIds,
+			ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list(512)), 16), RestockItemsPayload::entityIds,
 			RestockItemsPayload::new);
 
 	@Override
