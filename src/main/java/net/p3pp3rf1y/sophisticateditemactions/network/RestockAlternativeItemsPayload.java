@@ -18,14 +18,18 @@ import java.util.Map;
 
 public record RestockAlternativeItemsPayload(List<ItemStack> filters, int minSlot, int maxSlot, boolean fillEmpty, boolean refillSingle,
 		Map<ResourceLocation, List<BlockPos>> storagePositions, Map<ResourceLocation, List<Integer>> entityIds) implements CustomPacketPayload {
+	private static final int MAX_FILTERS = 64;
+	private static final int MAX_TARGET_GROUPS = 16;
+	private static final int MAX_TARGETS_PER_GROUP = 512;
 	public static final Type<RestockAlternativeItemsPayload> TYPE = new Type<>(SophisticatedCore.getRL("restock_alternative_items"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, RestockAlternativeItemsPayload> STREAM_CODEC = StreamCodecHelper.composite(
-			ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()), RestockAlternativeItemsPayload::filters, ByteBufCodecs.INT,
+			ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list(MAX_FILTERS)), RestockAlternativeItemsPayload::filters, ByteBufCodecs.INT,
 			RestockAlternativeItemsPayload::minSlot, ByteBufCodecs.INT, RestockAlternativeItemsPayload::maxSlot, ByteBufCodecs.BOOL,
 			RestockAlternativeItemsPayload::fillEmpty, ByteBufCodecs.BOOL, RestockAlternativeItemsPayload::refillSingle,
-			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()), HashMap::new),
-			RestockAlternativeItemsPayload::storagePositions,
-			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new),
+			ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list(MAX_TARGETS_PER_GROUP)),
+					MAX_TARGET_GROUPS),
+			RestockAlternativeItemsPayload::storagePositions, ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC,
+					ByteBufCodecs.INT.apply(ByteBufCodecs.list(MAX_TARGETS_PER_GROUP)), MAX_TARGET_GROUPS),
 			RestockAlternativeItemsPayload::entityIds, RestockAlternativeItemsPayload::new);
 
 	@Override
