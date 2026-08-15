@@ -8,7 +8,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
-import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
 
 import java.util.HashMap;
@@ -17,13 +16,17 @@ import java.util.Map;
 
 public record DepositItemsPayload(int minSlot, int maxSlot, Map<ResourceLocation, List<BlockPos>> storagePositions,
 		Map<ResourceLocation, List<Integer>> entityIds, boolean onlyMatching) implements CustomPacketPayload {
+	private static final int MAX_TARGET_GROUPS = 16;
+	private static final int MAX_TARGETS_PER_GROUP = 512;
 	public static final Type<DepositItemsPayload> TYPE = new Type<>(SophisticatedCore.getRL("deposit_items"));
-	public static final StreamCodec<RegistryFriendlyByteBuf, DepositItemsPayload> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.INT,
-			DepositItemsPayload::minSlot, ByteBufCodecs.INT, DepositItemsPayload::maxSlot,
-			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()), HashMap::new),
-			DepositItemsPayload::storagePositions,
-			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new), DepositItemsPayload::entityIds,
-			ByteBufCodecs.BOOL, DepositItemsPayload::onlyMatching, DepositItemsPayload::new);
+	public static final StreamCodec<RegistryFriendlyByteBuf, DepositItemsPayload> STREAM_CODEC = StreamCodec
+			.composite(
+					ByteBufCodecs.INT, DepositItemsPayload::minSlot, ByteBufCodecs.INT, DepositItemsPayload::maxSlot, ByteBufCodecs.map(HashMap::new,
+							ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list(MAX_TARGETS_PER_GROUP)), MAX_TARGET_GROUPS),
+					DepositItemsPayload::storagePositions,
+					ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list(MAX_TARGETS_PER_GROUP)),
+							MAX_TARGET_GROUPS),
+					DepositItemsPayload::entityIds, ByteBufCodecs.BOOL, DepositItemsPayload::onlyMatching, DepositItemsPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

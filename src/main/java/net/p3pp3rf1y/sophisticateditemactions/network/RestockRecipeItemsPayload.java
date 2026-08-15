@@ -9,7 +9,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
-import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
 
 import java.util.HashMap;
@@ -18,12 +17,18 @@ import java.util.Map;
 
 public record RestockRecipeItemsPayload(List<List<ItemStack>> ingredientOptions, Map<ResourceLocation, List<BlockPos>> storagePositions,
 		Map<ResourceLocation, List<Integer>> entityIds) implements CustomPacketPayload {
+	private static final int MAX_INGREDIENTS = 64;
+	private static final int MAX_ALTERNATIVES_PER_INGREDIENT = 256;
+	private static final int MAX_TARGET_GROUPS = 16;
+	private static final int MAX_TARGETS_PER_GROUP = 512;
 	public static final Type<RestockRecipeItemsPayload> TYPE = new Type<>(SophisticatedCore.getRL("restock_recipe_items"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, RestockRecipeItemsPayload> STREAM_CODEC = StreamCodec.composite(
-			ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()).apply(ByteBufCodecs.list()), RestockRecipeItemsPayload::ingredientOptions,
-			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()), HashMap::new),
-			RestockRecipeItemsPayload::storagePositions,
-			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new),
+			ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list(MAX_ALTERNATIVES_PER_INGREDIENT)).apply(ByteBufCodecs.list(MAX_INGREDIENTS)),
+			RestockRecipeItemsPayload::ingredientOptions,
+			ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list(MAX_TARGETS_PER_GROUP)),
+					MAX_TARGET_GROUPS),
+			RestockRecipeItemsPayload::storagePositions, ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC,
+					ByteBufCodecs.INT.apply(ByteBufCodecs.list(MAX_TARGETS_PER_GROUP)), MAX_TARGET_GROUPS),
 			RestockRecipeItemsPayload::entityIds, RestockRecipeItemsPayload::new);
 
 	@Override

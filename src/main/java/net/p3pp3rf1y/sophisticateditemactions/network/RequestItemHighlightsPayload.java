@@ -11,7 +11,6 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
-import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 import net.p3pp3rf1y.sophisticateditemactions.common.HighlightHandler;
 
 import java.util.HashMap;
@@ -20,12 +19,15 @@ import java.util.Map;
 
 public record RequestItemHighlightsPayload(ItemStack stack, Map<ResourceLocation, List<BlockPos>> inventoryPositions,
 		Map<ResourceLocation, List<Integer>> entities) implements CustomPacketPayload {
+	private static final int MAX_TARGET_GROUPS = 16;
+	private static final int MAX_TARGETS_PER_GROUP = 512;
 	public static final Type<RequestItemHighlightsPayload> TYPE = new Type<>(SophisticatedCore.getRL("request_item_highlights"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, RequestItemHighlightsPayload> STREAM_CODEC = StreamCodec.composite(ItemStack.STREAM_CODEC,
 			RequestItemHighlightsPayload::stack,
-			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()), HashMap::new),
-			RequestItemHighlightsPayload::inventoryPositions,
-			StreamCodecHelper.ofMap(ResourceLocation.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new),
+			ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list(MAX_TARGETS_PER_GROUP)),
+					MAX_TARGET_GROUPS),
+			RequestItemHighlightsPayload::inventoryPositions, ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC,
+					ByteBufCodecs.INT.apply(ByteBufCodecs.list(MAX_TARGETS_PER_GROUP)), MAX_TARGET_GROUPS),
 			RequestItemHighlightsPayload::entities, RequestItemHighlightsPayload::new);
 
 	@Override
