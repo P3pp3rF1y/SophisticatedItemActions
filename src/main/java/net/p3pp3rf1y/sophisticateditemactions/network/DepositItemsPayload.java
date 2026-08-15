@@ -8,7 +8,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
-import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
 
 import java.util.HashMap;
@@ -20,9 +19,9 @@ public record DepositItemsPayload(int minSlot, int maxSlot, Map<Identifier, List
 	public static final Type<DepositItemsPayload> TYPE = new Type<>(SophisticatedCore.getIdentifier("deposit_items"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, DepositItemsPayload> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.INT,
 			DepositItemsPayload::minSlot, ByteBufCodecs.INT, DepositItemsPayload::maxSlot,
-			StreamCodecHelper.ofMap(Identifier.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()), HashMap::new),
+			ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list(512)), 16),
 			DepositItemsPayload::storagePositions,
-			StreamCodecHelper.ofMap(Identifier.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list()), HashMap::new), DepositItemsPayload::entityIds,
+			ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list(512)), 16), DepositItemsPayload::entityIds,
 			ByteBufCodecs.BOOL, DepositItemsPayload::onlyMatching, DepositItemsPayload::new);
 
 	@Override
