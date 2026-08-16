@@ -9,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticateditemactions.client.ChestOpeningAnimator;
+import net.p3pp3rf1y.sophisticateditemactions.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferData;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class ItemTransferClientHandler {
 	private ItemTransferClientHandler() {
 	}
 
-	public static void handleItemTransfers(List<ItemTransferData> itd, Vec3 playerPos, boolean fromPlayer) {
+	public static void handleItemTransfers(List<ItemTransferData> itd, Vec3 playerPos, boolean fromPlayer, boolean recipeRestock) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		Level level = player.level();
 
@@ -35,5 +36,12 @@ public class ItemTransferClientHandler {
 					: RandHelper.getRandomMinusOneToOne(level.random) * 1.4F + 2.0F;
 			level.playSound(player, to.x(), to.y(), to.z(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.3F, pitch);
 		});
+		if (recipeRestock) {
+			if (itd.isEmpty()) {
+				level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.3F,
+						RandHelper.getRandomMinusOneToOne(level.random) * 1.4F + 2.0F);
+			}
+			ClientEventHandler.handleRecipeRestockSync();
+		}
 	}
 }
