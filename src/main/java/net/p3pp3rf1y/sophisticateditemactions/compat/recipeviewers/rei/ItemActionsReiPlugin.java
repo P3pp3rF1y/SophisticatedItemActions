@@ -16,6 +16,7 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.forge.REIPluginClient;
+import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -23,6 +24,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
@@ -31,6 +33,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SuppressWarnings("unused")
 @REIPluginClient
@@ -125,13 +128,29 @@ public class ItemActionsReiPlugin implements REIClientPlugin {
 
 		private static void restockRecipeItems(Display display) {
 			Minecraft minecraft = Minecraft.getInstance();
-			List<List<ItemStack>> ingredientOptions = getIngredientOptions(display, Screen.hasShiftDown());
-			if (!Config.SERVER.recipeRestockEnabled.get() || minecraft.player == null || ingredientOptions.isEmpty()) {
+			if (!Config.SERVER.recipeRestockEnabled.get() || minecraft.player == null) {
 				return;
 			}
 
-			ItemTransferHandler.restockRecipeItems(minecraft.player, ingredientOptions);
+			Optional<ResourceLocation> recipeId = getRegisteredRecipeId(display);
+			if (recipeId.isPresent()) {
+				ItemTransferHandler.restockRecipeItems(minecraft.player, recipeId.get(), Screen.hasShiftDown());
+			} else {
+				List<List<ItemStack>> ingredientOptions = getIngredientOptions(display, Screen.hasShiftDown());
+				if (ingredientOptions.isEmpty()) {
+					return;
+				}
+				ItemTransferHandler.restockRecipeItems(minecraft.player, ingredientOptions);
+			}
 			NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
+		}
+
+		private static Optional<ResourceLocation> getRegisteredRecipeId(Display display) {
+			if (!(display instanceof DefaultCraftingDisplay)) {
+				return Optional.empty();
+			}
+
+			return display.getDisplayLocation().flatMap(ClientRecipeHelper::getRecipe).map(recipeHolder -> recipeHolder.id().location());
 		}
 	}
 }
