@@ -16,6 +16,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
@@ -24,6 +26,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @EmiEntrypoint
 public class ItemActionsEmiPlugin implements EmiPlugin {
@@ -87,14 +90,31 @@ public class ItemActionsEmiPlugin implements EmiPlugin {
 		@Override
 		public boolean mouseClicked(int mouseX, int mouseY, int button) {
 			Minecraft minecraft = Minecraft.getInstance();
-			List<List<ItemStack>> ingredientOptions = getIngredientOptions(recipe, Screen.hasShiftDown());
-			if (!bounds.contains(mouseX, mouseY) || !Config.SERVER.recipeRestockEnabled.get() || minecraft.player == null || ingredientOptions.isEmpty()) {
+			if (!bounds.contains(mouseX, mouseY) || !Config.SERVER.recipeRestockEnabled.get() || minecraft.player == null) {
 				return false;
 			}
 
-			ItemTransferHandler.restockRecipeItems(minecraft.player, ingredientOptions);
+			Optional<ResourceLocation> recipeId = getRegisteredRecipeId();
+			if (recipeId.isPresent()) {
+				ItemTransferHandler.restockRecipeItems(minecraft.player, recipeId.get(), Screen.hasShiftDown());
+			} else {
+				List<List<ItemStack>> ingredientOptions = getIngredientOptions(recipe, Screen.hasShiftDown());
+				if (ingredientOptions.isEmpty()) {
+					return false;
+				}
+				ItemTransferHandler.restockRecipeItems(minecraft.player, ingredientOptions);
+			}
 			NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
 			return true;
+		}
+
+		private Optional<ResourceLocation> getRegisteredRecipeId() {
+			Recipe<?> backingRecipe = recipe.getBackingRecipe();
+			if (backingRecipe == null) {
+				return Optional.empty();
+			}
+
+			return ClientRecipeHelper.getRecipe(backingRecipe.getId()).filter(registeredRecipe -> registeredRecipe == backingRecipe).map(Recipe::getId);
 		}
 	}
 }

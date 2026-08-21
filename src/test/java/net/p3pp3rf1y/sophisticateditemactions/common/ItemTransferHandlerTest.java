@@ -5,6 +5,7 @@ import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -77,6 +78,16 @@ class ItemTransferHandlerTest {
 
 		assertEquals(1, missingIngredients.size());
 		assertIngredientCount(missingIngredients, Items.OAK_PLANKS, 2);
+	}
+
+	@Test
+	void getRecipeIngredientOptionsCreatesFullStacksForRegisteredIngredients() {
+		List<List<ItemStack>> ingredientOptions = ItemTransferHandler.getRecipeIngredientOptions(List.of(Ingredient.of(Items.OAK_PLANKS, Items.BIRCH_PLANKS)),
+				true);
+
+		assertEquals(1, ingredientOptions.size());
+		assertEquals(2, ingredientOptions.get(0).size());
+		assertTrue(ingredientOptions.get(0).stream().allMatch(stack -> stack.getCount() == stack.getMaxStackSize()));
 	}
 
 	private static void assertIngredientCount(List<List<ItemStack>> ingredients, Item item, int count) {

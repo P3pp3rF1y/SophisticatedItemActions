@@ -12,10 +12,12 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.RecipeHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
@@ -24,6 +26,7 @@ import net.p3pp3rf1y.sophisticateditemactions.network.ItemActionsPacketHandler;
 import net.p3pp3rf1y.sophisticateditemactions.network.RestockAlternativeItemsMessage;
 import net.p3pp3rf1y.sophisticateditemactions.network.RestockItemsMessage;
 import net.p3pp3rf1y.sophisticateditemactions.network.RestockRecipeItemsMessage;
+import net.p3pp3rf1y.sophisticateditemactions.network.RestockRegisteredRecipeMessage;
 import net.p3pp3rf1y.sophisticateditemactions.network.SyncItemTransfersMessage;
 
 import java.util.*;
@@ -265,6 +268,18 @@ public class ItemTransferHandler {
 				.orElse(false);
 		if (!storages.isEmpty() || !entities.isEmpty() || hasRecipeInventorySource) {
 			ItemActionsPacketHandler.INSTANCE.sendToServer(new RestockRecipeItemsMessage(ingredientOptions, storages, entities));
+		} else {
+			playError(player, ItemActionsTranslationHelper.INSTANCE.translStatusMessage("no_storage_in_range").setStyle(Style.EMPTY.withColor(0xFF5555)));
+		}
+	}
+
+	public static void restockRecipeItems(Player player, ResourceLocation recipeId, boolean fullStacks) {
+		Map<ResourceLocation, List<BlockPos>> storages = getInteractionStoragePositionsAround(player);
+		Map<ResourceLocation, List<Integer>> entities = getStorageEntitiesAround(player);
+		boolean hasRecipeInventorySource = ItemTransferExtensionRegistry.getExtension().map(extension -> extension.hasRecipeInventorySource(player))
+				.orElse(false);
+		if (!storages.isEmpty() || !entities.isEmpty() || hasRecipeInventorySource) {
+			ItemActionsPacketHandler.INSTANCE.sendToServer(new RestockRegisteredRecipeMessage(recipeId, fullStacks, storages, entities));
 		} else {
 			playError(player, ItemActionsTranslationHelper.INSTANCE.translStatusMessage("no_storage_in_range").setStyle(Style.EMPTY.withColor(0xFF5555)));
 		}
@@ -566,6 +581,28 @@ public class ItemTransferHandler {
 			player.displayClientMessage(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_recipe_items",
 					Component.literal(String.valueOf(restockedCount)).withStyle(ChatFormatting.DARK_GREEN)), true);
 		}
+	}
+
+	public static void handleRecipeRestock(Player player, Map<ResourceLocation, List<BlockPos>> storagePositions, Map<ResourceLocation, List<Integer>> entities,
+			ResourceLocation recipeId, boolean fullStacks) {
+		if (!(player instanceof ServerPlayer)) {
+			return;
+		}
+		if (!Config.SERVER.recipeRestockEnabled.get()) {
+			player.displayClientMessage(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("recipe_restock_disabled"), true);
+			return;
+		}
+
+		RecipeHelper.getRecipe(recipeId).map(recipe -> getRecipeIngredientOptions(recipe.getIngredients(), fullStacks))
+				.filter(ingredientOptions -> !ingredientOptions.isEmpty())
+				.ifPresent(ingredientOptions -> handleRecipeRestock(player, storagePositions, entities, ingredientOptions));
+	}
+
+	static List<List<ItemStack>> getRecipeIngredientOptions(List<Ingredient> ingredients, boolean fullStacks) {
+		return ingredients.stream().map(Ingredient::getItems)
+				.map(options -> Arrays.stream(options).filter(stack -> !stack.isEmpty())
+						.map(stack -> stack.copyWithCount(fullStacks ? stack.getMaxStackSize() : stack.getCount())).toList())
+				.filter(options -> !options.isEmpty()).toList();
 	}
 
 	static List<List<ItemStack>> getMissingRecipeIngredientOptions(List<List<ItemStack>> ingredientOptions, List<ItemStack> inventory) {

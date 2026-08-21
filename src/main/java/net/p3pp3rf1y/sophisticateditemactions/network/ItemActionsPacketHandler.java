@@ -23,6 +23,8 @@ public class ItemActionsPacketHandler extends PacketHandler {
 				RestockAlternativeItemsMessage::onMessage, NetworkDirection.PLAY_TO_SERVER);
 		registerMessage(RestockRecipeItemsMessage.class, RestockRecipeItemsMessage::encode, RestockRecipeItemsMessage::decode,
 				RestockRecipeItemsMessage::onMessage, NetworkDirection.PLAY_TO_SERVER);
+		registerMessage(RestockRegisteredRecipeMessage.class, RestockRegisteredRecipeMessage::encode, RestockRegisteredRecipeMessage::decode,
+				RestockRegisteredRecipeMessage::onMessage, NetworkDirection.PLAY_TO_SERVER);
 		registerMessage(SyncEntityHighlightsMessage.class, SyncEntityHighlightsMessage::encode, SyncEntityHighlightsMessage::decode,
 				SyncEntityHighlightsMessage::onMessage, NetworkDirection.PLAY_TO_CLIENT);
 		registerMessage(SyncHighlightDirectionsMessage.class, SyncHighlightDirectionsMessage::encode, SyncHighlightDirectionsMessage::decode,
