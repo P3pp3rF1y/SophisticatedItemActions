@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.emi;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.emi.emi.api.EmiEntrypoint;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
@@ -15,14 +16,18 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeHintType;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @EmiEntrypoint
 public class ItemActionsEmiPlugin implements EmiPlugin {
@@ -89,14 +94,37 @@ public class ItemActionsEmiPlugin implements EmiPlugin {
 		@Override
 		public boolean mouseClicked(int mouseX, int mouseY, int button) {
 			Minecraft minecraft = Minecraft.getInstance();
-			List<List<ItemStack>> ingredientOptions = getIngredientOptions(recipe, false);
-			if (!bounds.contains(mouseX, mouseY) || !Config.SERVER.recipeRestockEnabled.get() || minecraft.player == null || ingredientOptions.isEmpty()) {
+			if (!bounds.contains(mouseX, mouseY) || !Config.SERVER.recipeRestockEnabled.get() || minecraft.player == null) {
 				return false;
 			}
 
-			ItemTransferHandler.restockRecipeItems(minecraft.player, ingredientOptions);
+			Optional<Identifier> recipeId = getRegisteredRecipeId();
+			if (recipeId.isPresent()) {
+				ItemTransferHandler.restockRecipeItems(minecraft.player, recipeId.get(), isShiftDown());
+			} else {
+				List<List<ItemStack>> ingredientOptions = getIngredientOptions(recipe, isShiftDown());
+				if (ingredientOptions.isEmpty()) {
+					return false;
+				}
+				ItemTransferHandler.restockRecipeItems(minecraft.player, ingredientOptions);
+			}
 			NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
 			return true;
+		}
+
+		private Optional<Identifier> getRegisteredRecipeId() {
+			RecipeHolder<?> backingRecipe = recipe.getBackingRecipe();
+			if (backingRecipe == null) {
+				return Optional.empty();
+			}
+
+			return ClientRecipeHelper.getRecipe(backingRecipe.id().identifier()).filter(registeredRecipe -> registeredRecipe.value() == backingRecipe.value())
+					.map(registeredRecipe -> registeredRecipe.id().identifier());
+		}
+
+		private static boolean isShiftDown() {
+			return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)
+					|| InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), GLFW.GLFW_KEY_RIGHT_SHIFT);
 		}
 	}
 }

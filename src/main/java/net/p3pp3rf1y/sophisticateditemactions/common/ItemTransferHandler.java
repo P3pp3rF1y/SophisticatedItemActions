@@ -2,15 +2,18 @@ package net.p3pp3rf1y.sophisticateditemactions.common;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
@@ -23,6 +26,7 @@ import net.p3pp3rf1y.sophisticateditemactions.network.DepositItemsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.RestockAlternativeItemsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.RestockItemsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.RestockRecipeItemsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.RestockRegisteredRecipePayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.SyncItemTransfersPayload;
 
 import java.util.*;
@@ -285,6 +289,18 @@ public class ItemTransferHandler {
 		}
 	}
 
+	public static void restockRecipeItems(Player player, Identifier recipeId, boolean fullStacks) {
+		Map<Identifier, List<BlockPos>> storages = getInteractionStoragePositionsAround(player);
+		Map<Identifier, List<Integer>> entities = getStorageEntitiesAround(player);
+		boolean hasRecipeInventorySource = ItemTransferExtensionRegistry.getExtension().map(extension -> extension.hasRecipeInventorySource(player))
+				.orElse(false);
+		if (!storages.isEmpty() || !entities.isEmpty() || hasRecipeInventorySource) {
+			ClientPacketDistributor.sendToServer(new RestockRegisteredRecipePayload(recipeId, fullStacks, storages, entities));
+		} else {
+			playError(player, ItemActionsTranslationHelper.INSTANCE.translStatusMessage("no_storage_in_range").setStyle(Style.EMPTY.withColor(0xFF5555)));
+		}
+	}
+
 	public static void restockAlternativeItems(Player player, List<ItemStack> filters, boolean mainInventory, boolean hotbar, boolean fillEmpty,
 			boolean refillSingle) {
 		if (!mainInventory && !hotbar) {
@@ -515,6 +531,29 @@ public class ItemTransferHandler {
 			player.displayClientMessage(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_recipe_items",
 					Component.literal(String.valueOf(restockedCount)).withStyle(ChatFormatting.DARK_GREEN)), true);
 		}
+	}
+
+	public static void handleRecipeRestock(Player player, Map<Identifier, List<BlockPos>> storagePositions, Map<Identifier, List<Integer>> entities,
+			Identifier recipeId, boolean fullStacks) {
+		if (!(player instanceof ServerPlayer serverPlayer)) {
+			return;
+		}
+		if (!Config.SERVER.recipeRestockEnabled.get()) {
+			player.displayClientMessage(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("recipe_restock_disabled"), true);
+			return;
+		}
+
+		serverPlayer.level().recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, recipeId))
+				.map(recipe -> getRecipeIngredientOptions(recipe.value().placementInfo().ingredients(), fullStacks))
+				.filter(ingredientOptions -> !ingredientOptions.isEmpty())
+				.ifPresent(ingredientOptions -> handleRecipeRestock(player, storagePositions, entities, ingredientOptions));
+	}
+
+	static List<List<ItemStack>> getRecipeIngredientOptions(List<Ingredient> ingredients, boolean fullStacks) {
+		return ingredients.stream().map(Ingredient::items)
+				.map(options -> options.map(item -> new ItemStack(item.value())).filter(stack -> !stack.isEmpty())
+						.map(stack -> stack.copyWithCount(fullStacks ? stack.getMaxStackSize() : stack.getCount())).toList())
+				.filter(options -> !options.isEmpty()).toList();
 	}
 
 	static List<List<ItemStack>> getMissingRecipeIngredientOptions(List<List<ItemStack>> ingredientOptions, List<ItemStack> inventory) {

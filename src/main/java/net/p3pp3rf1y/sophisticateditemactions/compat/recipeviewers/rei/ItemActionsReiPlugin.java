@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.rei;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
@@ -16,20 +17,24 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.forge.REIPluginClient;
+import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeHintType;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SuppressWarnings("unused")
 @REIPluginClient
@@ -119,13 +124,36 @@ public class ItemActionsReiPlugin implements REIClientPlugin {
 
 		private static void restockRecipeItems(Display display) {
 			Minecraft minecraft = Minecraft.getInstance();
-			List<List<ItemStack>> ingredientOptions = getIngredientOptions(display, false);
-			if (!Config.SERVER.recipeRestockEnabled.get() || minecraft.player == null || ingredientOptions.isEmpty()) {
+			if (!Config.SERVER.recipeRestockEnabled.get() || minecraft.player == null) {
 				return;
 			}
 
-			ItemTransferHandler.restockRecipeItems(minecraft.player, ingredientOptions);
+			Optional<Identifier> recipeId = getRegisteredRecipeId(display);
+			if (recipeId.isPresent()) {
+				ItemTransferHandler.restockRecipeItems(minecraft.player, recipeId.get(), isShiftDown());
+			} else {
+				List<List<ItemStack>> ingredientOptions = getIngredientOptions(display, isShiftDown());
+				if (ingredientOptions.isEmpty()) {
+					return;
+				}
+				ItemTransferHandler.restockRecipeItems(minecraft.player, ingredientOptions);
+			}
 			NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
+		}
+
+		private static Optional<Identifier> getRegisteredRecipeId(Display display) {
+			if (!(display instanceof DefaultCraftingDisplay craftingDisplay)) {
+				return Optional.empty();
+			}
+
+			Optional<?> displayLocation = craftingDisplay.getDisplayLocation();
+			return displayLocation.map(Object::toString).map(Identifier::parse).flatMap(ClientRecipeHelper::getRecipe)
+					.map(registeredRecipe -> registeredRecipe.id().identifier());
+		}
+
+		private static boolean isShiftDown() {
+			return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT)
+					|| InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), GLFW.GLFW_KEY_RIGHT_SHIFT);
 		}
 	}
 }

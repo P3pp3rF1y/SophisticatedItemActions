@@ -20,6 +20,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
@@ -119,11 +121,26 @@ public class ItemActionsPlugin implements IModPlugin {
 			if (!input.isSimulate()) {
 				Minecraft minecraft = Minecraft.getInstance();
 				if (minecraft.player != null) {
-					ItemTransferHandler.restockRecipeItems(minecraft.player, getIngredientOptions((input.getModifiers() & GLFW.GLFW_MOD_SHIFT) != 0));
+					boolean fullStacks = (input.getModifiers() & GLFW.GLFW_MOD_SHIFT) != 0;
+					Optional<Identifier> recipeId = getRegisteredRecipeId();
+					if (recipeId.isPresent()) {
+						ItemTransferHandler.restockRecipeItems(minecraft.player, recipeId.get(), fullStacks);
+					} else {
+						ItemTransferHandler.restockRecipeItems(minecraft.player, getIngredientOptions(fullStacks));
+					}
 					NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
 				}
 			}
 			return true;
+		}
+
+		private Optional<Identifier> getRegisteredRecipeId() {
+			if (!(recipeLayoutDrawable.getRecipe() instanceof RecipeHolder<?> recipeHolder)) {
+				return Optional.empty();
+			}
+
+			return ClientRecipeHelper.getRecipe(recipeHolder.id().identifier()).filter(registeredRecipe -> registeredRecipe.value() == recipeHolder.value())
+					.map(registeredRecipe -> registeredRecipe.id().identifier());
 		}
 
 		@Override
