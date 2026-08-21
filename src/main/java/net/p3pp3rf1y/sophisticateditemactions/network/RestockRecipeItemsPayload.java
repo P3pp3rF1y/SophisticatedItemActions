@@ -17,12 +17,17 @@ import java.util.Map;
 
 public record RestockRecipeItemsPayload(List<List<ItemStack>> ingredientOptions, Map<Identifier, List<BlockPos>> storagePositions,
 		Map<Identifier, List<Integer>> entityIds) implements CustomPacketPayload {
+	private static final int MAX_INGREDIENTS = 64;
+	private static final int MAX_ALTERNATIVES_PER_INGREDIENT = 2048;
+	private static final int MAX_TARGET_GROUPS = 16;
+	private static final int MAX_TARGETS_PER_GROUP = 512;
 	public static final Type<RestockRecipeItemsPayload> TYPE = new Type<>(SophisticatedCore.getIdentifier("restock_recipe_items"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, RestockRecipeItemsPayload> STREAM_CODEC = StreamCodec.composite(
-			ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list(256)).apply(ByteBufCodecs.list(64)), RestockRecipeItemsPayload::ingredientOptions,
-			ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list(512)), 16),
+			ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list(MAX_ALTERNATIVES_PER_INGREDIENT)).apply(ByteBufCodecs.list(MAX_INGREDIENTS)),
+			RestockRecipeItemsPayload::ingredientOptions,
+			ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list(MAX_TARGETS_PER_GROUP)), MAX_TARGET_GROUPS),
 			RestockRecipeItemsPayload::storagePositions,
-			ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list(512)), 16),
+			ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list(MAX_TARGETS_PER_GROUP)), MAX_TARGET_GROUPS),
 			RestockRecipeItemsPayload::entityIds, RestockRecipeItemsPayload::new);
 
 	@Override

@@ -17,14 +17,17 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.forge.REIPluginClient;
+import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
@@ -33,6 +36,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SuppressWarnings("unused")
 @REIPluginClient
@@ -129,16 +133,26 @@ public class ItemActionsReiPlugin implements REIClientPlugin {
 
 		private static void restockRecipeItems(Display display) {
 			Minecraft minecraft = Minecraft.getInstance();
-			List<List<ItemStack>> ingredientOptions = getIngredientOptions(display, minecraft.hasShiftDown());
-			if (!Config.SERVER.recipeRestockEnabled.get() || minecraft.player == null || ingredientOptions.isEmpty()) {
+			if (!Config.SERVER.recipeRestockEnabled.get() || minecraft.player == null) {
 				return;
 			}
 
-			var payload = ItemTransferHandler.createRestockRecipeItemsPayload(minecraft.player, ingredientOptions);
+			Optional<Identifier> recipeId = getRegisteredRecipeId(display);
+			CustomPacketPayload payload = recipeId.isPresent()
+					? ItemTransferHandler.createRestockRegisteredRecipePayload(minecraft.player, recipeId.get(), minecraft.hasShiftDown())
+					: ItemTransferHandler.createRestockRecipeItemsPayload(minecraft.player, getIngredientOptions(display, minecraft.hasShiftDown()));
 			if (payload != null) {
 				ClientPacketDistributor.sendToServer(payload);
 				NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
 			}
+		}
+
+		private static Optional<Identifier> getRegisteredRecipeId(Display display) {
+			if (!(display instanceof DefaultCraftingDisplay craftingDisplay)) {
+				return Optional.empty();
+			}
+
+			return craftingDisplay.getDisplayLocation().filter(recipeId -> ClientRecipeHelper.getRecipe(recipeId).isPresent());
 		}
 	}
 }

@@ -18,9 +18,12 @@ import mezz.jei.api.registration.IAdvancedRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
@@ -119,7 +122,10 @@ public class ItemActionsPlugin implements IModPlugin {
 			if (!input.isSimulate()) {
 				Minecraft minecraft = Minecraft.getInstance();
 				if (minecraft.player != null) {
-					var payload = ItemTransferHandler.createRestockRecipeItemsPayload(minecraft.player, getIngredientOptions(minecraft.hasShiftDown()));
+					Optional<Identifier> recipeId = getRegisteredRecipeId();
+					CustomPacketPayload payload = recipeId.isPresent()
+							? ItemTransferHandler.createRestockRegisteredRecipePayload(minecraft.player, recipeId.get(), minecraft.hasShiftDown())
+							: ItemTransferHandler.createRestockRecipeItemsPayload(minecraft.player, getIngredientOptions(minecraft.hasShiftDown()));
 					if (payload != null) {
 						ClientPacketDistributor.sendToServer(payload);
 						NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
@@ -127,6 +133,15 @@ public class ItemActionsPlugin implements IModPlugin {
 				}
 			}
 			return true;
+		}
+
+		private Optional<Identifier> getRegisteredRecipeId() {
+			if (!(recipeLayoutDrawable.getRecipe() instanceof RecipeHolder<?> recipeHolder)) {
+				return Optional.empty();
+			}
+
+			return ClientRecipeHelper.getRecipe(recipeHolder.id().identifier()).filter(registeredRecipe -> registeredRecipe.value() == recipeHolder.value())
+					.map(registeredRecipe -> registeredRecipe.id().identifier());
 		}
 
 		@Override
