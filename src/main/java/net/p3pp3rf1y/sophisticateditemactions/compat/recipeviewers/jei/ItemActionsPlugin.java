@@ -20,6 +20,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
 import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
@@ -118,15 +120,33 @@ public class ItemActionsPlugin implements IModPlugin {
 			if (!input.isSimulate()) {
 				Minecraft minecraft = Minecraft.getInstance();
 				if (minecraft.player != null) {
-					var payload = ItemTransferHandler.createRestockRecipeItemsPayload(minecraft.player,
-							getIngredientOptions((input.getModifiers() & GLFW.GLFW_MOD_SHIFT) != 0));
-					if (payload != null) {
-						Minecraft.getInstance().getConnection().send(payload);
-						NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
+					boolean fullStacks = (input.getModifiers() & GLFW.GLFW_MOD_SHIFT) != 0;
+					Optional<Identifier> recipeId = getRegisteredRecipeId();
+					if (recipeId.isPresent()) {
+						var payload = ItemTransferHandler.createRestockRegisteredRecipePayload(minecraft.player, recipeId.get(), fullStacks);
+						if (payload != null) {
+							minecraft.getConnection().send(payload);
+							NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
+						}
+					} else {
+						var payload = ItemTransferHandler.createRestockRecipeItemsPayload(minecraft.player, getIngredientOptions(fullStacks));
+						if (payload != null) {
+							minecraft.getConnection().send(payload);
+							NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
+						}
 					}
 				}
 			}
 			return true;
+		}
+
+		private Optional<Identifier> getRegisteredRecipeId() {
+			if (!(recipeLayoutDrawable.getRecipe() instanceof RecipeHolder<?> recipeHolder)) {
+				return Optional.empty();
+			}
+
+			return ClientRecipeHelper.getRecipe(recipeHolder.id().identifier()).filter(registeredRecipe -> registeredRecipe.value() == recipeHolder.value())
+					.map(registeredRecipe -> registeredRecipe.id().identifier());
 		}
 
 		@Override

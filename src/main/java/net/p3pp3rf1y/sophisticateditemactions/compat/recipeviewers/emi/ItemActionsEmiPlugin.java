@@ -10,7 +10,10 @@ import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.WidgetHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeHintType;
@@ -18,6 +21,7 @@ import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @EmiEntrypoint
 public class ItemActionsEmiPlugin implements EmiPlugin {
@@ -58,15 +62,38 @@ public class ItemActionsEmiPlugin implements EmiPlugin {
 
 	private static void restockRecipeItems(EmiRecipe recipe) {
 		Minecraft minecraft = Minecraft.getInstance();
-		List<List<ItemStack>> ingredientOptions = getIngredientOptions(recipe, minecraft.hasShiftDown());
-		if (!Config.SERVER.recipeRestockEnabled.get() || minecraft.player == null || ingredientOptions.isEmpty()) {
+		if (!Config.SERVER.recipeRestockEnabled.get() || minecraft.player == null) {
 			return;
 		}
 
+		Optional<Identifier> recipeId = getRegisteredRecipeId(recipe);
+		if (recipeId.isPresent()) {
+			var payload = ItemTransferHandler.createRestockRegisteredRecipePayload(minecraft.player, recipeId.get(), minecraft.hasShiftDown());
+			if (payload != null) {
+				minecraft.getConnection().send(payload);
+				NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
+			}
+			return;
+		}
+
+		List<List<ItemStack>> ingredientOptions = getIngredientOptions(recipe, minecraft.hasShiftDown());
+		if (ingredientOptions.isEmpty()) {
+			return;
+		}
 		var payload = ItemTransferHandler.createRestockRecipeItemsPayload(minecraft.player, ingredientOptions);
 		if (payload != null) {
 			minecraft.getConnection().send(payload);
 			NudgeActionUsageTracker.markUsed(NudgeHintType.RESTOCK);
 		}
+	}
+
+	private static Optional<Identifier> getRegisteredRecipeId(EmiRecipe recipe) {
+		RecipeHolder<?> backingRecipe = recipe.getBackingRecipe();
+		if (backingRecipe == null) {
+			return Optional.empty();
+		}
+
+		return ClientRecipeHelper.getRecipe(backingRecipe.id().identifier()).filter(registeredRecipe -> registeredRecipe.value() == backingRecipe.value())
+				.map(registeredRecipe -> registeredRecipe.id().identifier());
 	}
 }

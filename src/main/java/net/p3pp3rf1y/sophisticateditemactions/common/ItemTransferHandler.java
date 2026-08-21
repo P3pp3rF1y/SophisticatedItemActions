@@ -12,17 +12,20 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.RecipeHelper;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
 import net.p3pp3rf1y.sophisticateditemactions.network.DepositItemsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.RestockAlternativeItemsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.RestockItemsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.RestockRecipeItemsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.RestockRegisteredRecipePayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.SyncItemTransfersPayload;
 import org.jspecify.annotations.Nullable;
 
@@ -324,6 +327,19 @@ public class ItemTransferHandler {
 	}
 
 	@Nullable
+	public static RestockRegisteredRecipePayload createRestockRegisteredRecipePayload(Player player, Identifier recipeId, boolean fullStacks) {
+		Map<Identifier, List<BlockPos>> storages = getInteractionStoragePositionsAround(player);
+		Map<Identifier, List<Integer>> entities = getStorageEntitiesAround(player);
+		boolean hasRecipeInventorySource = ItemTransferExtensionRegistry.getExtension().map(extension -> extension.hasRecipeInventorySource(player))
+				.orElse(false);
+		if (!storages.isEmpty() || !entities.isEmpty() || hasRecipeInventorySource) {
+			return new RestockRegisteredRecipePayload(recipeId, fullStacks, storages, entities);
+		}
+		playError(player, ItemActionsTranslationHelper.INSTANCE.translStatusMessage("no_storage_in_range").setStyle(Style.EMPTY.withColor(0xFF5555)));
+		return null;
+	}
+
+	@Nullable
 	public static RestockAlternativeItemsPayload createRestockAlternativeItemsPayload(Player player, List<ItemStack> filters, boolean mainInventory,
 			boolean hotbar, boolean fillEmpty, boolean refillSingle) {
 		if (!mainInventory && !hotbar) {
@@ -597,6 +613,29 @@ public class ItemTransferHandler {
 			player.sendOverlayMessage(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("restocked_recipe_items",
 					Component.literal(String.valueOf(restockedCount)).withStyle(ChatFormatting.DARK_GREEN)));
 		}
+	}
+
+	public static void handleRecipeRestock(Player player, Map<Identifier, List<BlockPos>> storagePositions, Map<Identifier, List<Integer>> entities,
+			Identifier recipeId, boolean fullStacks) {
+		if (!(player instanceof ServerPlayer)) {
+			return;
+		}
+		if (!Config.SERVER.recipeRestockEnabled.get()) {
+			player.sendOverlayMessage(ItemActionsTranslationHelper.INSTANCE.translStatusMessage("recipe_restock_disabled"));
+			return;
+		}
+
+		RecipeHelper.getRecipe(recipeId)
+				.map(recipe -> getRecipeIngredientOptions(RecipeHelper.getIngredients(recipe.value()).stream().flatMap(Optional::stream).toList(), fullStacks))
+				.filter(ingredientOptions -> !ingredientOptions.isEmpty())
+				.ifPresent(ingredientOptions -> handleRecipeRestock(player, storagePositions, entities, ingredientOptions));
+	}
+
+	static List<List<ItemStack>> getRecipeIngredientOptions(List<Ingredient> ingredients, boolean fullStacks) {
+		return ingredients.stream().map(Ingredient::items)
+				.map(options -> options.map(ItemStack::new).filter(stack -> !stack.isEmpty())
+						.map(stack -> stack.copyWithCount(fullStacks ? stack.getMaxStackSize() : stack.getCount())).toList())
+				.filter(options -> !options.isEmpty()).toList();
 	}
 
 	static List<List<ItemStack>> getMissingRecipeIngredientOptions(List<List<ItemStack>> ingredientOptions, List<ItemStack> inventory) {
