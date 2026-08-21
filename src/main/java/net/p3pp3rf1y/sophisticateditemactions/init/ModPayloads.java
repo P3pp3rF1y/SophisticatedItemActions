@@ -8,6 +8,7 @@ import net.p3pp3rf1y.sophisticateditemactions.network.RequestItemHighlightsPaylo
 import net.p3pp3rf1y.sophisticateditemactions.network.RestockAlternativeItemsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.RestockItemsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.RestockRecipeItemsPayload;
+import net.p3pp3rf1y.sophisticateditemactions.network.RestockRegisteredRecipePayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.SyncEntityHighlightsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.SyncHighlightDirectionsPayload;
 import net.p3pp3rf1y.sophisticateditemactions.network.SyncItemTransfersPayload;
@@ -24,6 +25,7 @@ public class ModPayloads {
 		registrar.playToServer(RestockItemsPayload.TYPE, RestockItemsPayload.STREAM_CODEC, RestockItemsPayload::handlePayload);
 		registrar.playToServer(RestockAlternativeItemsPayload.TYPE, RestockAlternativeItemsPayload.STREAM_CODEC, RestockAlternativeItemsPayload::handlePayload);
 		registrar.playToServer(RestockRecipeItemsPayload.TYPE, RestockRecipeItemsPayload.STREAM_CODEC, RestockRecipeItemsPayload::handlePayload);
+		registrar.playToServer(RestockRegisteredRecipePayload.TYPE, RestockRegisteredRecipePayload.STREAM_CODEC, RestockRegisteredRecipePayload::handlePayload);
 		registrar.playToClient(SyncItemTransfersPayload.TYPE, SyncItemTransfersPayload.STREAM_CODEC, SyncItemTransfersPayload::handlePayload);
 		registrar.playToServer(RequestItemHighlightsPayload.TYPE, RequestItemHighlightsPayload.STREAM_CODEC, RequestItemHighlightsPayload::handlePayload);
 		registrar.playToClient(SyncRenderedBlockHighlightsPayload.TYPE, SyncRenderedBlockHighlightsPayload.STREAM_CODEC,
