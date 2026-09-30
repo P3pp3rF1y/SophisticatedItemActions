@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.141'
+    id 'net.neoforged.moddev' version '2.0.147'
     id "org.openrewrite.rewrite" version "7.35.0"
     id "net.darkhax.curseforgegradle" version "1.1.15"
     id "com.modrinth.minotaur" version "2.+"
@@ -10,7 +10,7 @@ plugins {
 }
 
 def sharedCodeQualityScript = file('../gradle/code-quality.gradle')
-apply from: sharedCodeQualityScript.exists() ? sharedCodeQualityScript : 'https://raw.githubusercontent.com/P3pp3rF1y/MultiWorkspace/26.2/gradle/code-quality.gradle'
+apply from: sharedCodeQualityScript.exists() ? sharedCodeQualityScript : 'https://raw.githubusercontent.com/P3pp3rF1y/MultiWorkspace/26.3/gradle/code-quality.gradle'
 
 idea {
     module {
@@ -78,6 +78,7 @@ repositories {
         url "https://maven.blamejared.com/"
         content {
             includeGroup "mezz.jei"
+            includeGroup "net.mezzdev.config"
         }
     }
     maven {
@@ -243,6 +244,10 @@ neoForge {
 sourceSets.main.resources {
     srcDir 'src/generated/resources'
 }
+
+// Create has no 26.3 build; retain its sources until a compatible artifact exists.
+sourceSets.main.java.exclude 'net/p3pp3rf1y/sophisticateditemactions/compat/create/**',
+        'net/p3pp3rf1y/sophisticateditemactions/compat/sophisticatedstorage/SophisticatedStorageCreateCompat.java'
 
 configurations {
     runtimeClasspath.extendsFrom localRuntime

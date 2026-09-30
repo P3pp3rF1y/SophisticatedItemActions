@@ -56,8 +56,8 @@ public class ItemFlightAnimator {
 
 			poseStack.pushPose();
 			poseStack.translate(pos.x - cameraPos.x(), pos.y - cameraPos.y(), pos.z - cameraPos.z());
-			poseStack.mulPose(Axis.YP.rotationDegrees(flight.yawDeg));
-			poseStack.mulPose(Axis.XP.rotationDegrees(spinDeg));
+			poseStack.rotate(Axis.YP.rotationDegrees(flight.yawDeg));
+			poseStack.rotate(Axis.XP.rotationDegrees(spinDeg));
 			poseStack.translate(0, -0.15, 0);
 			poseStack.scale(scale, scale, scale);
 

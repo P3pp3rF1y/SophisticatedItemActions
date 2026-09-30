@@ -4,7 +4,6 @@ import net.p3pp3rf1y.sophisticatedcore.compat.CompatInfo;
 import net.p3pp3rf1y.sophisticatedcore.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedcore.compat.CompatRegistry;
 import net.p3pp3rf1y.sophisticateditemactions.compat.ae2.AppliedEnergistics2Compat;
-import net.p3pp3rf1y.sophisticateditemactions.compat.create.CreateCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.ftblibrary.FtbLibraryCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.emi.EmiCompat;
 import net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.jei.JeiCompat;
@@ -16,7 +15,6 @@ import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorage.Sophis
 import net.p3pp3rf1y.sophisticateditemactions.compat.sophisticatedstorageinmotion.StorageInMotionCompat;
 
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.AE2;
-import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.CREATE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.FTB_LIBRARY;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.REFINED_STORAGE;
 import static net.p3pp3rf1y.sophisticateditemactions.compat.CompatModIds.SABLE;
@@ -30,7 +28,6 @@ public class ModCompat {
 
 	public static void register() {
 		CompatRegistry.registerCompat(new CompatInfo(AE2), () -> modBus -> new AppliedEnergistics2Compat());
-		CompatRegistry.registerCompat(new CompatInfo(CREATE), () -> modBus -> new CreateCompat());
 		CompatRegistry.registerCompat(new CompatInfo(CompatModIds.JEI), () -> modBus -> new JeiCompat());
 		CompatRegistry.registerCompat(new CompatInfo(CompatModIds.EMI), () -> modBus -> new EmiCompat());
 		CompatRegistry.registerCompat(new CompatInfo(CompatModIds.REI), () -> modBus -> new ReiCompat());

@@ -58,7 +58,7 @@ public class RenderedBlockHighlightRenderer {
 			poseStack.translate(-cameraPos.x(), -cameraPos.y(), -cameraPos.z());
 		} else {
 			poseStack.translate(transform.position().x - cameraPos.x(), transform.position().y - cameraPos.y(), transform.position().z - cameraPos.z());
-			poseStack.mulPose(transform.orientation());
+			poseStack.rotate(transform.orientation());
 			poseStack.scale((float) transform.scale().x, (float) transform.scale().y, (float) transform.scale().z);
 			poseStack.translate(-transform.rotationPoint().x, -transform.rotationPoint().y, -transform.rotationPoint().z);
 		}
