@@ -2,7 +2,10 @@ package net.p3pp3rf1y.sophisticateditemactions.compat.recipeviewers.rei;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -15,9 +18,14 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.forge.REIPluginClient;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
+import net.p3pp3rf1y.sophisticateditemactions.SophisticatedItemActions;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeActionUsageTracker;
 import net.p3pp3rf1y.sophisticateditemactions.client.discovery.NudgeHintType;
 import net.p3pp3rf1y.sophisticateditemactions.common.ItemTransferHandler;
@@ -29,6 +37,8 @@ import java.util.List;
 @REIPluginClient
 public class ItemActionsReiPlugin implements REIClientPlugin {
 	private static final int RESTOCK_BUTTON_SIZE = 10;
+	private static final int RESTOCK_ICON_SIZE = 7;
+	private static final Identifier RESTOCK_ICON_TEXTURE = SophisticatedItemActions.getIdentifier("textures/gui/restock.png");
 
 	@Override
 	public void postStage(PluginManager<REIClientPlugin> manager, ReloadStage stage) {
@@ -54,8 +64,7 @@ public class ItemActionsReiPlugin implements REIClientPlugin {
 				if (Config.SERVER.recipeRestockEnabled.get() && Minecraft.getInstance().player != null) {
 					Rectangle buttonBounds = new Rectangle(bounds.getMaxX() + 2, bounds.getMaxY() - RESTOCK_BUTTON_SIZE * 2 - 8, RESTOCK_BUTTON_SIZE,
 							RESTOCK_BUTTON_SIZE);
-					widgets.add(Widgets.createButton(buttonBounds, Component.literal("R")).focusable(false).onClick(ignored -> restockRecipeItems(display))
-							.tooltipLine(Component.translatable("gui.sophisticateditemactions.recipe_restock")));
+					widgets.add(new RecipeRestockWidget(display, buttonBounds));
 				}
 				return widgets;
 			}
@@ -81,6 +90,41 @@ public class ItemActionsReiPlugin implements REIClientPlugin {
 			}
 		}
 		return ingredientOptions;
+	}
+
+	private static class RecipeRestockWidget extends WidgetWithBounds {
+		private final Rectangle bounds;
+		private final Button button;
+
+		private RecipeRestockWidget(Display display, Rectangle bounds) {
+			this.bounds = bounds;
+			button = Widgets.createButton(bounds, Component.empty()).focusable(false).onClick(ignored -> restockRecipeItems(display))
+					.tooltipLine(Component.translatable("gui.sophisticateditemactions.recipe_restock"));
+		}
+
+		@Override
+		public Rectangle getBounds() {
+			return bounds;
+		}
+
+		@Override
+		public List<? extends GuiEventListener> children() {
+			return List.of();
+		}
+
+		@Override
+		public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+			button.render(guiGraphics, mouseX, mouseY, delta);
+			int color = bounds.contains(mouseX, mouseY) ? 0xFFFFFFA0 : -1;
+			guiGraphics.blit(RenderPipelines.GUI_TEXTURED, RESTOCK_ICON_TEXTURE, bounds.x + (RESTOCK_BUTTON_SIZE - RESTOCK_ICON_SIZE) / 2,
+					bounds.y + (RESTOCK_BUTTON_SIZE - RESTOCK_ICON_SIZE) / 2, 0, 0, RESTOCK_ICON_SIZE, RESTOCK_ICON_SIZE, RESTOCK_ICON_SIZE, RESTOCK_ICON_SIZE,
+					color);
+		}
+
+		@Override
+		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+			return button.mouseClicked(event, doubleClick);
+		}
 	}
 
 	private static void restockRecipeItems(Display display) {

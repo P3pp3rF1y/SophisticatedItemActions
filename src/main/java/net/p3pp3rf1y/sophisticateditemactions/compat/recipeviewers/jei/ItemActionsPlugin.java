@@ -40,6 +40,7 @@ import java.util.WeakHashMap;
 @JeiPlugin
 public class ItemActionsPlugin implements IModPlugin {
 	private static final Identifier ID = SophisticatedItemActions.getIdentifier("default");
+	private static final Identifier RESTOCK_ICON_TEXTURE = SophisticatedItemActions.getIdentifier("textures/gui/restock.png");
 	private static final Set<IRecipeType<?>> RECIPE_RESTOCK_RECIPE_TYPES = Set.of(RecipeTypes.CRAFTING, RecipeTypes.ANVIL, RecipeTypes.STONECUTTING,
 			RecipeTypes.SMITHING);
 	private static final Set<RecipeRestockButtonController> RECIPE_RESTOCK_BUTTON_CONTROLLERS = Collections.newSetFromMap(new WeakHashMap<>());
@@ -51,7 +52,7 @@ public class ItemActionsPlugin implements IModPlugin {
 
 	@Override
 	public void registerAdvanced(IAdvancedRegistration registration) {
-		IDrawable restockIcon = registration.getJeiHelpers().getGuiHelper().getRecipeArrowFilled();
+		IDrawable restockIcon = registration.getJeiHelpers().getGuiHelper().drawableBuilder(RESTOCK_ICON_TEXTURE, 0, 0, 7, 7).setTextureSize(7, 7).build();
 		registration.addRecipeButtonFactory(new IRecipeButtonControllerFactory() {
 			@Override
 			public <T> IIconButtonController createButtonController(IRecipeLayoutDrawable<T> recipeLayoutDrawable) {
