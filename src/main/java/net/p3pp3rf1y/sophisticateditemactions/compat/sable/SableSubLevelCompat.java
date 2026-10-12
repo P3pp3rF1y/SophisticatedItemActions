@@ -6,8 +6,6 @@ import dev.ryanhcode.sable.companion.math.BoundingBox3d;
 import dev.ryanhcode.sable.sublevel.ServerSubLevel;
 import dev.ryanhcode.sable.sublevel.SubLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
@@ -56,12 +54,6 @@ public class SableSubLevelCompat implements ISubLevelCompat {
 			return subLevel;
 		}
 		return level;
-	}
-
-	@Override
-	public boolean mayInteract(Player player, Level level, BlockPos pos) {
-		Level interactionLevel = getLevelForPosition(level, pos);
-		return !(interactionLevel instanceof ServerLevel serverLevel) || player.mayInteract(serverLevel, pos);
 	}
 
 	private static void collectBlockEntities(Level level, BlockPos origin, int range, Set<BlockEntity> blockEntities, ServerSubLevel subLevel) {
