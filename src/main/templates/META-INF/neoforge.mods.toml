@@ -19,6 +19,13 @@ config = "sophisticateditemactions-refinedstorage.mixins.json"
 requiredMods = ["refinedstorage"]
 
 [[dependencies.${mod_id}]]
+modId="sophisticatedcore"
+type="required"
+versionRange="${sc_version_range}"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
 modId="sophisticatedstorageinmotion"
 type="optional"
 versionRange="${ssim_version}"

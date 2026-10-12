@@ -5,9 +5,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
-
 import java.util.List;
 
 public interface ISubLevelCompat {
@@ -28,7 +28,7 @@ public interface ISubLevelCompat {
 	}
 
 	default boolean mayInteract(Player player, Level level, BlockPos pos) {
-		return player.mayInteract(getLevelForPosition(level, pos), pos);
+		return WorldHelper.playerMayInteract(player, getLevelForPosition(level, pos), pos);
 	}
 
 	@Nullable
