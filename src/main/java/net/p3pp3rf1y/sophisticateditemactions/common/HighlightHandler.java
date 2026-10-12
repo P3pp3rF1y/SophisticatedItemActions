@@ -81,6 +81,10 @@ public class HighlightHandler {
 		Map<Integer, List<EntityBlockHighlightData>> renderedEntityItemHighlights = new HashMap<>();
 
 		storagePositions.forEach((handlerId, positions) -> ItemActionHandlerRegistry.getBlockHandler(handlerId).ifPresent(handler -> positions.forEach(pos -> {
+			if (!WorldHelper.playerMayInteract(serverPlayer, serverPlayer.level(), pos)) {
+				return;
+			}
+
 			switch (handler.getItemMatch(serverPlayer, stackKey, pos, IBlockItemActionHandler.Action.HIGHLIGHT)) {
 				case MATCHING_STACK -> stackPositions.putIfAbsent(getHighlightGroupKey(handler.getHighlightPositions(serverPlayer, pos), pos),
 						handler.getHighlightPositions(serverPlayer, pos));
@@ -99,7 +103,7 @@ public class HighlightHandler {
 
 		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
 			Entity entity = player.level().getEntity(entityId);
-			if (entity == null) {
+			if (entity == null || !WorldHelper.playerMayInteract(serverPlayer, entity)) {
 				return;
 			}
 

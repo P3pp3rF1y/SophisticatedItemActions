@@ -196,7 +196,7 @@ public class ItemTransferHandler {
 
 		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
 			Entity entity = player.level().getEntity(entityId);
-			if (entity == null) {
+			if (entity == null || !WorldHelper.playerMayInteract(serverPlayer, entity)) {
 				return;
 			}
 
@@ -220,7 +220,7 @@ public class ItemTransferHandler {
 
 		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
 			Entity entity = player.level().getEntity(entityId);
-			if (entity == null) {
+			if (entity == null || !WorldHelper.playerMayInteract(serverPlayer, entity)) {
 				return;
 			}
 
@@ -775,7 +775,7 @@ public class ItemTransferHandler {
 
 		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
 			Entity entity = player.level().getEntity(entityId);
-			if (entity == null) {
+			if (entity == null || !WorldHelper.playerMayInteract(serverPlayer, entity)) {
 				return;
 			}
 
