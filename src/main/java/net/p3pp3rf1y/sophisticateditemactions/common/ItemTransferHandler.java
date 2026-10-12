@@ -19,6 +19,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RecipeHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
 import net.p3pp3rf1y.sophisticateditemactions.network.DepositItemsPayload;
@@ -200,7 +201,7 @@ public class ItemTransferHandler {
 
 		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
 			Entity entity = player.level().getEntity(entityId);
-			if (entity == null) {
+			if (entity == null || !WorldHelper.playerMayInteract(player, entity)) {
 				return;
 			}
 
@@ -223,7 +224,7 @@ public class ItemTransferHandler {
 
 		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
 			Entity entity = player.level().getEntity(entityId);
-			if (entity == null) {
+			if (entity == null || !WorldHelper.playerMayInteract(player, entity)) {
 				return;
 			}
 
@@ -813,7 +814,7 @@ public class ItemTransferHandler {
 
 		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
 			Entity entity = player.level().getEntity(entityId);
-			if (entity == null) {
+			if (entity == null || !WorldHelper.playerMayInteract(player, entity)) {
 				return;
 			}
 
