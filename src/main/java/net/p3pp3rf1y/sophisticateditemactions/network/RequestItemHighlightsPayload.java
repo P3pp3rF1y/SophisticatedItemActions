@@ -20,7 +20,7 @@ import java.util.Map;
 public record RequestItemHighlightsPayload(ItemStack stack, Map<ResourceLocation, List<BlockPos>> inventoryPositions,
 		Map<ResourceLocation, List<Integer>> entities) implements CustomPacketPayload {
 	private static final int MAX_TARGET_GROUPS = 16;
-	private static final int MAX_TARGETS_PER_GROUP = 512;
+	private static final int MAX_TARGETS_PER_GROUP = 1024;
 	public static final Type<RequestItemHighlightsPayload> TYPE = new Type<>(SophisticatedCore.getRL("request_item_highlights"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, RequestItemHighlightsPayload> STREAM_CODEC = StreamCodec.composite(ItemStack.STREAM_CODEC,
 			RequestItemHighlightsPayload::stack,
