@@ -22,9 +22,9 @@ public record RequestItemHighlightsPayload(ItemStack stack, Map<Identifier, List
 	public static final Type<RequestItemHighlightsPayload> TYPE = new Type<>(SophisticatedCore.getIdentifier("request_item_highlights"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, RequestItemHighlightsPayload> STREAM_CODEC = StreamCodec.composite(ItemStack.STREAM_CODEC,
 			RequestItemHighlightsPayload::stack,
-			ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list(512)), 16),
+			ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list(1024)), 16),
 			RequestItemHighlightsPayload::inventoryPositions,
-			ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list(512)), 16),
+			ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.list(1024)), 16),
 			RequestItemHighlightsPayload::entities, RequestItemHighlightsPayload::new);
 
 	@Override
