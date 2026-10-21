@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 public record RequestItemHighlightsMessage(ItemStack stack, Map<ResourceLocation, List<BlockPos>> inventoryPositions,
 		Map<ResourceLocation, List<Integer>> entities) {
 	private static final int MAX_TARGET_GROUPS = 16;
-	private static final int MAX_TARGETS_PER_GROUP = 512;
+	private static final int MAX_TARGETS_PER_GROUP = 1024;
 
 	public static void encode(RequestItemHighlightsMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeItemStack(msg.stack(), false);
