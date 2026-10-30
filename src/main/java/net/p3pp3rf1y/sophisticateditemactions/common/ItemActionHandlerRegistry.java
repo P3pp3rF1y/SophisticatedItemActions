@@ -3,8 +3,13 @@ package net.p3pp3rf1y.sophisticateditemactions.common;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
+
+import javax.annotation.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,6 +36,22 @@ public class ItemActionHandlerRegistry {
 		}
 
 		return Optional.ofNullable(blockHandlersRegistry.get(id));
+	}
+
+	public static boolean canUseBlockHandler(Player player, BlockPos pos, IBlockItemActionHandler handler, IBlockItemActionHandler.Action action, int range) {
+		Level level = player.level();
+		if (player.position().distanceToSqr(Vec3.atCenterOf(pos)) > (double) range * range || !level.hasChunkAt(pos)
+				|| !WorldHelper.playerMayInteract(player, level, pos)) {
+			return false;
+		}
+		return WorldHelper.getLoadedBlockEntity(level, pos).flatMap(blockEntity -> getBlockHandlerFor(level, pos, blockEntity, action))
+				.filter(selected -> selected.id().equals(handler.id())).isPresent();
+	}
+
+	public static boolean canUseEntityHandler(Player player, @Nullable Entity entity, IEntityItemActionHandler handler, int range) {
+		return entity != null && entity.isAlive() && entity.level() == player.level()
+				&& player.position().distanceToSqr(entity.position()) <= (double) range * range && WorldHelper.playerMayInteract(player, entity)
+				&& getEntityHandlerIdFor(entity).filter(handler.id()::equals).isPresent();
 	}
 
 	public static Optional<ResourceLocation> getBlockHandlerIdFor(Level level, BlockPos pos, BlockEntity blockEntity, IBlockItemActionHandler.Action action) {

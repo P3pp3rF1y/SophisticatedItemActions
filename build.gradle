@@ -299,6 +299,11 @@ dependencies {
     }
     if (findProject(':SophisticatedStorage') != null) {
         implementation project(':SophisticatedStorage')
+
+        // Inherited mapped runtime dependencies also need registration with this project's remapper.
+        testRuntimeOnly fg.deobf("curse.maven:chipped-456956:${project(':SophisticatedStorage').chipped_cf_file_id}")
+        testRuntimeOnly fg.deobf("curse.maven:athena-841890:${project(':SophisticatedStorage').athena_cf_file_id}")
+        testRuntimeOnly fg.deobf("curse.maven:resourcefullib-570073:${project(':SophisticatedStorage').resourcefullib_cf_file_id}")
     } else {
         implementation fg.deobf("net.p3pp3rf1y:sophisticatedstorage:${ss_version}") {
             transitive = false
