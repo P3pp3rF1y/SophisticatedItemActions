@@ -19,7 +19,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RecipeHelper;
-import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 import net.p3pp3rf1y.sophisticateditemactions.Config;
 import net.p3pp3rf1y.sophisticateditemactions.client.gui.ItemActionsTranslationHelper;
 import net.p3pp3rf1y.sophisticateditemactions.network.DepositItemsPayload;
@@ -92,7 +91,7 @@ public class ItemTransferHandler {
 
 	public static void handleDeposit(Player player, int minSlot, int maxSlot, Map<Identifier, List<BlockPos>> storagePositions,
 			Map<Identifier, List<Integer>> entities, boolean onlyMatching) {
-		if (!(player instanceof ServerPlayer serverPlayer)) {
+		if (!(player instanceof ServerPlayer serverPlayer) || !isValidInventoryRange(minSlot, maxSlot)) {
 			return;
 		}
 
@@ -192,21 +191,23 @@ public class ItemTransferHandler {
 			Map<Identifier, List<Integer>> entities, ServerPlayer serverPlayer) {
 		List<IDepositHandler> handlers = new ArrayList<>();
 
-		storagePositions.forEach((handlerId, positions) -> ItemActionHandlerRegistry.getBlockHandler(handlerId).ifPresent(handler -> positions.forEach(pos -> {
-			if (SubLevelCompatHelper.mayInteract(player, player.level(), pos)) {
-				handler.getDepositHandler(serverPlayer, pos).ifPresent(handlers::add);
-			}
+		storagePositions.forEach((handlerId, positions) -> ItemActionHandlerRegistry.getBlockHandler(handlerId)
+				.ifPresent(handler -> positions.stream().distinct().forEach(pos -> {
+					if (ItemActionHandlerRegistry.canUseBlockHandler(player, pos, handler, IBlockItemActionHandler.Action.DEPOSIT, INTERACTION_RANGE)) {
+						handler.getDepositHandler(serverPlayer, pos).ifPresent(handlers::add);
+					}
 
-		})));
+				})));
 
-		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
-			Entity entity = player.level().getEntity(entityId);
-			if (entity == null || !WorldHelper.playerMayInteract(player, entity)) {
-				return;
-			}
+		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId)
+				.ifPresent(handler -> entityIds.stream().distinct().forEach(entityId -> {
+					Entity entity = player.level().getEntity(entityId);
+					if (!ItemActionHandlerRegistry.canUseEntityHandler(player, entity, handler, INTERACTION_RANGE)) {
+						return;
+					}
 
-			handler.getDepositHandler(entity).ifPresent(handlers::add);
-		})));
+					handler.getDepositHandler(entity).ifPresent(handlers::add);
+				})));
 
 		handlers.sort(Comparator.comparingDouble(h -> SubLevelCompatHelper.distanceSquared(player.level(), player.position(), h.getPosition())));
 		return handlers;
@@ -216,20 +217,22 @@ public class ItemTransferHandler {
 			Map<Identifier, List<Integer>> entities, ServerPlayer serverPlayer) {
 		List<StorageItemHandlerTarget> targets = new ArrayList<>();
 
-		storagePositions.forEach((handlerId, positions) -> ItemActionHandlerRegistry.getBlockHandler(handlerId).ifPresent(handler -> positions.forEach(pos -> {
-			if (SubLevelCompatHelper.mayInteract(player, player.level(), pos)) {
-				targets.addAll(handler.getStorageItemHandlerTargets(serverPlayer, pos));
-			}
-		})));
+		storagePositions.forEach((handlerId, positions) -> ItemActionHandlerRegistry.getBlockHandler(handlerId)
+				.ifPresent(handler -> positions.stream().distinct().forEach(pos -> {
+					if (ItemActionHandlerRegistry.canUseBlockHandler(player, pos, handler, IBlockItemActionHandler.Action.DEPOSIT, INTERACTION_RANGE)) {
+						targets.addAll(handler.getStorageItemHandlerTargets(serverPlayer, pos));
+					}
+				})));
 
-		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
-			Entity entity = player.level().getEntity(entityId);
-			if (entity == null || !WorldHelper.playerMayInteract(player, entity)) {
-				return;
-			}
+		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId)
+				.ifPresent(handler -> entityIds.stream().distinct().forEach(entityId -> {
+					Entity entity = player.level().getEntity(entityId);
+					if (!ItemActionHandlerRegistry.canUseEntityHandler(player, entity, handler, INTERACTION_RANGE)) {
+						return;
+					}
 
-			targets.addAll(handler.getStorageItemHandlerTargets(entity));
-		})));
+					targets.addAll(handler.getStorageItemHandlerTargets(entity));
+				})));
 
 		targets.sort(Comparator.comparingDouble(target -> SubLevelCompatHelper.distanceSquared(player.level(), player.position(), target.position())));
 		return targets;
@@ -430,7 +433,7 @@ public class ItemTransferHandler {
 
 	public static void handleRestock(Player player, Map<Identifier, List<BlockPos>> storagePositions, Map<Identifier, List<Integer>> entities, int minSlot,
 			int maxSlot, ItemStack filter, boolean fillEmpty, boolean refillSingle) {
-		if (!(player instanceof ServerPlayer serverPlayer)) {
+		if (!(player instanceof ServerPlayer serverPlayer) || !isValidInventoryRange(minSlot, maxSlot)) {
 			return;
 		}
 
@@ -532,7 +535,7 @@ public class ItemTransferHandler {
 
 	public static void handleAlternativeRestock(Player player, Map<Identifier, List<BlockPos>> storagePositions, Map<Identifier, List<Integer>> entities,
 			List<ItemStack> filters, int minSlot, int maxSlot, boolean fillEmpty, boolean refillSingle) {
-		if (!(player instanceof ServerPlayer serverPlayer) || filters.isEmpty()) {
+		if (!(player instanceof ServerPlayer serverPlayer) || filters.isEmpty() || !isValidInventoryRange(minSlot, maxSlot)) {
 			return;
 		}
 
@@ -806,22 +809,28 @@ public class ItemTransferHandler {
 			Map<Identifier, List<Integer>> entities, ServerPlayer serverPlayer) {
 		List<IRestockHandler> handlers = new ArrayList<>();
 
-		storagePositions.forEach((handlerId, positions) -> ItemActionHandlerRegistry.getBlockHandler(handlerId).ifPresent(handler -> positions.forEach(pos -> {
-			if (SubLevelCompatHelper.mayInteract(player, player.level(), pos)) {
-				handler.getRestockHandler(serverPlayer, pos).ifPresent(handlers::add);
-			}
-		})));
+		storagePositions.forEach((handlerId, positions) -> ItemActionHandlerRegistry.getBlockHandler(handlerId)
+				.ifPresent(handler -> positions.stream().distinct().forEach(pos -> {
+					if (ItemActionHandlerRegistry.canUseBlockHandler(player, pos, handler, IBlockItemActionHandler.Action.RESTOCK, INTERACTION_RANGE)) {
+						handler.getRestockHandler(serverPlayer, pos).ifPresent(handlers::add);
+					}
+				})));
 
-		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId).ifPresent(handler -> entityIds.forEach(entityId -> {
-			Entity entity = player.level().getEntity(entityId);
-			if (entity == null || !WorldHelper.playerMayInteract(player, entity)) {
-				return;
-			}
+		entities.forEach((handlerId, entityIds) -> ItemActionHandlerRegistry.getEntityHandler(handlerId)
+				.ifPresent(handler -> entityIds.stream().distinct().forEach(entityId -> {
+					Entity entity = player.level().getEntity(entityId);
+					if (!ItemActionHandlerRegistry.canUseEntityHandler(player, entity, handler, INTERACTION_RANGE)) {
+						return;
+					}
 
-			handler.getRestockHandler(entity).ifPresent(handlers::add);
-		})));
+					handler.getRestockHandler(entity).ifPresent(handlers::add);
+				})));
 
 		handlers.sort(Comparator.comparingDouble(h -> SubLevelCompatHelper.distanceSquared(player.level(), player.position(), h.getPosition())));
 		return handlers;
+	}
+
+	static boolean isValidInventoryRange(int minSlot, int maxSlot) {
+		return minSlot >= 0 && minSlot < maxSlot && (maxSlot <= 36 || minSlot >= 36 && maxSlot <= 41 && maxSlot - minSlot == 1);
 	}
 }
